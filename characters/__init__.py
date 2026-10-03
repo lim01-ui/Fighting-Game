@@ -1,0 +1,1 @@
+# This file marks the 'characters' folder as a Python package.

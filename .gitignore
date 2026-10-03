@@ -1,0 +1,19 @@
+# Python bytecode and environments
+__pycache__/
+*.py[cod]
+.venv/
+.venv-build/
+venv/
+
+# Build and test output
+build/
+dist/
+.pytest_cache/
+.coverage
+
+# Local settings, secrets, and OS metadata
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
