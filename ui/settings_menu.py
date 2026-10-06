@@ -4,6 +4,7 @@ import pygame
 
 import settings
 from audio import music, preferences, sound_fx
+from ui.text_layout import draw_text_fit
 
 
 VOLUME_KEYS = ("master_volume", "music_volume", "sfx_volume")
@@ -13,6 +14,7 @@ CONTROL_LABELS = {
     "right": "MOVE RIGHT",
     "jump": "JUMP",
     "crouch": "CROUCH",
+    "block": "BLOCK / PARRY",
     "light": "LIGHT ATTACK",
     "heavy": "HEAVY ATTACK",
     "special": "SPECIAL ATTACK",
@@ -80,33 +82,41 @@ def run_controls_menu(screen, clock):
                 sound_fx.play("menu_confirm")
 
         screen.fill((12, 12, 26))
-        title = title_font.render("PLAYER 1 CONTROLS", True, settings.WHITE)
-        screen.blit(title, title.get_rect(center=(settings.WINDOW_WIDTH // 2, 110)))
+        draw_text_fit(
+            screen, title_font, "PLAYER 1 CONTROLS", settings.WHITE,
+            pygame.Rect(40, 75, settings.WINDOW_WIDTH - 80, 70),
+        )
 
         for index, action in enumerate(actions):
-            y = 190 + index * 54
+            y = 155 + index * 47
             color = (255, 230, 110) if index == selected else settings.WHITE
             label = CONTROL_LABELS[action]
             binding = "PRESS A KEY..." if action == listening_action else settings.P1_KEYS[action]
-            screen.blit(item_font.render(label, True, color), (350, y))
-            binding_image = item_font.render(binding, True, color)
-            screen.blit(binding_image, (760, y))
+            draw_text_fit(
+                screen, item_font, label, color,
+                pygame.Rect(300, y, 390, 36), align="left",
+            )
+            draw_text_fit(
+                screen, item_font, binding, color,
+                pygame.Rect(760, y, 220, 36), align="left",
+            )
 
         back_color = (255, 230, 110) if selected == len(actions) else settings.WHITE
-        back_image = item_font.render("BACK", True, back_color)
-        screen.blit(back_image, back_image.get_rect(center=(settings.WINDOW_WIDTH // 2, 590)))
-        if message:
-            message_image = hint_font.render(message, True, (255, 205, 110))
-            screen.blit(message_image, message_image.get_rect(
-                center=(settings.WINDOW_WIDTH // 2, 635)
-            ))
-        hint = hint_font.render(
-            "UP/DOWN select   ENTER rebind   ESC cancel/back",
-            True, (195, 200, 215),
+        draw_text_fit(
+            screen, item_font, "BACK", back_color,
+            pygame.Rect(20, 530, settings.WINDOW_WIDTH - 40, 36),
         )
-        screen.blit(hint, hint.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 30)
-        ))
+        if message:
+            draw_text_fit(
+                screen, hint_font, message, (255, 205, 110),
+                pygame.Rect(20, 575, settings.WINDOW_WIDTH - 40, 28),
+            )
+        draw_text_fit(
+            screen, hint_font, "UP/DOWN select   ENTER rebind   ESC cancel/back",
+            (195, 200, 215),
+            pygame.Rect(20, settings.WINDOW_HEIGHT - 50,
+                        settings.WINDOW_WIDTH - 40, 36),
+        )
         pygame.display.flip()
         clock.tick(settings.FPS)
 
@@ -178,8 +188,10 @@ def run_settings_menu(screen, clock):
                     return screen
 
         screen.fill((12, 12, 26))
-        title = title_font.render("SETTINGS", True, settings.WHITE)
-        screen.blit(title, title.get_rect(center=(settings.WINDOW_WIDTH // 2, 115)))
+        draw_text_fit(
+            screen, title_font, "SETTINGS", settings.WHITE,
+            pygame.Rect(40, 75, settings.WINDOW_WIDTH - 80, 80),
+        )
 
         for index, label in enumerate(options):
             y = row_y + index * row_gap

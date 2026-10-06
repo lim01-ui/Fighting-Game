@@ -17,6 +17,10 @@ players' inputs for that frame are available. This avoids blocking the window
 while preserving deterministic combat updates. A slow or disconnected peer can
 still pause simulation, and the game reports a disconnect.
 
+Player 1 can hold Q to guard, or hold away from the opponent. Tap guard just
+before an attack lands to parry it. The network protocol version is checked
+during setup so incompatible game versions do not start a match.
+
 After a match, press Enter or R on either computer to rematch, or Escape to
 return both players to the main lobby.
 

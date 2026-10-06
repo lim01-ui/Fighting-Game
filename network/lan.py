@@ -9,10 +9,10 @@ import threading
 
 
 PORT = 47611
-PROTOCOL_VERSION = 2
+PROTOCOL_VERSION = 3
 MAX_SETUP_SIZE = 4096
 ACTIONS = (
-    "left", "right", "jump", "crouch", "light", "heavy", "special",
+    "left", "right", "jump", "crouch", "block", "light", "heavy", "special",
     "rematch", "leave",
 )
 

@@ -97,6 +97,11 @@ def load():
     elif "fullscreen" in stored:
         print(f"[preferences] ignoring invalid 'fullscreen' in {_config_path}")
     controls = stored.get("p1_controls", DEFAULTS["p1_controls"])
+    if (
+        isinstance(controls, dict)
+        and set(controls) == set(DEFAULTS["p1_controls"]) - {"block"}
+    ):
+        controls = {**DEFAULTS["p1_controls"], **controls}
     if is_valid_control_map(controls):
         _values["p1_controls"] = controls.copy()
     elif "p1_controls" in stored:

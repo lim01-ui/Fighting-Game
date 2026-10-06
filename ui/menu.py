@@ -1,12 +1,15 @@
 import pygame
 import settings
 from audio import sound_fx
+from ui.text_layout import draw_text_fit
 
 
 def _draw_title(surface, font, text, y):
-    img = font.render(text, True, settings.WHITE)
-    rect = img.get_rect(center=(settings.WINDOW_WIDTH // 2, y))
-    surface.blit(img, rect)
+    draw_text_fit(
+        surface, font, text, settings.WHITE,
+        pygame.Rect(30, y - font.get_height() // 2,
+                    settings.WINDOW_WIDTH - 60, font.get_height()),
+    )
 
 
 def _draw_choices(surface, font, choices, selected):
@@ -14,9 +17,11 @@ def _draw_choices(surface, font, choices, selected):
     gap = 70
     for i, label in enumerate(choices):
         color = (255, 240, 120) if i == selected else settings.WHITE
-        img = font.render(label, True, color)
-        rect = img.get_rect(center=(settings.WINDOW_WIDTH // 2, start_y + i * gap))
-        surface.blit(img, rect)
+        draw_text_fit(
+            surface, font, label, color,
+            pygame.Rect(30, start_y + i * gap - font.get_height() // 2,
+                        settings.WINDOW_WIDTH - 60, font.get_height()),
+        )
 
 
 def run_main_menu(screen, clock):
@@ -64,13 +69,14 @@ def run_main_menu(screen, clock):
         screen.fill((7, 10, 23))
         pygame.draw.rect(screen, (14, 20, 38), (0, 0, settings.WINDOW_WIDTH, 150))
         pygame.draw.line(screen, (42, 190, 255), (0, 150), (settings.WINDOW_WIDTH, 150), 2)
-        title = title_font.render("PYTHON FIGHTERS", True, settings.WHITE)
-        screen.blit(title, (72, 42))
-        subtitle = subtitle_font.render(
-            "ARCADE LOBBY   /   SELECT YOUR NEXT FIGHT",
-            True, (105, 215, 255),
+        draw_text_fit(
+            screen, title_font, "PYTHON FIGHTERS", settings.WHITE,
+            pygame.Rect(72, 36, 560, 64), align="left",
         )
-        screen.blit(subtitle, (78, 112))
+        draw_text_fit(
+            screen, subtitle_font, "ARCADE LOBBY   /   SELECT YOUR NEXT FIGHT",
+            (105, 215, 255), pygame.Rect(78, 100, 550, 26), align="left",
+        )
 
         left_panel = pygame.Rect(70, 190, 540, 438)
         pygame.draw.rect(screen, (13, 20, 38), left_panel, border_radius=18)
@@ -88,10 +94,12 @@ def run_main_menu(screen, clock):
                 color = (220, 226, 242)
             number = subtitle_font.render(f"{index + 1:02}", True, (100, 190, 225))
             screen.blit(number, (row.x + 15, row.y + 9))
-            label_image = pygame.font.SysFont("Arial", 26, bold=True).render(
-                label, True, color
+            draw_text_fit(
+                screen, pygame.font.SysFont("Arial", 26, bold=True),
+                label, color,
+                pygame.Rect(row.x + 64, row.y + 2, row.width - 78, row.height - 4),
+                align="left",
             )
-            screen.blit(label_image, (row.x + 64, row.y + 4))
 
         right_panel = pygame.Rect(650, 190, 560, 438)
         pygame.draw.rect(screen, (13, 20, 38), right_panel, border_radius=18)
@@ -110,18 +118,17 @@ def run_main_menu(screen, clock):
         screen.blit(versus, versus.get_rect(center=(930, 365)))
         ready = item_font.render("FIGHTERS READY", True, settings.WHITE)
         screen.blit(ready, ready.get_rect(center=(930, 535)))
-        detail = subtitle_font.render(
-            "LOCAL PLAY   •   TRAINING   •   DIRECT-IP LAN",
-            True, (150, 170, 205),
+        draw_text_fit(
+            screen, subtitle_font, "LOCAL PLAY  |  TRAINING  |  DIRECT-IP LAN",
+            (150, 170, 205), pygame.Rect(670, 552, 520, 36),
         )
-        screen.blit(detail, detail.get_rect(center=(930, 570)))
-        hint = hint_font.render(
+        draw_text_fit(
+            screen, hint_font,
             "UP/DOWN or W/S: navigate    ENTER: select    ESC: quit",
-            True, (185, 195, 215),
+            (185, 195, 215),
+            pygame.Rect(20, settings.WINDOW_HEIGHT - 56,
+                        settings.WINDOW_WIDTH - 40, 42),
         )
-        screen.blit(hint, hint.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 34)
-        ))
         pygame.display.flip()
         clock.tick(settings.FPS)
 
@@ -153,9 +160,9 @@ def run_tutorial(screen, clock):
         ),
         (
             "BLOCK AND FIND AN OPENING",
-            "Hold the direction away from your opponent to block.",
-            "Blocking reduces damage, but does not make you invulnerable.",
-            "Punish a missed heavy attack while your opponent recovers.",
+            f"Hold {settings.P1_KEYS['block'].upper()} or move away to block.",
+            "Tap block just before impact for a perfect parry.",
+            "Parries cancel the attack and leave the opponent open.",
         ),
         (
             "PRACTICE YOUR COMBOS",
@@ -189,26 +196,31 @@ def run_tutorial(screen, clock):
         pygame.draw.line(screen, (42, 190, 255), (0, 150),
                          (settings.WINDOW_WIDTH, 150), 2)
         title = title_font.render("FIGHTER FIELD GUIDE", True, settings.WHITE)
-        screen.blit(title, title.get_rect(center=(settings.WINDOW_WIDTH // 2, 86)))
+        draw_text_fit(
+            screen, title_font, "FIGHTER FIELD GUIDE", settings.WHITE,
+            pygame.Rect(40, 48, settings.WINDOW_WIDTH - 80, 76),
+        )
 
         panel = pygame.Rect(150, 195, settings.WINDOW_WIDTH - 300, 380)
         pygame.draw.rect(screen, (13, 20, 38), panel, border_radius=18)
         pygame.draw.rect(screen, (45, 65, 98), panel, 2, border_radius=18)
         heading, *lines = pages[page]
-        heading_image = heading_font.render(heading, True, (255, 230, 125))
-        screen.blit(heading_image, heading_image.get_rect(
-            center=(panel.centerx, panel.y + 62)
-        ))
+        draw_text_fit(
+            screen, heading_font, heading, (255, 230, 125),
+            pygame.Rect(panel.x + 24, panel.y + 32, panel.width - 48, 60),
+        )
         for index, text in enumerate(lines):
-            image = body_font.render(text, True, (220, 226, 242))
-            screen.blit(image, image.get_rect(
-                center=(panel.centerx, panel.y + 135 + index * 48)
-            ))
+            draw_text_fit(
+                screen, body_font, text, (220, 226, 242),
+                pygame.Rect(panel.x + 28, panel.y + 111 + index * 48,
+                            panel.width - 56, 44),
+            )
 
         movement = (
             f"MOVE {settings.P1_KEYS['left'].upper()}/{settings.P1_KEYS['right'].upper()}   "
             f"JUMP {settings.P1_KEYS['jump'].upper()}   "
-            f"CROUCH {settings.P1_KEYS['crouch'].upper()}"
+            f"CROUCH {settings.P1_KEYS['crouch'].upper()}   "
+            f"BLOCK {settings.P1_KEYS['block'].upper()}"
         )
         attacks = (
             f"LIGHT {settings.P1_KEYS['light'].upper()}   "
@@ -217,24 +229,22 @@ def run_tutorial(screen, clock):
         )
         controls_font = pygame.font.SysFont("Arial", 19, bold=True)
         for index, text in enumerate((movement, attacks)):
-            image = controls_font.render(text, True, (100, 215, 255))
-            screen.blit(image, image.get_rect(
-                center=(settings.WINDOW_WIDTH // 2, 615 + index * 27)
-            ))
-        progress = hint_font.render(
+            draw_text_fit(
+                screen, controls_font, text, (100, 215, 255),
+                pygame.Rect(35, 601 + index * 27,
+                            settings.WINDOW_WIDTH - 70, 28),
+            )
+        draw_text_fit(
+            screen, hint_font,
             f"PAGE {page + 1} / {len(pages)}     LEFT/RIGHT: BROWSE",
-            True, (175, 190, 215),
+            (175, 190, 215),
+            pygame.Rect(20, 662, settings.WINDOW_WIDTH - 40, 24),
         )
-        screen.blit(progress, progress.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, 680)
-        ))
-        hint = hint_font.render(
-            "ENTER: START TRAINING    ESC: BACK",
-            True, (175, 190, 215),
+        draw_text_fit(
+            screen, hint_font, "ENTER: START TRAINING    ESC: BACK",
+            (175, 190, 215),
+            pygame.Rect(20, 690, settings.WINDOW_WIDTH - 40, 26),
         )
-        screen.blit(hint, hint.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, 704)
-        ))
         pygame.display.flip()
         clock.tick(settings.FPS)
 
@@ -267,10 +277,13 @@ def run_difficulty_menu(screen, clock):
         screen.fill((20, 20, 40))
         _draw_title(screen, title_font, "SELECT DIFFICULTY", 150)
         _draw_choices(screen, item_font, choices, selected)
-        hint = hint_font.render(
+        draw_text_fit(
+            screen, hint_font,
             "Up/Down to move   Enter to confirm   ESC to go back",
-            True, (200, 200, 200),
+            (200, 200, 200),
+            pygame.Rect(20, settings.WINDOW_HEIGHT - 58,
+                        settings.WINDOW_WIDTH - 40, 38),
+            align="left",
         )
-        screen.blit(hint, (30, settings.WINDOW_HEIGHT - 40))
         pygame.display.flip()
         clock.tick(settings.FPS)

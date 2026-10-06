@@ -16,6 +16,7 @@ import pygame
 import settings
 from stages import stages, stage_palettes
 from audio import sound_fx
+from ui.text_layout import draw_text_fit
 
 
 TILE_W = 160
@@ -105,9 +106,10 @@ def run_stage_select(screen, clock, title="CHOOSE YOUR STAGE"):
         screen.fill((12, 12, 26))
 
         # Title
-        title_img = title_font.render(title, True, settings.WHITE)
-        screen.blit(title_img, title_img.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, 55)))
+        draw_text_fit(
+            screen, title_font, title, settings.WHITE,
+            pygame.Rect(30, 18, settings.WINDOW_WIDTH - 60, 70),
+        )
 
         # Timer
         timer_color = (255, 80, 80) if secs_left <= 5 else (255, 240, 120)
@@ -130,19 +132,22 @@ def run_stage_select(screen, clock, title="CHOOSE YOUR STAGE"):
             screen.blit(s, strip.topleft)
             # 4. Label text on top of strip
             label = stage_palettes.display_name(sk, pk)
-            label_img = small_font.render(label, True, (240, 240, 240))
-            screen.blit(label_img, label_img.get_rect(center=strip.center))
+            draw_text_fit(
+                screen, small_font, label, (240, 240, 240), strip.inflate(-8, -2),
+            )
             # 5. Border last (so it outlines everything cleanly)
             border_color = (255, 240, 100) if is_sel else (90, 90, 120)
             thickness = 4 if is_sel else 2
             pygame.draw.rect(screen, border_color, tile, thickness)
 
         # Hint
-        hint = hint_font.render(
+        draw_text_fit(
+            screen, hint_font,
             "Arrows / WASD to move    ENTER to lock in    Auto-pick when timer hits 0",
-            True, (200, 200, 200))
-        screen.blit(hint, hint.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 30)))
+            (200, 200, 200),
+            pygame.Rect(20, settings.WINDOW_HEIGHT - 52,
+                        settings.WINDOW_WIDTH - 40, 40),
+        )
 
         pygame.display.flip()
         clock.tick(settings.FPS)

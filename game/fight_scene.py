@@ -30,6 +30,7 @@ from game.round_manager import (
 from game.match_manager import MatchManager
 from ui import transitions
 from ui import vs_screen
+from ui.text_layout import draw_text_fit
 from audio import sound_fx
 from audio import music
 from network.lan import ACTIONS
@@ -118,7 +119,8 @@ class _VirtualKeys:
     def __init__(self, player, action_values):
         self.values = {
             player._key(player.keymap[action]): action_values[action]
-            for action in ACTIONS[:7]
+            for action in ACTIONS
+            if action not in ("rematch", "leave")
         }
 
     def __getitem__(self, key):
@@ -167,28 +169,39 @@ def _resolve_combat(attacker, defender, attacker_combo, sparks, flashes, shake,
     defender_is_blocking = (
         defender.on_ground
         and defender._holding_back
-        and defender.state not in ("HITSTUN", "BLOCKSTUN", "KNOCKDOWN")
+        and defender.state not in ("ATTACK", "HITSTUN", "BLOCKSTUN", "KNOCKDOWN")
     )
 
     contact = hb.clip(hurtbox)
     cx = contact.centerx if contact.width else hb.centerx
     cy = contact.centery if contact.height else hb.centery
 
-    defender.receive_hit(attacker.current_attack, blocked=defender_is_blocking)
+    attack = attacker.current_attack
+    data = attack.data
+    perfect_guard = (
+        defender_is_blocking and defender.is_perfect_guarding
+    )
+    defender.receive_hit(attack, blocked=defender_is_blocking)
     attacker.mark_attack_connected()
 
-    _data = attacker.current_attack.data
-    if defender_is_blocking:
-        _dealt = int(_data.damage * defender.defense * settings.BLOCK_REDUCTION)
+    if perfect_guard:
+        attacker._end_attack()
+        attacker.state = "BLOCKSTUN"
+        attacker.state_timer = max(8, data.blockstun)
+        _dealt = 0
+    elif defender_is_blocking:
+        _dealt = int(data.damage * defender.defense * settings.BLOCK_REDUCTION)
     else:
-        _dealt = int(_data.damage * defender.defense)
-    _dealt = max(1, _dealt)
+        _dealt = int(data.damage * defender.defense)
+    if not perfect_guard:
+        _dealt = max(1, _dealt)
     attacker.gain_ultimate_meter(_dealt)
     defender.gain_ultimate_meter(_dealt)
-    damage_numbers.spawn(damage_numbers_list, cx, cy - 20, _dealt,
-                         blocked=defender_is_blocking)
+    if _dealt > 0:
+        damage_numbers.spawn(damage_numbers_list, cx, cy - 20, _dealt,
+                             blocked=defender_is_blocking)
 
-    name = attacker.current_attack.data.name
+    name = data.name
     if not defender_is_blocking:
         impact_strength = (
             0.075 if name == "ultimate"
@@ -215,7 +228,7 @@ def _resolve_combat(attacker, defender, attacker_combo, sparks, flashes, shake,
         attacker_combo.reset()
         combo_display.reset()
         reflect = defender.character.get("weapon_effect", {}).get("shield_reflect", 0.0)
-        if reflect > 0:
+        if reflect > 0 and not perfect_guard:
             back = max(1, int(_dealt * reflect * 4))
             attacker.health = max(0, attacker.health - back)
             damage_numbers.spawn(damage_numbers_list,
@@ -232,7 +245,7 @@ def _resolve_combat(attacker, defender, attacker_combo, sparks, flashes, shake,
             defender.state = "HITSTUN"
 
     # Multi-hit: if the behavior allows extra hits, mark not-connected again
-    is_ultimate = _data.name == "ultimate"
+    is_ultimate = data.name == "ultimate"
     beh = (
         character_data.ultimate_for(attacker.character["key"])
         if is_ultimate else attacker.character.get("special_behavior", {})
@@ -254,6 +267,12 @@ def _resolve_combat(attacker, defender, attacker_combo, sparks, flashes, shake,
 
     _spawn_hit_effects(sparks, flashes, name, cx, cy,
                        attacker.attack_color, defender_is_blocking, shake)
+    if perfect_guard:
+        sparks.append(HitSpark(
+            cx, cy, (175, 235, 255), count=18, speed=8, life=17,
+        ))
+        flashes.append(Flash((100, 200, 255), life=7, max_alpha=75))
+        shake.kick(8, 10)
     if defender.health <= 0:
         defender.go_knockdown()
     return True
@@ -678,7 +697,8 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                             if training_mode else 0
                         )
                         combat_callout = (
-                            "BLOCK!" if p2.state == "BLOCKSTUN" else "HIT!"
+                            "PARRY!" if p2._last_hit_was_parried
+                            else "BLOCK!" if p2.state == "BLOCKSTUN" else "HIT!"
                         )
                         combat_callout_color = (
                             (120, 195, 255)
@@ -694,7 +714,8 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                     )
                     if opponent_hit:
                         combat_callout = (
-                            "BLOCK!" if p1.state == "BLOCKSTUN" else "HIT!"
+                            "PARRY!" if p1._last_hit_was_parried
+                            else "BLOCK!" if p1.state == "BLOCKSTUN" else "HIT!"
                         )
                         combat_callout_color = (
                             (120, 195, 255)
@@ -752,17 +773,29 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                     if victim is pr.owner:
                         continue
                     if pr.rect.colliderect(victim.get_hurtbox()):
-                        blocked = (victim.on_ground and victim._holding_back
-                                   and victim.state not in ("HITSTUN", "BLOCKSTUN", "KNOCKDOWN"))
+                        blocked = (
+                            victim.on_ground and victim._holding_back
+                            and victim.state not in (
+                                "ATTACK", "HITSTUN", "BLOCKSTUN", "KNOCKDOWN"
+                            )
+                        )
+                        perfect_guard = blocked and victim.is_perfect_guarding
                         incoming = pr.damage * victim.defense
-                        dmg = int(incoming * settings.BLOCK_REDUCTION) if blocked else int(incoming)
-                        dmg = max(1, dmg)
+                        dmg = (
+                            0 if perfect_guard else
+                            int(incoming * settings.BLOCK_REDUCTION)
+                            if blocked else int(incoming)
+                        )
+                        if not perfect_guard:
+                            dmg = max(1, dmg)
                         victim.health = max(0, victim.health - dmg)
                         attacker_combo = combo_on_p2 if pr.owner is p1 else combo_on_p1
                         attacker_display = combo_display_p1 if pr.owner is p1 else combo_display_p2
                         if blocked:
+                            victim._last_hit_was_parried = perfect_guard
+                            victim._parry_flash_frames = 20 if perfect_guard else 0
                             victim.state = "BLOCKSTUN"
-                            victim.state_timer = 8
+                            victim.state_timer = 4 if perfect_guard else 8
                             if pr.owner is not None:
                                 pr.owner.gain_ultimate_meter(dmg)
                             victim.gain_ultimate_meter(dmg)
@@ -770,7 +803,20 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                             attacker_display.reset()
                             sparks.append(BlockSpark(pr.x, pr.y))
                             shake.kick(3, 5)
-                            combat_callout = "BLOCK!"
+                            if perfect_guard:
+                                sparks.append(HitSpark(
+                                    pr.x, pr.y, (175, 235, 255),
+                                    count=18, speed=8, life=17,
+                                ))
+                                flashes.append(Flash(
+                                    (100, 200, 255), life=7, max_alpha=75,
+                                ))
+                                pr.owner = victim
+                                pr.vx = -pr.vx
+                                pr.color = victim.attack_color
+                                pr.x += (1 if pr.vx > 0 else -1) * 14
+                                pr.rect.centerx = int(pr.x)
+                            combat_callout = "PARRY!" if perfect_guard else "BLOCK!"
                             combat_callout_color = (120, 195, 255)
                             combat_callout_timer = 28
                         else:
@@ -799,11 +845,13 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                             combat_callout_timer = 28
                         if training_mode and pr.owner is p1:
                             training_damage += dmg
-                        damage_numbers.spawn(damage_numbers_list,
-                                             pr.x, pr.y - 20, dmg, blocked=blocked)
+                        if dmg > 0:
+                            damage_numbers.spawn(damage_numbers_list,
+                                                 pr.x, pr.y - 20, dmg, blocked=blocked)
                         if victim.health <= 0:
                             victim.go_knockdown()
-                        pr.life = 0
+                        if not perfect_guard:
+                            pr.life = 0
                         break
             projectiles = [pr for pr in alive if pr.life > 0]
             special_effects = [se for se in special_effects if not se.update()]
@@ -851,6 +899,49 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
         for presentation in ultimate_presentations:
             presentation.draw(screen, (ox, oy))
 
+        # Scene-wide effects and transition overlays belong behind the HUD.
+        # Drawing these last used to tint or cover player names and round text.
+        for flash in flashes:
+            flash.draw(screen)
+
+        if round_mgr.state == ROUND_COUNTDOWN:
+            transitions.draw_countdown(
+                screen, match.round_number, round_mgr.countdown_progress, fonts,
+            )
+
+        if round_mgr.state == ROUND_OVER and not match.match_over:
+            transitions.draw_round_over(
+                screen, round_mgr.winner, round_end_reason,
+                round_mgr.over_progress, fonts,
+            )
+
+        if match.match_over:
+            progress = (
+                round_mgr.over_progress
+                if round_mgr.state == ROUND_OVER else 1.0
+            )
+            if network_peer is not None:
+                local_won = (
+                    (match.match_winner == "p1" and local_player == 1)
+                    or (match.match_winner == "p2" and local_player == 2)
+                )
+                header = "YOU WIN THE MATCH" if local_won else "YOU LOSE THE MATCH"
+                prompt = "ENTER / R = REMATCH     ESC = RETURN TO LOBBY"
+                winner_color = p1.color if match.match_winner == "p1" else p2.color
+            elif match.match_winner == "p1":
+                header = "YOU WIN THE MATCH" if bot else "PLAYER 1 WINS THE MATCH"
+                prompt = "ENTER / R = new match     ESC = back to menu"
+                winner_color = p1.color
+            else:
+                header = "BOT WINS THE MATCH" if bot else "PLAYER 2 WINS THE MATCH"
+                prompt = "ENTER / R = new match     ESC = back to menu"
+                winner_color = p2.color
+            rounds_text = f"Rounds: {match.p1_wins} - {match.p2_wins}"
+            transitions.draw_match_over(
+                screen, header, rounds_text, progress, fonts,
+                winner_color=winner_color, prompt=prompt,
+            )
+
         if paused:
             overlay = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT), pygame.SRCALPHA)
             overlay.fill((8, 8, 16, 180))
@@ -862,7 +953,10 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                 txt = fonts["mid"].render(label, True, color)
                 rect = txt.get_rect(center=(settings.WINDOW_WIDTH // 2, 330 + idx * 70))
                 screen.blit(txt, rect)
-            hint = fonts["small"].render("W/S or arrow keys to move • Enter to confirm", True, (200, 200, 200))
+            hint = fonts["small"].render(
+                "W/S or arrow keys to move - Enter to confirm",
+                True, (200, 200, 200),
+            )
             screen.blit(hint, hint.get_rect(center=(settings.WINDOW_WIDTH // 2, 560)))
 
         if network_waiting:
@@ -886,20 +980,20 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             )
 
         # HUD
-        bar_w, bar_h = 400, 30
+        bar_w = 400
         left_x = 40
         right_x = settings.WINDOW_WIDTH - bar_w - 40
-        draw_health_bar(screen, left_x, 30, bar_w, bar_h,
+        draw_health_bar(screen, left_x, 42, bar_w, 26,
                         p1.health, p1.max_health,
                         settings.HEALTH_FG_P1, flip=False,
                         trail_current=p1_health_trail)
-        draw_health_bar(screen, right_x, 30, bar_w, bar_h,
+        draw_health_bar(screen, right_x, 42, bar_w, 26,
                         p2.health, p2.max_health,
                         settings.HEALTH_FG_P2, flip=True,
                         trail_current=p2_health_trail)
-        draw_ultimate_meter(screen, left_x, 65, bar_w, p1.ultimate_meter,
+        draw_ultimate_meter(screen, left_x, 72, bar_w, p1.ultimate_meter,
                             (255, 206, 75))
-        draw_ultimate_meter(screen, right_x, 65, bar_w, p2.ultimate_meter,
+        draw_ultimate_meter(screen, right_x, 72, bar_w, p2.ultimate_meter,
                             (255, 108, 130), flip=True)
 
         p1_name = p1.character["name"]
@@ -910,82 +1004,104 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             else f"BOT ({bot.diff.name})" if bot
             else "PLAYER 2"
         )
-        screen.blit(font.render(f"P1  {p1_name}", True, settings.WHITE), (left_x, 2))
-        p2_header = font.render(f"{p2_label}  {p2_name}", True, settings.WHITE)
-        screen.blit(p2_header, (right_x + bar_w - p2_header.get_width(), 2))
+        pygame.draw.rect(
+            screen, (12, 16, 28), (left_x, 2, bar_w, 33), border_radius=7,
+        )
+        pygame.draw.rect(
+            screen, (12, 16, 28), (right_x, 2, bar_w, 33), border_radius=7,
+        )
+        name_font = pygame.font.SysFont("Arial", 23, bold=True)
+        draw_text_fit(
+            screen, name_font, f"P1  {p1_name}", settings.WHITE,
+            pygame.Rect(left_x + 10, 4, bar_w - 20, 28), align="left",
+        )
+        draw_text_fit(
+            screen, name_font, f"{p2_label}  {p2_name}", settings.WHITE,
+            pygame.Rect(right_x + 10, 4, bar_w - 20, 28), align="right",
+        )
 
         health_font = fonts["small"]
         p1_health = health_font.render(
             f"{max(0, int(p1.health))} / {p1.max_health}", True, settings.WHITE)
         p2_health = health_font.render(
             f"{max(0, int(p2.health))} / {p2.max_health}", True, settings.WHITE)
-        screen.blit(p1_health, p1_health.get_rect(center=(left_x + bar_w // 2, 45)))
-        screen.blit(p2_health, p2_health.get_rect(center=(right_x + bar_w // 2, 45)))
-        p1_meter_label = health_font.render(
+        screen.blit(p1_health, p1_health.get_rect(center=(left_x + bar_w // 2, 55)))
+        screen.blit(p2_health, p2_health.get_rect(center=(right_x + bar_w // 2, 55)))
+        draw_text_fit(
+            screen, health_font,
             "ULTIMATE READY" if p1.ultimate_meter >= 100
             else f"ULTIMATE {int(p1.ultimate_meter)}%",
-            True, (255, 220, 115),
+            (255, 220, 115), pygame.Rect(left_x, 88, bar_w, 24), align="left",
         )
-        p2_meter_label = health_font.render(
+        draw_text_fit(
+            screen, health_font,
             "ULTIMATE READY" if p2.ultimate_meter >= 100
             else f"ULTIMATE {int(p2.ultimate_meter)}%",
-            True, (255, 160, 175),
-        )
-        screen.blit(p1_meter_label, (left_x, 78))
-        screen.blit(
-            p2_meter_label,
-            (right_x + bar_w - p2_meter_label.get_width(), 78),
+            (255, 160, 175), pygame.Rect(right_x, 88, bar_w, 24), align="right",
         )
 
         if not training_mode:
             p1_wins, p2_wins, wins_needed = match.pips_display()
-            draw_round_pips(screen, 60, 140, p1_wins, wins_needed,
+            draw_round_pips(screen, 60, 138, p1_wins, wins_needed,
                             (240, 200, 80), right_align=False)
-            draw_round_pips(screen, settings.WINDOW_WIDTH - 60, 140,
+            draw_round_pips(screen, settings.WINDOW_WIDTH - 60, 138,
                             p2_wins, wins_needed,
                             (240, 200, 80), right_align=True)
 
+        timer_badge = pygame.Rect(
+            settings.WINDOW_WIDTH // 2 - 58, 25, 116, 68,
+        )
+        pygame.draw.rect(
+            screen, (12, 16, 28), timer_badge, border_radius=14,
+        )
+        pygame.draw.rect(
+            screen, (180, 195, 220), timer_badge, 2, border_radius=14,
+        )
         if training_mode:
-            timer_img = timer_font.render("∞", True, settings.WHITE)
-            screen.blit(timer_img, timer_img.get_rect(
-                center=(settings.WINDOW_WIDTH // 2, 60)))
+            draw_text_fit(
+                screen, timer_font, "INF", settings.WHITE,
+                pygame.Rect(settings.WINDOW_WIDTH // 2 - 60, 25, 120, 68),
+            )
             round_text = "TRAINING"
         else:
             draw_timer(screen, timer_font, settings.WINDOW_WIDTH // 2, 60,
                        round_mgr.timer_display)
             round_text = f"ROUND {match.round_number}"
-        round_label = font.render(round_text, True, settings.WHITE)
-        screen.blit(round_label, round_label.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, 130)))
+        draw_text_fit(
+            screen, font, round_text, settings.WHITE,
+            pygame.Rect(settings.WINDOW_WIDTH // 2 - 180, 112, 360, 34),
+        )
 
         if round_mgr.is_fighting:
             combo_display_p1.draw(screen)
             combo_display_p2.draw(screen)
         if training_mode:
             best_combo = combo_display_p1.best_hits
-            practice_text = pygame.font.SysFont("Arial", 17, bold=True).render(
+            draw_text_fit(
+                screen, pygame.font.SysFont("Arial", 17, bold=True),
                 f"BEST {best_combo} HITS   DAMAGE {training_damage}   "
                 f"DUMMY {training_dummy_mode} [T]   MOVES [V]   RESET [R]   HELP [H]",
-                True, (230, 235, 250),
+                (230, 235, 250),
+                pygame.Rect(20, settings.WINDOW_HEIGHT - 45,
+                            settings.WINDOW_WIDTH - 40, 40),
             )
-            screen.blit(practice_text, practice_text.get_rect(
-                center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 25)))
         elif not show_controls:
             hint_text = (
                 "H: CONTROLS   ESC: LEAVE MATCH"
                 if network_peer is not None
                 else "H: CONTROLS   ESC: PAUSE"
             )
-            guide_hint = health_font.render(hint_text, True, (210, 215, 230))
-            screen.blit(guide_hint, guide_hint.get_rect(
-                center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 22)
-            ))
+            draw_text_fit(
+                screen, health_font, hint_text, (210, 215, 230),
+                pygame.Rect(20, settings.WINDOW_HEIGHT - 42,
+                            settings.WINDOW_WIDTH - 40, 34),
+            )
 
-        if combat_callout_timer > 0:
-            callout = fonts["big"].render(combat_callout, True, combat_callout_color)
-            screen.blit(callout, callout.get_rect(
-                center=(settings.WINDOW_WIDTH // 2, 145)
-            ))
+        if combat_callout_timer > 0 and round_mgr.is_fighting:
+            draw_text_fit(
+                screen, fonts["big"], combat_callout, combat_callout_color,
+                pygame.Rect(settings.WINDOW_WIDTH // 2 - 220, 198, 440, 58),
+            )
 
         if show_controls:
             panel = pygame.Surface((680, 310), pygame.SRCALPHA)
@@ -993,10 +1109,11 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             panel_rect = panel.get_rect(center=(settings.WINDOW_WIDTH // 2, 365))
             screen.blit(panel, panel_rect)
             control_font = pygame.font.SysFont("Arial", 18)
-            title = fonts["mid"].render("CONTROLS", True, (255, 225, 110))
-            screen.blit(title, title.get_rect(
-                center=(panel_rect.centerx, panel_rect.y + 34)
-            ))
+            draw_text_fit(
+                screen, fonts["mid"], "CONTROLS", (255, 225, 110),
+                pygame.Rect(panel_rect.x + 20, panel_rect.y + 14,
+                            panel_rect.width - 40, 40),
+            )
             control_lines = (
                 [("LAN PLAYER CONTROLS", settings.P1_KEYS)]
                 if network_peer is not None
@@ -1009,34 +1126,48 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                 )
                 attacks = (
                     f"CROUCH {keymap['crouch']}    LIGHT {keymap['light']}    "
-                    f"HEAVY {keymap['heavy']}    SPECIAL {keymap['special']}"
+                    f"BLOCK {keymap['block']}    HEAVY {keymap['heavy']}    "
+                    f"SPECIAL {keymap['special']}"
                 )
                 y = panel_rect.y + 68 + player_index * 90
-                screen.blit(control_font.render(label, True, settings.WHITE),
-                            (panel_rect.x + 28, y))
-                screen.blit(control_font.render(movement, True, settings.WHITE),
-                            (panel_rect.x + 28, y + 22))
-                screen.blit(control_font.render(attacks, True, settings.WHITE),
-                            (panel_rect.x + 28, y + 44))
-            ultimate_hint = pygame.font.SysFont("Arial", 15, bold=True).render(
+                draw_text_fit(
+                    screen, control_font, label, settings.WHITE,
+                    pygame.Rect(panel_rect.x + 28, y, panel_rect.width - 56, 20),
+                    align="left",
+                )
+                draw_text_fit(
+                    screen, control_font, movement, settings.WHITE,
+                    pygame.Rect(panel_rect.x + 28, y + 20,
+                                panel_rect.width - 56, 24), align="left",
+                )
+                draw_text_fit(
+                    screen, control_font, attacks, settings.WHITE,
+                    pygame.Rect(panel_rect.x + 28, y + 44,
+                                panel_rect.width - 56, 24), align="left",
+                )
+            draw_text_fit(
+                screen, pygame.font.SysFont("Arial", 15, bold=True),
                 "Deal and take damage to charge meter; at 100%, SPECIAL uses your ULTIMATE.",
-                True, (255, 220, 115),
+                (255, 220, 115),
+                pygame.Rect(panel_rect.x + 20, panel_rect.bottom - 62,
+                            panel_rect.width - 40, 24),
             )
-            screen.blit(ultimate_hint, ultimate_hint.get_rect(
-                center=(panel_rect.centerx, panel_rect.bottom - 48)
-            ))
-            close_hint = health_font.render("H: CLOSE", True, (190, 195, 210))
-            screen.blit(close_hint, close_hint.get_rect(
-                center=(panel_rect.centerx, panel_rect.bottom - 22)
-            ))
+            draw_text_fit(
+                screen, health_font, "H: CLOSE", (190, 195, 210),
+                pygame.Rect(panel_rect.x + 20, panel_rect.bottom - 34,
+                            panel_rect.width - 40, 22),
+            )
 
         if show_move_list and training_mode:
             panel = pygame.Surface((420, 300), pygame.SRCALPHA)
             panel.fill((8, 10, 22, 225))
             panel_rect = panel.get_rect(topleft=(30, 145))
             screen.blit(panel, panel_rect)
-            title = health_font.render("PLAYER MOVES", True, (255, 225, 110))
-            screen.blit(title, (panel_rect.x + 18, panel_rect.y + 12))
+            draw_text_fit(
+                screen, health_font, "PLAYER MOVES", (255, 225, 110),
+                pygame.Rect(panel_rect.x + 18, panel_rect.y + 8,
+                            panel_rect.width - 36, 26), align="left",
+            )
             move_font = pygame.font.SysFont("Arial", 17)
             actions = ("light", "heavy", "special", "ultimate")
             for index, action in enumerate(actions):
@@ -1052,54 +1183,22 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                     f"{settings.P1_KEYS[action].upper()} {move_name} "
                     f"- {data.damage} DAMAGE"
                 )
-                label = move_font.render(
-                    label_text, True,
-                    (255, 220, 115) if action == "ultimate" else settings.WHITE,
+                label_color = (
+                    (255, 220, 115) if action == "ultimate" else settings.WHITE
                 )
-                frame_data = move_font.render(
+                draw_text_fit(
+                    screen, move_font, label_text, label_color,
+                    pygame.Rect(panel_rect.x + 18, y, panel_rect.width - 36, 20),
+                    align="left",
+                )
+                draw_text_fit(
+                    screen, move_font,
                     f"{data.startup} startup / {data.active} active / "
                     f"{data.recovery} recovery / {data.reach} reach",
-                    True, (180, 195, 220),
+                    (180, 195, 220),
+                    pygame.Rect(panel_rect.x + 18, y + 22,
+                                panel_rect.width - 36, 22),
+                    align="left",
                 )
-                screen.blit(label, (panel_rect.x + 18, y))
-                screen.blit(frame_data, (panel_rect.x + 18, y + 22))
-
-        # ---- Transitions ----
-        if round_mgr.state == ROUND_COUNTDOWN:
-            transitions.draw_countdown(screen, match.round_number,
-                                       round_mgr.countdown_progress, fonts)
-
-        if round_mgr.state == ROUND_OVER and not match.match_over:
-            transitions.draw_round_over(screen, round_mgr.winner,
-                                        round_end_reason,
-                                        round_mgr.over_progress, fonts)
-
-        if match.match_over:
-            # Progress is how far into the round-over pause we are
-            progress = round_mgr.over_progress if round_mgr.state == ROUND_OVER else 1.0
-            if network_peer is not None:
-                local_won = (
-                    (match.match_winner == "p1" and local_player == 1)
-                    or (match.match_winner == "p2" and local_player == 2)
-                )
-                header = "YOU WIN THE MATCH" if local_won else "YOU LOSE THE MATCH"
-                prompt = "ENTER / R = REMATCH     ESC = RETURN TO LOBBY"
-                winner_color = p1.color if match.match_winner == "p1" else p2.color
-            elif match.match_winner == "p1":
-                header = "YOU WIN THE MATCH" if bot else "PLAYER 1 WINS THE MATCH"
-                prompt = "ENTER / R = new match     ESC = back to menu"
-                winner_color = p1.color
-            else:
-                header = "BOT WINS THE MATCH" if bot else "PLAYER 2 WINS THE MATCH"
-                prompt = "ENTER / R = new match     ESC = back to menu"
-                winner_color = p2.color
-            rounds_text = f"Rounds: {match.p1_wins} - {match.p2_wins}"
-            transitions.draw_match_over(screen, header, rounds_text,
-                                        progress, fonts,
-                                        winner_color=winner_color,
-                                        prompt=prompt)
-
-        for f in flashes:
-            f.draw(screen)
 
         pygame.display.flip()

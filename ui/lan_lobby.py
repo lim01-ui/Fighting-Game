@@ -5,6 +5,7 @@ import pygame
 import settings
 from audio import sound_fx
 from network import lan
+from ui.text_layout import draw_text_fit
 
 
 def _draw_panel(screen, title, lines, hint, accent=(70, 205, 255)):
@@ -22,17 +23,23 @@ def _draw_panel(screen, title, lines, hint, accent=(70, 205, 255)):
     title_font = pygame.font.SysFont("Arial", 48, bold=True)
     body_font = pygame.font.SysFont("Arial", 27, bold=True)
     hint_font = pygame.font.SysFont("Arial", 19)
-    title_image = title_font.render(title, True, settings.WHITE)
-    screen.blit(title_image, title_image.get_rect(center=(settings.WINDOW_WIDTH // 2, 150)))
+    panel = pygame.Rect(100, 75, settings.WINDOW_WIDTH - 200,
+                        settings.WINDOW_HEIGHT - 150)
+    draw_text_fit(
+        screen, title_font, title, settings.WHITE,
+        pygame.Rect(panel.x + 24, 105, panel.width - 48, 86),
+    )
     for index, (text, color) in enumerate(lines):
-        image = body_font.render(text, True, color)
-        screen.blit(image, image.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, 265 + index * 58)
-        ))
-    hint_image = hint_font.render(hint, True, (185, 195, 215))
-    screen.blit(hint_image, hint_image.get_rect(
-        center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 130)
-    ))
+        draw_text_fit(
+            screen, body_font, text, color,
+            pygame.Rect(panel.x + 30, 225 + index * 58,
+                        panel.width - 60, 48),
+        )
+    draw_text_fit(
+        screen, hint_font, hint, (185, 195, 215),
+        pygame.Rect(panel.x + 30, settings.WINDOW_HEIGHT - 172,
+                    panel.width - 60, 42),
+    )
     pygame.display.flip()
 
 
@@ -72,12 +79,12 @@ def run_host_lobby(screen, clock):
                 return peer
 
             _draw_panel(
-                screen, "LAN LOBBY — HOST",
+                screen, "LAN LOBBY - HOST",
                 [
                     (f"ADDRESS  {address}:{lan.PORT}", (100, 220, 255)),
                     ("WAITING FOR ONE PLAYER...", settings.WHITE),
                 ],
-                "On the other computer choose JOIN LAN and enter this address   •   ESC: cancel",
+                "On the other computer choose JOIN LAN and enter this address   |   ESC: cancel",
             )
             clock.tick(settings.FPS)
     finally:
@@ -119,12 +126,12 @@ def run_join_lobby(screen, clock):
                     address += "".join(char for char in event.text if char in allowed)
 
             _draw_panel(
-                screen, "LAN LOBBY — JOIN",
+                screen, "LAN LOBBY - JOIN",
                 [
                     (address or "TYPE HOST IP ADDRESS", (100, 220, 255)),
                     (message, message_color),
                 ],
-                f"Enter: connect on port {lan.PORT}   •   Backspace: edit   •   ESC: back",
+                f"Enter: connect on port {lan.PORT}   |   Backspace: edit   |   ESC: back",
                 accent=(155, 125, 255),
             )
             clock.tick(settings.FPS)

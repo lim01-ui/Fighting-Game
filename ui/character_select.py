@@ -16,6 +16,7 @@ from characters import pixel_fighter
 from characters import sprite_fighter
 from audio import sound_fx
 from ui import portrait_loader
+from ui.text_layout import draw_text_fit
 
 
 GRID_COLS = 4
@@ -141,9 +142,10 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
         # ---------------- DRAW ----------------
         screen.fill((12, 12, 26))
 
-        title_img = title_font.render(title, True, settings.WHITE)
-        screen.blit(title_img,
-                    title_img.get_rect(center=(settings.WINDOW_WIDTH // 2, 60)))
+        draw_text_fit(
+            screen, title_font, title, settings.WHITE,
+            pygame.Rect(30, 24, settings.WINDOW_WIDTH - 60, 72),
+        )
 
         # ----- GRID -----
         for i, ch in enumerate(roster):
@@ -182,6 +184,13 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
             # Name strip at the bottom of the cell
             name_img = item_font.render(ch["name"], True, settings.WHITE)
             name_rect = name_img.get_rect(center=(cell.centerx, cell.bottom - 12))
+            if name_rect.width > cell.width - 12:
+                name_img = pygame.transform.smoothscale(
+                    name_img,
+                    (cell.width - 12, max(1, int(name_img.get_height()
+                                                  * (cell.width - 12) / name_rect.width))),
+                )
+                name_rect = name_img.get_rect(center=(cell.centerx, cell.bottom - 12))
             strip = pygame.Rect(cell.left + 4, name_rect.top - 2,
                                 cell.width - 8, name_rect.height + 4)
             s = pygame.Surface((strip.width, strip.height), pygame.SRCALPHA)
@@ -219,15 +228,23 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
             _draw_fighter_preview(screen, portrait_area, ch, t)
 
         # Name + archetype
-        name_img = title_font.render(ch["name"], True, settings.WHITE)
-        screen.blit(name_img, (panel.x + 20, panel.y + 230))
-        arch_img = item_font.render(ch["archetype"], True, (200, 220, 255))
-        screen.blit(arch_img, (panel.x + 20, panel.y + 280))
-        ultimate_name = character_data.ultimate_for(ch["key"])["name"]
-        ultimate_img = small_font.render(
-            f"ULTIMATE: {ultimate_name}", True, (255, 220, 115)
+        draw_text_fit(
+            screen, title_font, ch["name"], settings.WHITE,
+            pygame.Rect(panel.x + 20, panel.y + 224, panel.width - 40, 46),
+            align="left",
         )
-        screen.blit(ultimate_img, (panel.x + 20, panel.y + 302))
+        draw_text_fit(
+            screen, item_font, ch["archetype"], (200, 220, 255),
+            pygame.Rect(panel.x + 20, panel.y + 274, panel.width - 40, 28),
+            align="left",
+        )
+        ultimate_name = character_data.ultimate_for(ch["key"])["name"]
+        draw_text_fit(
+            screen, small_font, f"ULTIMATE: {ultimate_name}",
+            (255, 220, 115),
+            pygame.Rect(panel.x + 20, panel.y + 298, panel.width - 40, 22),
+            align="left",
+        )
 
         # Stats
         stats = ch["stats"]
@@ -247,9 +264,11 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
         hint_text = "Arrows / WASD to move    ENTER to confirm    ESC to go back"
         if allow_random:
             hint_text += "    R for random"
-        hint_img = hint_font.render(hint_text, True, (200, 200, 200))
-        screen.blit(hint_img, hint_img.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 30)))
+        draw_text_fit(
+            screen, hint_font, hint_text, (200, 200, 200),
+            pygame.Rect(20, settings.WINDOW_HEIGHT - 52,
+                        settings.WINDOW_WIDTH - 40, 40),
+        )
 
         pygame.display.flip()
         clock.tick(settings.FPS)

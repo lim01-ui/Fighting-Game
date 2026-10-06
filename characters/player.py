@@ -27,6 +27,7 @@ S_IDLE      = "IDLE"
 S_WALK      = "WALK"
 S_JUMP      = "JUMP"
 S_CROUCH    = "CROUCH"
+S_GUARD     = "GUARD"
 S_ATTACK    = "ATTACK"
 S_HITSTUN   = "HITSTUN"
 S_BLOCKSTUN = "BLOCKSTUN"
@@ -194,6 +195,11 @@ class Player:
         self.current_attack = None
         self.hit_pause = 0
         self._holding_back = False
+        self._block_age = settings.PARRY_WINDOW_FRAMES + 1
+        self._was_guarding = False
+        self._last_hit_was_parried = False
+        self._parry_flash_frames = 0
+        self._animation_time = 0.0
 
         self.color        = self.character["colors"]["body"]
         self.attack_color = self.character["colors"]["accent"]
@@ -227,6 +233,9 @@ class Player:
     def handle_input(self, keys):
         self.face_opponent()
         if self.state in (S_HITSTUN, S_BLOCKSTUN, S_KNOCKDOWN):
+            self._holding_back = False
+            self._was_guarding = False
+            self._block_age = settings.PARRY_WINDOW_FRAMES + 1
             return
         if self.hit_pause > 0:
             return
@@ -238,6 +247,21 @@ class Player:
         light   = keys[self._key(self.keymap["light"])]
         heavy   = keys[self._key(self.keymap["heavy"])]
         special = keys[self._key(self.keymap["special"])]
+        block = keys[self._key(self.keymap["block"])]
+
+        holding_back = (
+            (self.facing == 1 and left and not right)
+            or (self.facing == -1 and right and not left)
+        )
+        self._holding_back = block or holding_back
+        if self._holding_back:
+            if not getattr(self, "_was_guarding", False):
+                self._block_age = 0
+            else:
+                self._block_age += 1
+        else:
+            self._block_age = settings.PARRY_WINDOW_FRAMES + 1
+        self._was_guarding = self._holding_back
 
         if self.state != S_ATTACK:
             if light or heavy:
@@ -262,9 +286,9 @@ class Player:
 
         moving = False
         if not self.is_crouching:
-            if left and not right:
+            if left and not right and not (self._holding_back and block):
                 self.rect.x -= self.move_speed; moving = True
-            elif right and not left:
+            elif right and not left and not (self._holding_back and block):
                 self.rect.x += self.move_speed; moving = True
 
         if jump and self.on_ground:
@@ -272,14 +296,10 @@ class Player:
             self.on_ground = False
 
         if not self.on_ground:  self.state = S_JUMP
+        elif self._holding_back: self.state = S_GUARD
         elif self.is_crouching: self.state = S_CROUCH
         elif moving:            self.state = S_WALK
         else:                   self.state = S_IDLE
-
-        self._holding_back = (
-            (self.facing == 1 and left and not right)
-            or (self.facing == -1 and right and not left)
-        )
 
     def _start_attack(self, kind):
         data = self.attacks[kind]
@@ -305,6 +325,7 @@ class Player:
     def receive_hit(self, attack, blocked):
         data = attack.data
         incoming = data.damage * self.defense
+        self._last_hit_was_parried = False
         # Super-armor: take damage but ignore hitstun / knockback
         if self.super_armor_frames > 0 and not blocked:
             damage = int(incoming)
@@ -312,6 +333,12 @@ class Player:
             self.hit_pause = settings.HIT_PAUSE_FRAMES
             return True
         if blocked:
+            if self.is_perfect_guarding:
+                self._last_hit_was_parried = True
+                self._parry_flash_frames = 20
+                self.state = S_BLOCKSTUN
+                self.state_timer = max(2, data.blockstun // 2)
+                return True
             damage = int(incoming * settings.BLOCK_REDUCTION)
             self.health = max(0, self.health - damage)
             self.blockstun_left = data.blockstun
@@ -351,6 +378,13 @@ class Player:
         return self.state == S_ATTACK
 
     @property
+    def is_perfect_guarding(self):
+        return (
+            self._holding_back
+            and self._block_age <= settings.PARRY_WINDOW_FRAMES
+        )
+
+    @property
     def attack_has_connected(self):
         return self.current_attack is not None and self.current_attack.has_connected
 
@@ -362,6 +396,9 @@ class Player:
         if opponent is not None:
             self._opponent_ref = opponent
         self.face_opponent()
+        self._animation_time += 1.0
+        if self._parry_flash_frames > 0:
+            self._parry_flash_frames -= 1
         if self.hit_pause > 0:
             self.hit_pause -= 1
             return
@@ -429,6 +466,11 @@ class Player:
         self.is_crouching = False
         self.hit_pause = 0
         self._holding_back = False
+        self._was_guarding = False
+        self._block_age = settings.PARRY_WINDOW_FRAMES + 1
+        self._last_hit_was_parried = False
+        self._parry_flash_frames = 0
+        self._animation_time = 0.0
         self.walk_phase = 0.0
         self.weapon_trail = []
         self.super_armor_frames = 0
@@ -448,6 +490,9 @@ class Player:
         f = self.facing
 
         if self.state == S_IDLE:
+            breath = math.sin(self._animation_time * 0.075)
+            pose["torso_dy"] = int(breath * 2)
+            pose["head_dy"] = int(breath * 1.5)
             pose["arm_upper_front"] = 48
             pose["arm_fore_front"]  = 128
             pose["arm_upper_back"]  = 112
@@ -490,6 +535,18 @@ class Player:
             pose["leg_lower_front"] = 130
             pose["leg_upper"] = 120
             pose["leg_lower"] = 60
+
+        elif self.state == S_GUARD:
+            pulse = math.sin(self._animation_time * 0.16)
+            pose["torso_dx"] = self.facing * 2
+            pose["torso_dy"] = int(pulse)
+            pose["head_dx"] = self.facing * 2
+            pose["arm_upper_front"] = 8
+            pose["arm_fore_front"] = 18
+            pose["arm_upper_back"] = 28
+            pose["arm_fore_back"] = 12
+            pose["leg_upper_front"] = 78
+            pose["leg_lower_front"] = 108
 
         elif self.state == S_HITSTUN:
             pose["head_dx"] = -f * 5
@@ -597,10 +654,12 @@ class Player:
     def draw(self, surface):
         if self.character.get("sprite_asset"):
             self._draw_sprite_asset(surface)
+            self._draw_guard_effect(surface)
             self._draw_debug_boxes(surface)
             return
         if self.character.get("sprite_sheet"):
             self._draw_pixel_fighter(surface)
+            self._draw_guard_effect(surface)
             self._draw_debug_boxes(surface)
             return
 
@@ -613,6 +672,7 @@ class Player:
         r = self.rect
         if self.state == S_KNOCKDOWN:
             self._draw_knockdown(surface, body_c)
+            self._draw_guard_effect(surface)
             self._draw_debug_boxes(surface)
             return
 
@@ -825,7 +885,51 @@ class Player:
                 pygame.draw.circle(surface, self.attack_color,
                                    (head_cx, head_cy), head_r + 6, 3)
 
+        self._draw_guard_effect(surface)
         self._draw_debug_boxes(surface)
+
+    def _draw_guard_effect(self, surface):
+        if not self._holding_back and self._parry_flash_frames <= 0:
+            return
+
+        center_x = self.rect.centerx + self.facing * (self.width // 2 + 18)
+        center_y = self.rect.centery - 8
+        pulse = math.sin(self._animation_time * 0.22)
+        shield_w = int(self.width * (0.54 + pulse * 0.025))
+        shield_h = int(self.height * 0.58)
+        alpha = 105 if self._holding_back else 0
+        if self._parry_flash_frames > 0:
+            alpha = min(235, 110 + self._parry_flash_frames * 6)
+
+        layer = pygame.Surface((shield_w + 24, shield_h + 24), pygame.SRCALPHA)
+        mid_x = layer.get_width() // 2
+        top = 12
+        shield_points = (
+            (mid_x, top),
+            (mid_x + shield_w // 2, top + shield_h // 4),
+            (mid_x + shield_w // 2 - 4, top + shield_h * 2 // 3),
+            (mid_x, top + shield_h),
+            (mid_x - shield_w // 2 + 4, top + shield_h * 2 // 3),
+            (mid_x - shield_w // 2, top + shield_h // 4),
+        )
+        pygame.draw.polygon(layer, (65, 175, 255, alpha // 3), shield_points)
+        pygame.draw.polygon(
+            layer, (155, 225, 255, alpha), shield_points,
+            max(2, self.stick_thick // 5),
+        )
+        pygame.draw.line(
+            layer, (225, 250, 255, alpha),
+            (mid_x, top + 8), (mid_x, top + shield_h - 8),
+            max(1, self.stick_thick // 8),
+        )
+        surface.blit(layer, (center_x - mid_x, center_y - layer.get_height() // 2))
+
+        if self._parry_flash_frames > 0:
+            radius = 18 + (20 - self._parry_flash_frames) * 3
+            pygame.draw.circle(
+                surface, (190, 240, 255), (center_x, center_y), radius,
+                max(2, 5 - radius // 30),
+            )
 
     def _draw_sprite_asset(self, surface):
         image = sprite_fighter.frame_for_player(
@@ -844,9 +948,20 @@ class Player:
             target_h,
         )
         image = pygame.transform.scale(image, size)
+        bob = (
+            int(math.sin(self._animation_time * 0.075) * 2)
+            if self.state in (S_IDLE, S_GUARD) else 0
+        )
+        lunge = 8 if (
+            self.state == S_ATTACK and self.current_attack is not None
+            and self.current_attack.in_active
+        ) else 0
         surface.blit(
             image,
-            image.get_rect(midbottom=(self.rect.centerx, self.rect.bottom)),
+            image.get_rect(
+                midbottom=(self.rect.centerx + self.facing * lunge,
+                           self.rect.bottom + bob),
+            ),
         )
 
     def _draw_pixel_fighter(self, surface):
@@ -867,7 +982,21 @@ class Player:
             target_h,
         )
         image = pygame.transform.scale(image, size)
-        surface.blit(image, image.get_rect(midbottom=(self.rect.centerx, self.rect.bottom)))
+        bob = (
+            int(math.sin(self._animation_time * 0.075) * 2)
+            if self.state in (S_IDLE, S_GUARD) else 0
+        )
+        lunge = 8 if (
+            self.state == S_ATTACK and self.current_attack is not None
+            and self.current_attack.in_active
+        ) else 0
+        surface.blit(
+            image,
+            image.get_rect(
+                midbottom=(self.rect.centerx + self.facing * lunge,
+                           self.rect.bottom + bob),
+            ),
+        )
 
     def _stick_line(self, surface, p1, p2, color, thickness):
         pygame.draw.line(surface, color, p1, p2, thickness)

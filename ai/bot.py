@@ -20,12 +20,14 @@ class Bot:
         self.action_frames = 0
         self.keys = {
             "left": False, "right": False, "jump": False,
-            "crouch": False, "light": False, "heavy": False, "special": False,
+            "crouch": False, "block": False, "light": False,
+            "heavy": False, "special": False,
         }
 
     def update(self):
         self.keys["light"] = self.keys["heavy"] = self.keys["special"] = False
         self.keys["jump"] = False
+        self.keys["block"] = False
 
         if self.player.state in ("HITSTUN", "BLOCKSTUN", "KNOCKDOWN"):
             self._clear_movement()
@@ -92,6 +94,7 @@ class Bot:
             self.keys["left" if toward == 1 else "right"] = True
         elif self.state == B_BLOCK:
             self.keys["left" if toward == 1 else "right"] = True
+            self.keys["block"] = True
         elif self.state == B_JUMP:
             self.keys["jump"] = True
         elif self.state == B_ATTACK:

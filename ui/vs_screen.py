@@ -21,6 +21,7 @@ from characters import pixel_fighter
 from characters import sprite_fighter
 from ui import portrait_loader
 from effects import easing
+from ui.text_layout import draw_text_fit
 
 
 def _draw_preview(surface, rect, character, t, facing=1):
@@ -73,18 +74,12 @@ def _draw_side(surface, side_rect, character, t, facing, side):
         _draw_preview(surface, inner, character, t, facing=facing)
 
     name_font = pygame.font.SysFont("Arial", 36, bold=True)
-    name_img = name_font.render(character["name"], True, (255, 255, 255))
-    strip = pygame.Rect(inner.x, inner.bottom + 10, inner.width, name_img.get_height() + 8)
+    strip = pygame.Rect(inner.x, inner.bottom + 10, inner.width, name_font.get_height() + 8)
     pygame.draw.rect(surface, (0, 0, 0, 160), strip)
-    name_rect = name_img.get_rect(center=(inner.centerx, strip.centery))
-    # Outline for readability
-    outline = name_font.render(character["name"], True, (0, 0, 0))
-    for dx in (-2, 0, 2):
-        for dy in (-2, 0, 2):
-            if dx == 0 and dy == 0:
-                continue
-            surface.blit(outline, (name_rect.x + dx, name_rect.y + dy))
-    surface.blit(name_img, name_rect)
+    draw_text_fit(
+        surface, name_font, character["name"], (255, 255, 255),
+        strip.inflate(-8, -4),
+    )
 
 
 def run_vs_screen(screen, clock, p1_key, p2_key,
@@ -146,9 +141,10 @@ def run_vs_screen(screen, clock, p1_key, p2_key,
             (p1_label, left_pos, (255, 240, 120)),
             (p2_label, right_pos, (255, 240, 120)),
         ):
-            img = title_font.render(label, True, color)
-            r = img.get_rect(center=(rect.centerx, rect.top - 30))
-            screen.blit(img, r)
+            label_rect = pygame.Rect(
+                rect.left + 8, rect.top - 58, rect.width - 16, 50
+            )
+            draw_text_fit(screen, title_font, label, color, label_rect)
 
         # VS in the middle
         vs_color = (255, 60, 60)
@@ -171,19 +167,22 @@ def run_vs_screen(screen, clock, p1_key, p2_key,
         screen.blit(vs_scaled, vs_rect)
 
         # Stage name at bottom
-        stage_img = small_font.render("STAGE: " + stage_key.upper(),
-                                      True, (200, 220, 255))
-        screen.blit(stage_img, stage_img.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 90)))
+        draw_text_fit(
+            screen, small_font, "STAGE: " + stage_key.upper(),
+            (200, 220, 255),
+            pygame.Rect(40, settings.WINDOW_HEIGHT - 108,
+                        settings.WINDOW_WIDTH - 80, 36),
+        )
 
         # Hint
         if frame > 30:
             alpha = min(255, int(255 * easing.ease_out_cubic((frame - 30) / 30)))
-            hint = hint_font.render("PRESS ENTER TO BEGIN", True, (255, 255, 255))
-            hint.set_alpha(alpha)
-            screen.blit(hint, hint.get_rect(
-                center=(settings.WINDOW_WIDTH // 2,
-                        settings.WINDOW_HEIGHT - 40)))
+            draw_text_fit(
+                screen, hint_font, "PRESS ENTER TO BEGIN", (255, 255, 255),
+                pygame.Rect(40, settings.WINDOW_HEIGHT - 62,
+                            settings.WINDOW_WIDTH - 80, 40),
+                alpha=alpha,
+            )
 
         pygame.display.flip()
         clock.tick(settings.FPS)

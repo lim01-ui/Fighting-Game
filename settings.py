@@ -69,6 +69,7 @@ SPECIAL_HEIGHT    = 50
 HIT_PAUSE_FRAMES = 5
 BLOCK_REDUCTION  = 0.25
 BLOCK_KNOCKBACK_MULT = 0.5
+PARRY_WINDOW_FRAMES = 4
 
 # HURTBOX
 HURTBOX_INSET_X = 6
@@ -88,6 +89,7 @@ P1_KEYS = {
     "right":   "d",
     "jump":    "w",
     "crouch":  "s",
+    "block":   "q",
     "light":   "j",
     "heavy":   "k",
     "special": "l",
@@ -98,6 +100,7 @@ P2_KEYS = {
     "right":   "RIGHT",
     "jump":    "UP",
     "crouch":  "DOWN",
+    "block":   "RALT",
     "light":   "RETURN",
     "heavy":   "RSHIFT",
     "special": "RCTRL",

@@ -2,14 +2,16 @@
 import pygame
 import settings
 from effects import easing
+from ui.text_layout import draw_text_fit
 
 
 def _center_text(surface, font, text, y, color, alpha=255):
-    img = font.render(text, True, color)
-    if alpha < 255:
-        img.set_alpha(alpha)
-    rect = img.get_rect(center=(settings.WINDOW_WIDTH // 2, y))
-    surface.blit(img, rect)
+    draw_text_fit(
+        surface, font, text, color,
+        pygame.Rect(30, y - font.get_height() // 2,
+                    settings.WINDOW_WIDTH - 60, font.get_height()),
+        alpha=alpha,
+    )
 
 
 def draw_countdown(surface, round_number, progress, fonts):
