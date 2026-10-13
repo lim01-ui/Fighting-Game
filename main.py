@@ -2,7 +2,7 @@
 """
 Entry point for the arcade lobby, offline modes, and direct-IP LAN matches.
 """
-#hello
+#hello hi
 import sys
 import random
 import pygame
