@@ -118,9 +118,9 @@ def _draw_center_text(surface, font, text, y, color=None):
 class _VirtualKeys:
     def __init__(self, player, action_values):
         self.values = {
-            player._key(player.keymap[action]): action_values[action]
+            player._key(player.keymap[action]): bool(action_values.get(action, False))
             for action in ACTIONS
-            if action not in ("rematch", "leave")
+            if action not in ("rematch", "leave") and action in player.keymap
         }
 
     def __getitem__(self, key):

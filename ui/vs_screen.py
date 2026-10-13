@@ -112,6 +112,9 @@ def run_vs_screen(screen, clock, p1_key, p2_key,
                 if event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     return "start"
 
+        if frame >= 180:
+            return "start"
+
         # Side rects
         side_w = int(settings.WINDOW_WIDTH * 0.34)
         side_h = int(settings.WINDOW_HEIGHT * 0.62)

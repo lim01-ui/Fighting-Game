@@ -23,7 +23,7 @@ class LanPeer:
         self.address = address
         self.connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.connection.settimeout(300)
-        self._incoming = queue.Queue(maxsize=120)
+        self._incoming = queue.Queue(maxsize=300)
         self._outgoing = queue.Queue()
         self._pending_inputs = {}
         self._next_frame = 0
@@ -57,17 +57,17 @@ class LanPeer:
         pending_receive = bytearray()
         try:
             while not self._closed.is_set():
-                if not pending_send:
+                while not self._closed.is_set():
                     try:
                         pending_send.extend(self._outgoing.get_nowait())
                     except queue.Empty:
-                        pass
+                        break
 
                 readable, writable, _ = select.select(
                     [self.connection],
                     [self.connection] if pending_send else [],
                     [],
-                    0.1,
+                    0.005,
                 )
                 if readable:
                     chunk = self.connection.recv(4096)
@@ -212,5 +212,10 @@ def local_ip_address():
     try:
         probe.connect(("192.0.2.1", 9))
         return probe.getsockname()[0]
+    except OSError:
+        try:
+            return socket.gethostbyname(socket.gethostname())
+        except OSError:
+            return "127.0.0.1"
     finally:
         probe.close()

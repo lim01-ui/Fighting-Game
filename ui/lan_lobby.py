@@ -1,5 +1,6 @@
 """Host/join screens for direct-IP LAN matches."""
 
+import select
 import pygame
 
 import settings
@@ -149,4 +150,53 @@ def show_lan_message(screen, clock, title, message):
         for event in pygame.event.get():
             if event.type in (pygame.QUIT, pygame.KEYDOWN):
                 return
+        clock.tick(settings.FPS)
+
+
+def exchange_setup_with_ui(peer, screen, clock, local_data, waiting_message="WAITING FOR OPPONENT"):
+    peer.send_setup(local_data)
+    dots = 0
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return None
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                sound_fx.play("menu_back")
+                return None
+
+        readable, _, _ = select.select([peer.connection], [], [], 0.02)
+        if readable:
+            return peer.receive_setup()
+
+        dots = (dots + 1) % 120
+        dot_str = "." * (1 + (dots // 30) % 3)
+        _draw_panel(
+            screen, "LAN MATCH",
+            [(f"{waiting_message}{dot_str}", settings.WHITE)],
+            "Waiting for the other player to make their selection   |   ESC: cancel",
+        )
+        clock.tick(settings.FPS)
+
+
+def receive_setup_with_ui(peer, screen, clock, waiting_message="SYNCHRONIZING"):
+    dots = 0
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return None
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                sound_fx.play("menu_back")
+                return None
+
+        readable, _, _ = select.select([peer.connection], [], [], 0.02)
+        if readable:
+            return peer.receive_setup()
+
+        dots = (dots + 1) % 120
+        dot_str = "." * (1 + (dots // 30) % 3)
+        _draw_panel(
+            screen, "LAN MATCH",
+            [(f"{waiting_message}{dot_str}", settings.WHITE)],
+            "Synchronizing match settings...   |   ESC: cancel",
+        )
         clock.tick(settings.FPS)
