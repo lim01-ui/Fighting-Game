@@ -19,8 +19,8 @@ from stages import stages
 
 
 def main():
-    pygame.init()
     pygame.mixer.pre_init(frequency=22050, size=-16, channels=1, buffer=512)
+    pygame.init()
     pygame.mixer.init()
     preferences.load()
     from audio import sound_fx as _sfx
