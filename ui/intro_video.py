@@ -4,7 +4,6 @@ from pathlib import Path
 from bisect import bisect_right
 import time
 
-import av
 import pygame
 
 import settings
@@ -60,7 +59,7 @@ def _frame_timestamp(frame, first_pts, frame_index, rate):
     return frame_index / rate
 
 
-def _load_loop_frames(path, screen, rate):
+def _load_loop_frames(path, screen, rate, av):
     with av.open(str(path)) as container:
         if not container.streams.video:
             raise ValueError(f"Title video has no video stream: {path}")
@@ -86,6 +85,17 @@ def _load_loop_frames(path, screen, rate):
 
 def run_title_video(screen, clock, video_path=VIDEO_PATH):
     """Play the opening once, then loop only the video segment from 8s to 9s."""
+    try:
+        import av
+        import numpy  # Required by VideoFrame.to_ndarray and pygame.surfarray.
+    except ModuleNotFoundError as error:
+        if error.name not in ("av", "numpy"):
+            raise
+        print(
+            f"Skipping title video: {error.name} is not installed. "
+            "Install requirements.txt to enable video playback."
+        )
+        return True
     path = Path(video_path)
     if not path.is_file():
         raise FileNotFoundError(f"Title video is missing: {path}")
@@ -96,7 +106,7 @@ def run_title_video(screen, clock, video_path=VIDEO_PATH):
         video = container.streams.video[0]
         rate = float(video.average_rate or settings.FPS)
 
-    loop_frames = _load_loop_frames(path, screen, rate)
+    loop_frames = _load_loop_frames(path, screen, rate, av)
     loop_offsets = [offset for offset, _ in loop_frames]
 
     with av.open(str(path)) as container:
