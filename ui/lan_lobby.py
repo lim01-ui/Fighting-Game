@@ -1,6 +1,7 @@
 """Host/join screens for direct-IP LAN matches."""
 
-import select
+import queue
+import threading
 import pygame
 
 import settings
@@ -55,7 +56,8 @@ def run_host_lobby(screen, clock):
             listener.close()
         _draw_panel(
             screen, "COULD NOT HOST",
-            [(str(error), (255, 150, 150))],
+            [(str(error), (255, 150, 150)),
+             (f"Port {lan.PORT} may already be used by another host.", settings.WHITE)],
             "Press any key to return",
             accent=(255, 115, 115),
         )
@@ -84,6 +86,8 @@ def run_host_lobby(screen, clock):
                 [
                     (f"ADDRESS  {address}:{lan.PORT}", (100, 220, 255)),
                     ("WAITING FOR ONE PLAYER...", settings.WHITE),
+                    (f"Same LAN required. Allow TCP {lan.PORT} through the host firewall.",
+                     (185, 195, 215)),
                 ],
                 "On the other computer choose JOIN LAN and enter this address   |   ESC: cancel",
             )
@@ -97,6 +101,24 @@ def run_join_lobby(screen, clock):
     address = ""
     message = "Enter the host's IPv4 address"
     message_color = (185, 195, 215)
+    results = queue.Queue()
+    connecting = False
+    canceled = threading.Event()
+
+    def connect(address_text):
+        try:
+            result = lan.connect_to_host(address_text)
+        except (OSError, ValueError) as error:
+            result = error
+        # Lock the handoff so cancel cannot leak a late connection.
+        with handoff_lock:
+            if canceled.is_set():
+                if isinstance(result, lan.LanPeer):
+                    result.close()
+            else:
+                results.put(result)
+
+    handoff_lock = threading.Lock()
     pygame.key.start_text_input()
     try:
         while True:
@@ -107,24 +129,35 @@ def run_join_lobby(screen, clock):
                     if event.key == pygame.K_ESCAPE:
                         sound_fx.play("menu_back")
                         return None
-                    if event.key == pygame.K_BACKSPACE:
+                    if event.key == pygame.K_BACKSPACE and not connecting:
                         address = address[:-1]
                     elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                        if connecting:
+                            continue
                         if not address:
                             message = "Enter an IPv4 address first"
                             message_color = (255, 180, 120)
                             continue
-                        try:
-                            peer = lan.connect_to_host(address)
-                        except OSError as error:
-                            message = f"Could not connect: {error}"
-                            message_color = (255, 150, 150)
-                            continue
-                        sound_fx.play("menu_confirm")
-                        return peer
-                elif event.type == pygame.TEXTINPUT:
-                    allowed = "0123456789."
-                    address += "".join(char for char in event.text if char in allowed)
+                        connecting = True
+                        message = "CONNECTING...   ESC: cancel"
+                        message_color = (185, 195, 215)
+                        threading.Thread(target=connect, args=(address,), daemon=True).start()
+                elif event.type == pygame.TEXTINPUT and not connecting:
+                    allowed = "0123456789.:"
+                    address = (address + "".join(char for char in event.text if char in allowed))[:21]
+
+            try:
+                result = results.get_nowait()
+            except queue.Empty:
+                pass
+            else:
+                connecting = False
+                if isinstance(result, Exception):
+                    message = f"Could not connect: {result}"
+                    message_color = (255, 150, 150)
+                else:
+                    sound_fx.play("menu_confirm")
+                    return result
 
             _draw_panel(
                 screen, "LAN LOBBY - JOIN",
@@ -137,6 +170,12 @@ def run_join_lobby(screen, clock):
             )
             clock.tick(settings.FPS)
     finally:
+        with handoff_lock:
+            canceled.set()
+            while not results.empty():
+                result = results.get_nowait()
+                if isinstance(result, lan.LanPeer):
+                    result.close()
         pygame.key.stop_text_input()
 
 
@@ -164,9 +203,9 @@ def exchange_setup_with_ui(peer, screen, clock, local_data, waiting_message="WAI
                 sound_fx.play("menu_back")
                 return None
 
-        readable, _, _ = select.select([peer.connection], [], [], 0.02)
-        if readable:
-            return peer.receive_setup()
+        setup = peer.poll_setup()
+        if setup is not None:
+            return setup
 
         dots = (dots + 1) % 120
         dot_str = "." * (1 + (dots // 30) % 3)
@@ -188,9 +227,9 @@ def receive_setup_with_ui(peer, screen, clock, waiting_message="SYNCHRONIZING"):
                 sound_fx.play("menu_back")
                 return None
 
-        readable, _, _ = select.select([peer.connection], [], [], 0.02)
-        if readable:
-            return peer.receive_setup()
+        setup = peer.poll_setup()
+        if setup is not None:
+            return setup
 
         dots = (dots + 1) % 120
         dot_str = "." * (1 + (dots // 30) % 3)

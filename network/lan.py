@@ -6,11 +6,13 @@ import select
 import socket
 import struct
 import threading
+import time
 
 
 PORT = 47611
 PROTOCOL_VERSION = 3
 MAX_SETUP_SIZE = 4096
+INPUT_TIMEOUT = 15.0
 ACTIONS = (
     "left", "right", "jump", "crouch", "block", "light", "heavy", "special",
     "rematch", "leave",
@@ -31,6 +33,10 @@ class LanPeer:
         self._error = None
         self._closed = threading.Event()
         self._reader = None
+        self.local_inputs = {}
+        self._frame_started = None
+        self._setup_buffer = bytearray()
+        self._setup_started = None
 
     def _receive_exactly(self, size):
         data = bytearray()
@@ -130,6 +136,43 @@ class LanPeer:
             raise ValueError("LAN setup data must be a JSON object.")
         return setup
 
+    def poll_setup(self):
+        """Receive complete setup packets without blocking the Pygame event loop."""
+        if self._setup_started is None:
+            self._setup_started = time.monotonic()
+        if time.monotonic() - self._setup_started > 300:
+            raise ConnectionError("Timed out waiting for the other player's selection.")
+        readable, _, _ = select.select([self.connection], [], [], 0)
+        if readable:
+            # Read only this packet: the following bytes may be gameplay inputs.
+            remaining = 4 - len(self._setup_buffer)
+            if remaining <= 0:
+                size = struct.unpack("!I", self._setup_buffer[:4])[0]
+                if size > MAX_SETUP_SIZE:
+                    raise ValueError("Received oversized LAN setup data.")
+                remaining = 4 + size - len(self._setup_buffer)
+            chunk = self.connection.recv(max(1, remaining))
+            if not chunk:
+                raise ConnectionError("The other player disconnected during setup.")
+            self._setup_buffer.extend(chunk)
+        if len(self._setup_buffer) < 4:
+            return None
+        size = struct.unpack("!I", self._setup_buffer[:4])[0]
+        if size > MAX_SETUP_SIZE:
+            raise ValueError("Received oversized LAN setup data.")
+        if len(self._setup_buffer) < 4 + size:
+            return None
+        payload = bytes(self._setup_buffer[4:4 + size])
+        del self._setup_buffer[:4 + size]
+        self._setup_started = None
+        try:
+            setup = json.loads(payload)
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise ValueError("Received invalid LAN setup data.") from error
+        if not isinstance(setup, dict):
+            raise ValueError("LAN setup data must be a JSON object.")
+        return setup
+
     def poll_inputs(self, local_inputs):
         """Submit this simulation frame without blocking and poll its peer input."""
         self.start_input_transport()
@@ -142,8 +185,10 @@ class LanPeer:
             if local_inputs.get(action, False)
         )
         if self._submitted_frame != frame_number:
+            self.local_inputs = dict(local_inputs)
             self._outgoing.put(struct.pack("!IH", frame_number, mask))
             self._submitted_frame = frame_number
+            self._frame_started = time.monotonic()
 
         while True:
             try:
@@ -162,6 +207,8 @@ class LanPeer:
         if remote_mask is None:
             if self._error is not None:
                 raise self._error
+            if time.monotonic() - self._frame_started > INPUT_TIMEOUT:
+                raise ConnectionError("The other player stopped responding. Check the LAN connection.")
             return None
 
         self._next_frame += 1
@@ -187,10 +234,18 @@ class LanPeer:
 
 def create_host(port=PORT):
     listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    listener.bind(("0.0.0.0", port))
-    listener.listen(1)
-    listener.setblocking(False)
+    try:
+        # Windows SO_REUSEADDR can let two hosts bind the same port.
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            listener.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        else:
+            listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        listener.bind(("0.0.0.0", port))
+        listener.listen(1)
+        listener.setblocking(False)
+    except OSError:
+        listener.close()
+        raise
     return listener
 
 
@@ -202,7 +257,21 @@ def accept_if_ready(listener):
     return LanPeer(connection, address)
 
 
+def parse_address(address, default_port=PORT):
+    """Accept the host's displayed IPv4 address with an optional :port."""
+    host, separator, port_text = address.strip().partition(":")
+    try:
+        socket.inet_pton(socket.AF_INET, host)
+        port = int(port_text) if separator else default_port
+        if not 1 <= port <= 65535:
+            raise ValueError
+    except (OSError, ValueError) as error:
+        raise ValueError("Enter a valid IPv4 address, optionally followed by :port.") from error
+    return host, port
+
+
 def connect_to_host(ip_address, port=PORT):
+    ip_address, port = parse_address(ip_address, port)
     connection = socket.create_connection((ip_address, port), timeout=5)
     return LanPeer(connection, (ip_address, port))
 

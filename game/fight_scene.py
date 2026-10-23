@@ -418,8 +418,8 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             is_shortcut = event.type == pygame.KEYDOWN and event.key not in bound_keys
             if network_peer is not None and event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    network_local_leave = True
-                    continue
+                    # Leaving must remain possible even when the peer stops sending.
+                    return "MENU"
                 if match.match_over and event.key in (
                     pygame.K_RETURN, pygame.K_SPACE, pygame.K_r,
                 ):
@@ -488,12 +488,16 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             local_values["rematch"] = network_local_rematch
             local_values["leave"] = network_local_leave
             remote_values = network_peer.poll_inputs(local_values)
+            # Use exactly the snapshot sent for this frame, even after waiting.
+            local_values = network_peer.local_inputs
             if remote_values is None:
                 network_ready = False
                 network_waiting = True
             else:
-                network_local_rematch = False
-                network_local_leave = False
+                if local_values["rematch"]:
+                    network_local_rematch = False
+                if local_values["leave"]:
+                    network_local_leave = False
                 network_waiting = False
                 if remote_values["leave"] or local_values["leave"]:
                     return "MENU"
