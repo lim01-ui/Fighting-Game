@@ -373,6 +373,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
     network_local_rematch = False
     network_local_leave = False
     network_waiting = False
+    network_wait_started = None
     bound_keys = {preferences.key_code_from_name(name)
                   for name in settings.P1_KEYS.values() if name}
 
@@ -411,6 +412,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
 
     while True:
         dt = clock.tick(settings.FPS)
+        frame_started = pygame.time.get_ticks()
         t += dt / 1000.0
 
         # INPUT
@@ -489,18 +491,29 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             }
             local_values["rematch"] = network_local_rematch
             local_values["leave"] = network_local_leave
-            remote_values = network_peer.poll_inputs(local_values)
+            # Receive inputs arriving during this frame instead of losing a
+            # whole simulation tick to the transport thread's scheduling.
+            input_budget = max(
+                0.0, 1.0 / settings.FPS
+                - (pygame.time.get_ticks() - frame_started) / 1000.0,
+            )
+            remote_values = network_peer.poll_inputs(
+                local_values, wait_timeout=input_budget,
+            )
             # Use exactly the snapshot sent for this frame, even after waiting.
             local_values = network_peer.local_inputs
             if remote_values is None:
                 network_ready = False
                 network_waiting = True
+                if network_wait_started is None:
+                    network_wait_started = t
             else:
                 if local_values["rematch"]:
                     network_local_rematch = False
                 if local_values["leave"]:
                     network_local_leave = False
                 network_waiting = False
+                network_wait_started = None
                 if remote_values["leave"] or local_values["leave"]:
                     return "MENU"
                 if match.match_over and (
@@ -968,7 +981,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             )
             screen.blit(hint, hint.get_rect(center=(settings.WINDOW_WIDTH // 2, 560)))
 
-        if network_waiting:
+        if network_waiting and t - network_wait_started >= 0.25:
             wait_overlay = pygame.Surface(
                 (settings.WINDOW_WIDTH, 58), pygame.SRCALPHA
             )
@@ -979,12 +992,12 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             )
             screen.blit(
                 wait_overlay,
-                (0, settings.WINDOW_HEIGHT - wait_overlay.get_height()),
+                (0, settings.WINDOW_HEIGHT - 104),
             )
             screen.blit(
                 wait_text,
                 wait_text.get_rect(
-                    center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 29)
+                    center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 75)
                 ),
             )
 

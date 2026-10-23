@@ -173,8 +173,8 @@ class LanPeer:
             raise ValueError("LAN setup data must be a JSON object.")
         return setup
 
-    def poll_inputs(self, local_inputs):
-        """Submit this simulation frame without blocking and poll its peer input."""
+    def poll_inputs(self, local_inputs, wait_timeout=0.0):
+        """Submit a frame and optionally wait within the caller's frame budget."""
         self.start_input_transport()
         if self._error is not None:
             raise self._error
@@ -190,11 +190,18 @@ class LanPeer:
             self._submitted_frame = frame_number
             self._frame_started = time.monotonic()
 
+        deadline = time.monotonic() + max(0.0, wait_timeout)
         while True:
             try:
                 incoming = self._incoming.get_nowait()
             except queue.Empty:
-                break
+                remaining = deadline - time.monotonic()
+                if frame_number in self._pending_inputs or remaining <= 0:
+                    break
+                try:
+                    incoming = self._incoming.get(timeout=remaining)
+                except queue.Empty:
+                    break
             if incoming is None:
                 if self._error is not None:
                     raise self._error

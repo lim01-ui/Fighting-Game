@@ -2,6 +2,7 @@
 import json
 import socket
 import struct
+import threading
 import time
 import unittest
 from unittest.mock import patch
@@ -77,6 +78,27 @@ class LanTests(unittest.TestCase):
         with patch.object(lan.time, 'monotonic', return_value=self.host._frame_started + 16):
             with self.assertRaisesRegex(ConnectionError, 'stopped responding'):
                 self.host.poll_inputs({})
+
+    def test_input_arriving_within_frame_budget_is_used_immediately(self):
+        sender = threading.Timer(
+            0.01, self.guest.connection.sendall,
+            args=(struct.pack('!IH', 0, 1 << lan.ACTIONS.index('heavy')),),
+        )
+        sender.start()
+        try:
+            remote = self.host.poll_inputs({'light': True}, wait_timeout=0.5)
+        finally:
+            sender.join()
+        self.assertIsNotNone(remote)
+        self.assertTrue(remote['heavy'])
+        self.assertTrue(self.host.local_inputs['light'])
+        self.assertEqual(self.host._next_frame, 1)
+
+    def test_frame_budget_expires_without_advancing_simulation(self):
+        started = time.monotonic()
+        self.assertIsNone(self.host.poll_inputs({}, wait_timeout=0.01))
+        self.assertLess(time.monotonic() - started, 0.5)
+        self.assertEqual(self.host._next_frame, 0)
 
     def test_repeated_frames_and_rematch_inputs(self):
         for frame in range(60):
