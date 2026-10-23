@@ -21,6 +21,7 @@ from characters import pixel_fighter
 from characters import sprite_fighter
 from characters import weapons
 from effects import combat_behaviors
+from audio import preferences
 
 
 S_IDLE      = "IDLE"
@@ -224,11 +225,11 @@ class Player:
         self.ultimate_meter = 0.0
 
     def _key(self, name):
-        if hasattr(pygame, f"K_{name}"):
-            return getattr(pygame, f"K_{name}")
-        if hasattr(pygame, f"K_{name.upper()}"):
-            return getattr(pygame, f"K_{name.upper()}")
-        return getattr(pygame, f"K_{name.lower()}")
+        return preferences.key_code_from_name(name)
+
+    def action_pressed(self, keys, action):
+        binding = self.keymap[action]
+        return bool(binding) and bool(keys[self._key(binding)])
 
     def handle_input(self, keys):
         self.face_opponent()
@@ -240,14 +241,14 @@ class Player:
         if self.hit_pause > 0:
             return
 
-        left    = keys[self._key(self.keymap["left"])]
-        right   = keys[self._key(self.keymap["right"])]
-        jump    = keys[self._key(self.keymap["jump"])]
-        crouch  = keys[self._key(self.keymap["crouch"])]
-        light   = keys[self._key(self.keymap["light"])]
-        heavy   = keys[self._key(self.keymap["heavy"])]
-        special = keys[self._key(self.keymap["special"])]
-        block = keys[self._key(self.keymap["block"])]
+        left    = self.action_pressed(keys, "left")
+        right   = self.action_pressed(keys, "right")
+        jump    = self.action_pressed(keys, "jump")
+        crouch  = self.action_pressed(keys, "crouch")
+        light   = self.action_pressed(keys, "light")
+        heavy   = self.action_pressed(keys, "heavy")
+        special = self.action_pressed(keys, "special")
+        block   = self.action_pressed(keys, "block")
 
         holding_back = (
             (self.facing == 1 and left and not right)
