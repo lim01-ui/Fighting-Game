@@ -72,3 +72,36 @@ class Projectile:
                 pygame.draw.line(surface, self.color, (x1, y1), (x2, y2), 3)
             pygame.draw.circle(surface, (255, 255, 255),
                                (int(self.x), int(self.y)), 4)
+        elif self.kind == "arrow":
+            arrow_img = _get_arrow_sprite()
+            if arrow_img is not None:
+                # The arrow image points East (right).
+                angle = -math.degrees(math.atan2(self.vy, self.vx))
+                rotated = pygame.transform.rotate(arrow_img, angle)
+                r = rotated.get_rect(center=(int(self.x), int(self.y)))
+                surface.blit(rotated, r)
+            else:
+                # Fallback vector arrow
+                angle = math.atan2(self.vy, self.vx)
+                tip_x = self.x + math.cos(angle) * 18
+                tip_y = self.y + math.sin(angle) * 18
+                tail_x = self.x - math.cos(angle) * 18
+                tail_y = self.y - math.sin(angle) * 18
+                pygame.draw.line(surface, (230, 230, 240), (tail_x, tail_y), (tip_x, tip_y), 4)
+                pygame.draw.circle(surface, self.color, (int(tip_x), int(tip_y)), 4)
+
+
+_arrow_sprite = None
+
+def _get_arrow_sprite():
+    global _arrow_sprite
+    if _arrow_sprite is None:
+        from pathlib import Path
+        p = Path(__file__).resolve().parent.parent / "assets" / "characters" / "Minamoto" / "minamoto_Arrow.png"
+        if p.exists():
+            try:
+                _arrow_sprite = pygame.image.load(str(p)).convert_alpha()
+            except Exception:
+                _arrow_sprite = None
+    return _arrow_sprite
+

@@ -445,6 +445,10 @@ class Player:
     def _resolve_body_collision(self, other):
         if self.state in (S_HITSTUN, S_BLOCKSTUN, S_KNOCKDOWN): return
         if self.rect.colliderect(other.rect):
+            # Allow clean jump-overs: if one player is jumping above the other,
+            # don't wall them horizontally.
+            if self.rect.bottom <= other.rect.centery + 10 or other.rect.bottom <= self.rect.centery + 10:
+                return
             if self.rect.centerx < other.rect.centerx:
                 self.rect.right = other.rect.left
             else:
@@ -935,13 +939,17 @@ class Player:
         image = sprite_fighter.frame_for_player(
             self.character["sprite_asset"], self
         )
-        target_scale = 0.9
-        if self.state == S_ATTACK and self.current_attack is not None:
-            name = self.current_attack.data.name
-            if name.startswith("crouch_"):
-                target_scale = 0.70
-            elif name.startswith("air_"):
-                target_scale = 0.86
+        sprite_scale = self.character.get("sprite_scale", 1.0)
+        target_scale = 0.9 * sprite_scale
+        # Only procedural fallback fighters need artificial squashing during attacks;
+        # sprite characters with dedicated attack animations remain at consistent size.
+        if self.character.get("sprite_asset") in ("soldier", "renegade"):
+            if self.state == S_ATTACK and self.current_attack is not None:
+                name = self.current_attack.data.name
+                if name.startswith("crouch_"):
+                    target_scale = 0.70 * sprite_scale
+                elif name.startswith("air_"):
+                    target_scale = 0.86 * sprite_scale
         target_h = int(self.height * target_scale)
         size = (
             max(1, int(image.get_width() * target_h / image.get_height())),

@@ -267,6 +267,8 @@ ROSTER = {
         "key": "ash",
         "name": "ASH",
         "archetype": "Stance",
+        "sprite_asset": "ash",
+        "sprite_scale": 1.60,
         "special_behavior": {'type': 'teleport_slash', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': True, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
         "weapon": "katana",
         "weapon_color": (230, 230, 240),
@@ -412,6 +414,95 @@ ROSTER = {
         "attack_mods": {"reach": 1.00, "startup": 1.00, "cooldown": 1.00},
         "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.0, 'hitstun_mult': 1.0, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
+
+    # ---------------------------------------------------------
+    # 16. CHIB — swift sword master sprite fighter.
+    # ---------------------------------------------------------
+    "chib": {
+        "key": "chib",
+        "name": "CHIB",
+        "archetype": "Sword Master",
+        "sprite_asset": "chib",
+        "special_behavior": {
+            'type': 'slash',
+            'dash': 45,
+            'extra_hits': 1,
+            'projectiles': 0,
+            'teleport': False,
+            'spin': False,
+            'armor_frames': 0,
+            'stun_frames': 0,
+            'pierce': False,
+        },
+        "weapon": "sword",
+        "weapon_color": (244, 137, 246),
+        "weapon_handle": (120, 11, 247),
+        "colors": {
+            "body":   (244, 137, 246),
+            "accent": (120, 11, 247),
+            "eye":    (255, 255, 255),
+        },
+        "body": {"width": 64, "height": 136, "crouch_ratio": 0.55},
+        "stats": {
+            "speed": 1.25, "jump": 1.10, "health": 0.85,
+            "damage": 1.05, "defense": 1.05,
+        },
+        "attack_mods": {"reach": 1.05, "startup": 0.78, "cooldown": 0.85},
+        "weapon_effect": {
+            'knockback_mult': 0.95,
+            'reach_mult': 1.05,
+            'hitstun_mult': 1.0,
+            'startup_mult': 0.8,
+            'extra_hits': 1,
+            'projectile': None,
+            'shield_reflect': 0.0,
+        },
+    },
+
+    # ---------------------------------------------------------
+    # 17. MINAMOTO — Samurai Archer & Swordsman.
+    # ---------------------------------------------------------
+    "minamoto": {
+        "key": "minamoto",
+        "name": "MINAMOTO",
+        "archetype": "Archer",
+        "sprite_asset": "minamoto",
+        "sprite_scale": 1.28,
+        "special_behavior": {
+            'type': 'projectile',
+            'dash': 0,
+            'extra_hits': 0,
+            'projectiles': 1,
+            'teleport': False,
+            'spin': False,
+            'armor_frames': 0,
+            'stun_frames': 16,
+            'pierce': False,
+        },
+        "weapon": "sword",
+        "weapon_color": (173, 47, 69),
+        "weapon_handle": (20, 24, 46),
+        "colors": {
+            "body":   (20, 24, 46),
+            "accent": (173, 47, 69),
+            "eye":    (245, 255, 232),
+        },
+        "body": {"width": 64, "height": 140, "crouch_ratio": 0.55},
+        "stats": {
+            "speed": 1.15, "jump": 1.05, "health": 1.00,
+            "damage": 1.05, "defense": 1.00,
+        },
+        "attack_mods": {"reach": 1.10, "startup": 0.82, "cooldown": 0.88},
+        "weapon_effect": {
+            'knockback_mult': 1.0,
+            'reach_mult': 1.10,
+            'hitstun_mult': 1.0,
+            'startup_mult': 0.82,
+            'extra_hits': 0,
+            'projectile': 'arrow',
+            'shield_reflect': 0.0,
+        },
+    },
 }
 
 
@@ -422,7 +513,7 @@ ROSTER_ORDER = [
     "nova", "iron", "jinx", "kestrel",
     "bramble", "ash", "ryoko", "volt",
     # Imported open-source fighters are kept together.
-    "saikyo", "renegade", "soldier",
+    "saikyo", "renegade", "soldier", "chib", "minamoto",
 ]
 
 ULTIMATES = {
@@ -497,6 +588,16 @@ ULTIMATES = {
         "name": "SUPPRESSION BURST", "effect": "aura",
         "damage_mult": 1.8, "projectile": "spark", "projectiles": 6,
         "projectile_spread": 72, "stun_frames": 24,
+    },
+    "chib": {
+        "name": "ABSOLUTE", "effect": "double_slash",
+        "damage_mult": 1.85, "reach_mult": 1.4, "extra_hits": 3,
+        "dash": 65,
+    },
+    "minamoto": {
+        "name": "SHOT", "effect": "aura",
+        "damage_mult": 1.95, "projectile": "arrow", "projectiles": 5,
+        "projectile_spread": 48, "stun_frames": 30,
     },
 }
 

@@ -599,8 +599,8 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                                 and not getattr(attacker, "_projectile_fired", False)):
                             muzzle_x = attacker.rect.centerx + attacker.facing * (attacker.width // 2 + 15)
                             muzzle_y = attacker.rect.centery - 20
-                            speed = {"orb": 10, "knife": 14, "spark": 11}.get(
-                                proj_kind, 10
+                            speed = {"orb": 10, "knife": 14, "spark": 11, "arrow": 15}.get(
+                                proj_kind, 12
                             )
                             projectile_count = (
                                 ultimate.get("projectiles", 1)

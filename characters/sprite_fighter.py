@@ -41,6 +41,57 @@ _SPECS = {
             "jump": (("SMS_Soldier_JUMP_{direction}.png", 16),),
         },
     },
+    "chib": {
+        "folder": "Chib",
+        "height": 42,
+        "directional": False,
+        "animations": {
+            "idle": (("Chib_Idle.png", 42),),
+            "walk": (("Chib_Walk.png", 42),),
+            "run": (("Chib_Run.png", 42),),
+            "block": (("Chib_WalkAttack_block.png", 42),),
+            "light": (("Chib_Attack_light.png", 42),),
+            "heavy": (("Chib_Attack_heavy.png", 42),),
+            "special": (("Chib_SquatAttack.png", 42),),
+            "hit": (("Chib_Hurt.png", 42),),
+            "knockdown": (("Chib_Death.png", 42),),
+            "jump": (("Chib_Jump.png", 42),),
+        },
+    },
+    "minamoto": {
+        "folder": "Minamoto",
+        "height": 128,
+        "directional": False,
+        "animations": {
+            "idle": (("minamoto_Idle.png", 128),),
+            "walk": (("minamoto_Walk.png", 128),),
+            "run": (("minamoto_Run.png", 128),),
+            "block": (("minamoto_Idle.png", 128),),
+            "light": (("minamoto_light_attack.png", 128),),
+            "heavy": (("minamoto_heavy_attack.png", 128),),
+            "special": (("minamoto_Special_shooting.png", 128),),
+            "hit": (("minamoto_Hurt.png", 128),),
+            "knockdown": (("minamoto_Dead.png", 128),),
+            "jump": (("minamoto_Jump.png", 128),),
+        },
+    },
+    "ash": {
+        "folder": "Ash",
+        "height": 128,
+        "directional": False,
+        "animations": {
+            "idle": (("Ash_Idle.png", 128),),
+            "walk": (("Ash_Run.png", 128),),
+            "run": (("Ash_Run.png", 128),),
+            "block": (("Ash_Shield.png", 128),),
+            "light": (("Ash_Attack_light.png", 128),),
+            "heavy": (("Ash_Attack_heavy.png", 128),),
+            "special": (("Ash_Special.png", 128),),
+            "hit": (("Ash_Hurt.png", 128),),
+            "knockdown": (("Ash_Dead.png", 128),),
+            "jump": (("Ash_Jump.png", 128),),
+        },
+    },
 }
 _sheets = {}
 _frames = {}
@@ -98,7 +149,21 @@ def frame_for_player(asset, player):
         frame_index = player.current_attack.frame // 3
     elif not player.on_ground:
         animation = "jump"
-        frame_index = 0
+        # Progress through jump frames based on vertical velocity trajectory:
+        # From launch (high negative vel_y), to peak (vel_y ~ 0), to falling (positive vel_y)
+        spec = _SPECS.get(asset, {})
+        anim_specs = spec.get("animations", {}).get("jump", (("", 1),))
+        sheet_w = anim_specs[0][1]
+        # Map vel_y roughly from -21 (launch) to +21 (landing) into [0.0, 1.0]
+        jump_p = min(1.0, max(0.0, (player.vel_y + 20.0) / 40.0))
+        # Total frames in the jump sheet
+        filename = anim_specs[0][0]
+        sheet_key = (asset, filename)
+        if sheet_key in _sheets:
+            total_frames = max(1, _sheets[sheet_key].get_width() // sheet_w)
+        else:
+            total_frames = 8
+        frame_index = min(int(jump_p * total_frames), total_frames - 1)
     elif player.state == "WALK":
         animation = "walk"
         frame_index = pygame.time.get_ticks() // 110
@@ -108,23 +173,24 @@ def frame_for_player(asset, player):
 
     frame = _load_frame(asset, animation, frame_index, player.facing)
     if player.state == S_ATTACK and player.current_attack is not None:
-        attack_name = player.current_attack.data.name
-        progress = player.current_attack.frame / max(
-            1, player.current_attack.total - 1
-        )
-        active = player.current_attack.in_active
-        if attack_name.startswith("crouch_"):
-            width = max(1, int(frame.get_width() * 1.12))
-            height = max(1, int(frame.get_height() * 0.82))
-            frame = pygame.transform.scale(frame, (width, height))
-            angle = player.facing * (8 + (14 if active else 6 * progress))
-            frame = pygame.transform.rotate(frame, angle)
-        elif attack_name.startswith("air_"):
-            width = max(1, int(frame.get_width() * 1.12))
-            height = max(1, int(frame.get_height() * 0.92))
-            frame = pygame.transform.scale(frame, (width, height))
-            angle = -player.facing * (18 + (16 if active else 8 * progress))
-            frame = pygame.transform.rotate(frame, angle)
+        if asset in ("soldier", "renegade"):
+            attack_name = player.current_attack.data.name
+            progress = player.current_attack.frame / max(
+                1, player.current_attack.total - 1
+            )
+            active = player.current_attack.in_active
+            if attack_name.startswith("crouch_"):
+                width = max(1, int(frame.get_width() * 1.12))
+                height = max(1, int(frame.get_height() * 0.82))
+                frame = pygame.transform.scale(frame, (width, height))
+                angle = player.facing * (8 + (14 if active else 6 * progress))
+                frame = pygame.transform.rotate(frame, angle)
+            elif attack_name.startswith("air_"):
+                width = max(1, int(frame.get_width() * 1.12))
+                height = max(1, int(frame.get_height() * 0.92))
+                frame = pygame.transform.scale(frame, (width, height))
+                angle = -player.facing * (18 + (16 if active else 8 * progress))
+                frame = pygame.transform.rotate(frame, angle)
     return frame
 
 
