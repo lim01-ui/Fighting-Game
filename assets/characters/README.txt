@@ -1,6 +1,14 @@
 Character asset sources and licenses
 ====================================
 
+Generated fighter sprites
+-------------------------
+Rook, Vex, and Golem have project-specific transparent sprite sheets generated
+with the built-in image_gen tool. Each folder includes fighter-v1.png, the
+frame manifest fighter-v1.json, and exact prompts in fighter-v1.prompt.json.
+These are separate from the CC0 imported sets below. See SPRITE_AUDIT.md for
+coverage, remaining procedural fighters, and instructions for the next batch.
+
 Renegade
 --------
 Asset: Brawler Asset Character "Vigilante" SMS (free Renegade files)

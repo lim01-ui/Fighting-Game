@@ -41,6 +41,10 @@ training mode, or connect to another player over a local network.
   and victory poses.
 - **Fighter animation:** idle breathing, attack lunges, guard poses, and
   block/parry effects.
+- **Sprite artwork:** Rook, Vex, and Golem use matching generated pose sheets;
+  Saikyo, Renegade, and Soldier use imported pixel sprites. The remaining nine
+  fighters currently use procedural artwork. See the
+  [sprite audit](assets/characters/SPRITE_AUDIT.md) for coverage and prompts.
 
 ### Stages, presentation, and settings
 
