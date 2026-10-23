@@ -143,6 +143,8 @@ def main():
                         setup.get("protocol") != lan.PROTOCOL_VERSION
                         or p1_key not in character_data.ROSTER_ORDER
                         or p2_key not in character_data.ROSTER_ORDER
+                        or not isinstance(stage_key, str)
+                        or not isinstance(palette_key, str)
                         or (stage_key, palette_key) not in stages.all_stage_combos()
                         or p1_key != host_choice.get("p1_character")
                         or stage_key != host_choice.get("stage_key")
