@@ -299,6 +299,8 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
     bot = None
     sparks = []
     shake = ScreenShake()
+    # Rendering can precede the first update while a LAN peer is pending.
+    ox, oy = 0, 0
     camera_punch = CameraPunch()
     flashes = []
     damage_numbers_list = []

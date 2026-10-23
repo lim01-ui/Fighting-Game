@@ -6,7 +6,33 @@ import unittest
 from unittest.mock import Mock, patch
 from contextlib import ExitStack
 import main
+import pygame
 from network import lan
+
+
+class LanRenderingTests(unittest.TestCase):
+    def test_first_frames_waiting_for_peer_render_for_both_players(self):
+        pygame.init()
+        self.addCleanup(pygame.quit)
+        screen = pygame.display.set_mode((1280, 720))
+        for local_player in (1, 2):
+            with self.subTest(local_player=local_player):
+                peer = Mock()
+                peer.poll_inputs.return_value = None
+                peer.local_inputs = {action: False for action in lan.ACTIONS}
+                clock = Mock()
+                clock.tick.return_value = 16
+                with patch.object(main.fight_scene.vs_screen, 'run_vs_screen', return_value=True), \
+                     patch.object(main.fight_scene.music, 'play'), \
+                     patch('pygame.display.flip') as flip, \
+                     patch('pygame.event.get', side_effect=[
+                         [], [], [pygame.event.Event(pygame.QUIT)]]):
+                    result = main.fight_scene.run_fight(
+                        screen, clock, network_peer=peer, local_player=local_player,
+                    )
+                self.assertEqual(result, 'QUIT')
+                self.assertEqual(peer.poll_inputs.call_count, 2)
+                self.assertEqual(flip.call_count, 2)
 
 
 class JoinSetupTests(unittest.TestCase):
