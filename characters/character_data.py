@@ -92,6 +92,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "golem": {
         "key": "golem",
+        "sprite_asset": "golem",
         "name": "GOLEM",
         "archetype": "Heavy",
         "special_behavior": {'type': 'heavy_slam', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},

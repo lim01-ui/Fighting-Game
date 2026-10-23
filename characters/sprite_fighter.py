@@ -46,7 +46,7 @@ _SPECS = {
 _sheets = {}
 _frames = {}
 _manifests = {}
-GENERATED_ASSETS = ("rook", "vex")
+GENERATED_ASSETS = ("rook", "vex", "golem")
 
 
 def is_generated_asset(asset):
