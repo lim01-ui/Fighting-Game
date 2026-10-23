@@ -1,5 +1,6 @@
-"""Animation loading for the imported CC0 character sprite sets."""
+"""Animation loading for imported and generated fighter sprite sets."""
 
+import json
 from pathlib import Path
 
 import pygame
@@ -44,9 +45,52 @@ _SPECS = {
 }
 _sheets = {}
 _frames = {}
+_manifests = {}
+GENERATED_ASSETS = ("rook",)
+
+
+def is_generated_asset(asset):
+    return asset in GENERATED_ASSETS
+
+
+def _manifest(asset):
+    if asset not in _manifests:
+        path = ASSET_ROOT / asset / "fighter-v1.json"
+        _manifests[asset] = json.loads(path.read_text(encoding="utf-8"))
+    return _manifests[asset]
+
+
+def body_height(asset):
+    """Use one scale for a generated fighter's body, weapons, and effects."""
+    return _manifest(asset)["body_height"] if is_generated_asset(asset) else None
+
+
+def _generated_frame(asset, animation, facing):
+    manifest = _manifest(asset)
+    pose = manifest["poses"].get(animation, manifest["poses"]["idle"])
+    key = (asset, animation, facing)
+    if key not in _frames:
+        if asset not in _sheets:
+            _sheets[asset] = pygame.image.load(
+                str(ASSET_ROOT / asset / manifest["image"])
+            ).convert_alpha()
+        frame = _sheets[asset].subsurface(pygame.Rect(pose)).copy()
+        # Remove atlas padding without rescaling the character between poses.
+        bounds = frame.get_bounding_rect(min_alpha=16)
+        if not bounds.width or not bounds.height:
+            raise ValueError(f"Empty sprite pose: {asset}/{animation}")
+        frame = frame.subsurface(bounds).copy()
+        if facing < 0:
+            frame = pygame.transform.flip(frame, True, False)
+        if animation == "knockdown":
+            frame = pygame.transform.rotate(frame, 80 * facing)
+        _frames[key] = frame
+    return _frames[key]
 
 
 def _load_frame(asset, animation, frame_index, facing):
+    if is_generated_asset(asset):
+        return _generated_frame(asset, animation, facing)
     spec = _SPECS[asset]
     animation_specs = spec["animations"][animation]
     direction = "EAST" if facing >= 0 else "WEST"
@@ -77,7 +121,7 @@ def _load_frame(asset, animation, frame_index, facing):
 
 def frame_for_player(asset, player):
     """Return the sprite pose that best matches the player's current state."""
-    from characters.player import S_ATTACK, S_BLOCKSTUN, S_HITSTUN, S_KNOCKDOWN
+    from characters.player import S_ATTACK, S_BLOCKSTUN, S_GUARD, S_HITSTUN, S_KNOCKDOWN
 
     if player.state == S_KNOCKDOWN:
         animation = "knockdown"
@@ -85,7 +129,7 @@ def frame_for_player(asset, player):
     elif player.state == S_HITSTUN:
         animation = "hit"
         frame_index = 0
-    elif player.state == S_BLOCKSTUN:
+    elif player.state in (S_BLOCKSTUN, S_GUARD):
         animation = "block"
         frame_index = pygame.time.get_ticks() // 130
     elif player.state == S_ATTACK and player.current_attack is not None:
@@ -107,6 +151,10 @@ def frame_for_player(asset, player):
         frame_index = pygame.time.get_ticks() // 180
 
     frame = _load_frame(asset, animation, frame_index, player.facing)
+    if player.is_crouching and player.state != S_ATTACK:
+        frame = pygame.transform.scale(
+            frame, (frame.get_width(), max(1, int(frame.get_height() * player.crouch_ratio)))
+        )
     if player.state == S_ATTACK and player.current_attack is not None:
         attack_name = player.current_attack.data.name
         progress = player.current_attack.frame / max(

@@ -943,7 +943,12 @@ class Player:
                 target_scale = 0.70
             elif name.startswith("air_"):
                 target_scale = 0.86
+        reference_height = sprite_fighter.body_height(self.character["sprite_asset"])
+        if self.state == S_KNOCKDOWN and reference_height is None:
+            target_scale = 0.42
         target_h = int(self.height * target_scale)
+        if reference_height:
+            target_h = max(1, int(image.get_height() * self.height * target_scale / reference_height))
         size = (
             max(1, int(image.get_width() * target_h / image.get_height())),
             target_h,
