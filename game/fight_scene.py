@@ -32,7 +32,7 @@ from ui import transitions
 from ui import vs_screen
 from ui.text_layout import draw_text_fit
 from audio import sound_fx
-from audio import music
+from audio import music, preferences
 from network.lan import ACTIONS
 
 
@@ -118,9 +118,9 @@ def _draw_center_text(surface, font, text, y, color=None):
 class _VirtualKeys:
     def __init__(self, player, action_values):
         self.values = {
-            player._key(player.keymap[action]): action_values[action]
+            player._key(player.keymap[action]): bool(action_values.get(action, False))
             for action in ACTIONS
-            if action not in ("rematch", "leave")
+            if action not in ("rematch", "leave") and player.keymap.get(action)
         }
 
     def __getitem__(self, key):
@@ -371,6 +371,8 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
     network_local_rematch = False
     network_local_leave = False
     network_waiting = False
+    bound_keys = {preferences.key_code_from_name(name)
+                  for name in settings.P1_KEYS.values() if name}
 
     def reset_round_state():
         nonlocal match, round_mgr, ko_slowmo, ko_flash_done, round_end_registered, round_end_reason
@@ -413,10 +415,11 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "QUIT"
+            is_shortcut = event.type == pygame.KEYDOWN and event.key not in bound_keys
             if network_peer is not None and event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    network_local_leave = True
-                    continue
+                    # Leaving must remain possible even when the peer stops sending.
+                    return "MENU"
                 if match.match_over and event.key in (
                     pygame.K_RETURN, pygame.K_SPACE, pygame.K_r,
                 ):
@@ -438,13 +441,13 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                     pause_selected = 0
                 else:
                     paused = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+            if is_shortcut and event.key == pygame.K_p:
                 paused = not paused
                 pause_selected = 0
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+            if is_shortcut and event.key == pygame.K_r:
                 reset_round_state()
                 paused = False
-            if training_mode and event.type == pygame.KEYDOWN:
+            if training_mode and is_shortcut:
                 if event.key == pygame.K_t:
                     mode_index = training_dummy_modes.index(training_dummy_mode)
                     training_dummy_mode = training_dummy_modes[
@@ -456,7 +459,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                 elif event.key == pygame.K_v:
                     show_move_list = not show_move_list
                     sound_fx.play("menu_confirm")
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
+            if is_shortcut and event.key == pygame.K_h:
                 show_controls = not show_controls
             if paused and event.type == pygame.KEYDOWN:
                 if event.key in (pygame.K_DOWN, pygame.K_s):
@@ -478,19 +481,23 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
         network_ready = True
         if network_peer is not None:
             local_values = {
-                action: bool(keys[p1._key(settings.P1_KEYS[action])])
+                action: p1.action_pressed(keys, action)
                 for action in ACTIONS
                 if action not in ("rematch", "leave")
             }
             local_values["rematch"] = network_local_rematch
             local_values["leave"] = network_local_leave
             remote_values = network_peer.poll_inputs(local_values)
+            # Use exactly the snapshot sent for this frame, even after waiting.
+            local_values = network_peer.local_inputs
             if remote_values is None:
                 network_ready = False
                 network_waiting = True
             else:
-                network_local_rematch = False
-                network_local_leave = False
+                if local_values["rematch"]:
+                    network_local_rematch = False
+                if local_values["leave"]:
+                    network_local_leave = False
                 network_waiting = False
                 if remote_values["leave"] or local_values["leave"]:
                     return "MENU"
@@ -1121,13 +1128,13 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             )
             for player_index, (label, keymap) in enumerate(control_lines):
                 movement = (
-                    f"LEFT {keymap['left']}    RIGHT {keymap['right']}    "
-                    f"JUMP {keymap['jump']}"
+                    f"LEFT {preferences.binding_label(keymap['left'])}    RIGHT {preferences.binding_label(keymap['right'])}    "
+                    f"JUMP {preferences.binding_label(keymap['jump'])}"
                 )
                 attacks = (
-                    f"CROUCH {keymap['crouch']}    LIGHT {keymap['light']}    "
-                    f"BLOCK {keymap['block']}    HEAVY {keymap['heavy']}    "
-                    f"SPECIAL {keymap['special']}"
+                    f"CROUCH {preferences.binding_label(keymap['crouch'])}    LIGHT {preferences.binding_label(keymap['light'])}    "
+                    f"BLOCK {preferences.binding_label(keymap['block'])}    HEAVY {preferences.binding_label(keymap['heavy'])}    "
+                    f"SPECIAL {preferences.binding_label(keymap['special'])}"
                 )
                 y = panel_rect.y + 68 + player_index * 90
                 draw_text_fit(
@@ -1178,9 +1185,9 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                     if action == "ultimate" else action.upper()
                 )
                 label_text = (
-                    f"{settings.P1_KEYS['special'].upper()} ULTIMATE: {move_name}"
+                    f"{preferences.binding_label(settings.P1_KEYS['special'])} ULTIMATE: {move_name}"
                     if action == "ultimate" else
-                    f"{settings.P1_KEYS[action].upper()} {move_name} "
+                    f"{preferences.binding_label(settings.P1_KEYS[action])} {move_name} "
                     f"- {data.damage} DAMAGE"
                 )
                 label_color = (

@@ -21,6 +21,7 @@ from characters import pixel_fighter
 from characters import sprite_fighter
 from characters import weapons
 from effects import combat_behaviors
+from audio import preferences
 
 
 S_IDLE      = "IDLE"
@@ -224,11 +225,11 @@ class Player:
         self.ultimate_meter = 0.0
 
     def _key(self, name):
-        if hasattr(pygame, f"K_{name}"):
-            return getattr(pygame, f"K_{name}")
-        if hasattr(pygame, f"K_{name.upper()}"):
-            return getattr(pygame, f"K_{name.upper()}")
-        return getattr(pygame, f"K_{name.lower()}")
+        return preferences.key_code_from_name(name)
+
+    def action_pressed(self, keys, action):
+        binding = self.keymap[action]
+        return bool(binding) and bool(keys[self._key(binding)])
 
     def handle_input(self, keys):
         self.face_opponent()
@@ -240,14 +241,14 @@ class Player:
         if self.hit_pause > 0:
             return
 
-        left    = keys[self._key(self.keymap["left"])]
-        right   = keys[self._key(self.keymap["right"])]
-        jump    = keys[self._key(self.keymap["jump"])]
-        crouch  = keys[self._key(self.keymap["crouch"])]
-        light   = keys[self._key(self.keymap["light"])]
-        heavy   = keys[self._key(self.keymap["heavy"])]
-        special = keys[self._key(self.keymap["special"])]
-        block = keys[self._key(self.keymap["block"])]
+        left    = self.action_pressed(keys, "left")
+        right   = self.action_pressed(keys, "right")
+        jump    = self.action_pressed(keys, "jump")
+        crouch  = self.action_pressed(keys, "crouch")
+        light   = self.action_pressed(keys, "light")
+        heavy   = self.action_pressed(keys, "heavy")
+        special = self.action_pressed(keys, "special")
+        block   = self.action_pressed(keys, "block")
 
         holding_back = (
             (self.facing == 1 and left and not right)
@@ -939,6 +940,7 @@ class Player:
         image = sprite_fighter.frame_for_player(
             self.character["sprite_asset"], self
         )
+<<<<<<< HEAD
         sprite_scale = self.character.get("sprite_scale", 1.0)
         target_scale = 0.9 * sprite_scale
         # Only procedural fallback fighters need artificial squashing during attacks;
@@ -950,7 +952,21 @@ class Player:
                     target_scale = 0.70 * sprite_scale
                 elif name.startswith("air_"):
                     target_scale = 0.86 * sprite_scale
+=======
+        target_scale = 0.9
+        if self.state == S_ATTACK and self.current_attack is not None:
+            name = self.current_attack.data.name
+            if name.startswith("crouch_"):
+                target_scale = 0.70
+            elif name.startswith("air_"):
+                target_scale = 0.86
+        reference_height = sprite_fighter.body_height(self.character["sprite_asset"])
+        if self.state == S_KNOCKDOWN and reference_height is None:
+            target_scale = 0.42
+>>>>>>> 8cf8aa8ce015fb771b27b8d3978721ae1a74a1a7
         target_h = int(self.height * target_scale)
+        if reference_height:
+            target_h = max(1, int(image.get_height() * self.height * target_scale / reference_height))
         size = (
             max(1, int(image.get_width() * target_h / image.get_height())),
             target_h,

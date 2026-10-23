@@ -165,7 +165,8 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
                 cell.x + 6, cell.y + 6,
                 cell.width - 12, cell.height - 34,
             )
-            portrait = portrait_loader.load_portrait(ch["key"])
+            portrait = (None if sprite_fighter.is_generated_asset(ch.get("sprite_asset"))
+                        else portrait_loader.load_portrait(ch["key"]))
             if portrait is not None:
                 _blit_fit(screen, portrait, cell_inner)
             elif ch.get("sprite_sheet"):
@@ -210,7 +211,8 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
                                     panel.width - 40, 200)
         pygame.draw.rect(screen, (15, 15, 30), portrait_area)
 
-        big_portrait = portrait_loader.load_portrait(ch["key"])
+        big_portrait = (None if sprite_fighter.is_generated_asset(ch.get("sprite_asset"))
+                        else portrait_loader.load_portrait(ch["key"]))
         if big_portrait is not None:
             _blit_fit(screen, big_portrait, portrait_area,
                       border_color=ch["colors"]["accent"])

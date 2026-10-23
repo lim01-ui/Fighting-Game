@@ -40,6 +40,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "rook": {
         "key": "rook",
+        "sprite_asset": "rook",
         "name": "ROOK",
         "archetype": "Balanced",
         "special_behavior": {'type': 'slash', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
@@ -65,6 +66,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "vex": {
         "key": "vex",
+        "sprite_asset": "vex",
         "name": "VEX",
         "archetype": "Speed",
         "special_behavior": {'type': 'dash_slash', 'dash': 90, 'extra_hits': 1, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
@@ -90,6 +92,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "golem": {
         "key": "golem",
+        "sprite_asset": "golem",
         "name": "GOLEM",
         "archetype": "Heavy",
         "special_behavior": {'type': 'heavy_slam', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},

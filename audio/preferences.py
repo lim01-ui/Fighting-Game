@@ -39,23 +39,56 @@ def is_valid_control_map(value):
     for key_name in value.values():
         if not isinstance(key_name, str):
             return False
-        if not (
-            hasattr(pygame, f"K_{key_name}")
-            or hasattr(pygame, f"K_{key_name.lower()}")
-        ):
+        if not key_name:
+            continue
+        try:
+            key_code = key_code_from_name(key_name)
+        except ValueError:
             return False
-        if key_name.upper() in {
-            "ESCAPE", "P", "R", "H", "T", "V", "RETURN", "SPACE", "KPENTER",
-        }:
+        if key_code in (pygame.K_ESCAPE, pygame.K_UNKNOWN):
             return False
-        keys.append(key_name.upper())
+        keys.append(key_code)
     return len(keys) == len(set(keys))
+
+
+def key_code_from_name(name):
+    """Resolve saved constant names, including older uppercase bindings."""
+    if not name:
+        return pygame.K_UNKNOWN
+    for candidate in (name, name.lower(), name.upper()):
+        value = getattr(pygame, f"K_{candidate}", None)
+        if isinstance(value, int):
+            return value
+    try:
+        return pygame.key.key_code(name)
+    except (ValueError, TypeError) as error:
+        raise ValueError(f"Unsupported keyboard key: {name}") from error
+
+
+def binding_label(name):
+    return pygame.key.name(key_code_from_name(name)).upper() if name else "UNBOUND"
+
+
+def bind_control(action, key_code):
+    """Bind a key, swapping an existing assignment; Escape clears the action."""
+    updated = get("p1_controls")
+    previous = updated[action]
+    name = "" if key_code == pygame.K_ESCAPE else key_name_from_code(key_code)
+    if name:
+        for other, binding in updated.items():
+            if other != action and binding and key_code_from_name(binding) == key_code:
+                updated[other] = previous
+    updated[action] = name
+    set_value("p1_controls", updated)
 
 
 def key_name_from_code(key_code):
     for name in dir(pygame):
         if name.startswith("K_") and getattr(pygame, name) == key_code:
             return name[2:]
+    name = pygame.key.name(key_code)
+    if name and pygame.key.key_code(name) == key_code:
+        return name
     raise ValueError(f"Unsupported keyboard key code: {key_code}")
 
 
@@ -122,7 +155,7 @@ def set_value(key, value):
         raise KeyError(f"Unknown preference: {key}")
     if key == "p1_controls":
         if not is_valid_control_map(value):
-            raise ValueError("Player 1 controls must use unique, valid, non-reserved keys")
+            raise ValueError("Player 1 controls must use unique valid keys or empty bindings")
         _values[key] = value.copy()
         settings.P1_KEYS = value.copy()
         return

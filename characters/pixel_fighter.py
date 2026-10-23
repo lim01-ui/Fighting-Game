@@ -78,6 +78,7 @@ def frame_for_player(player):
     from characters.player import (
         S_ATTACK,
         S_BLOCKSTUN,
+        S_GUARD,
         S_HITSTUN,
         S_KNOCKDOWN,
     )
@@ -86,7 +87,7 @@ def frame_for_player(player):
         return pygame.transform.rotate(get_frame(2, 1), 90)
     if player.state == S_HITSTUN:
         return get_frame(2, 1)
-    if player.state == S_BLOCKSTUN or player.is_crouching:
+    if player.state in (S_BLOCKSTUN, S_GUARD) or player.is_crouching:
         return get_frame(1, 0)
     if player.state == S_ATTACK and player.current_attack is not None:
         attack_name = player.current_attack.data.name
@@ -98,6 +99,7 @@ def frame_for_player(player):
             "air_light": (1, 4),
             "air_heavy": (3, 4),
             "special": (2, 2),
+            "ultimate": (2, 2),
         }
         row, column = poses.get(attack_name, (1, 4))
         frame = get_frame(row, column)

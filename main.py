@@ -2,7 +2,7 @@
 """
 Entry point for the arcade lobby, offline modes, and direct-IP LAN matches.
 """
-
+#hello hi hi
 import sys
 import random
 import pygame
@@ -76,13 +76,19 @@ def main():
                     stage_key, palette_key = stage_select.run_stage_select(
                         screen, clock, title="HOST: CHOOSE THE STAGE"
                     )
-                    remote_choice = peer.exchange_setup({
-                        "role": "host",
-                        "protocol": lan.PROTOCOL_VERSION,
-                        "p1_character": p1_key,
-                        "stage_key": stage_key,
-                        "palette_key": palette_key,
-                    })
+                    remote_choice = lan_lobby.exchange_setup_with_ui(
+                        peer, screen, clock,
+                        {
+                            "role": "host",
+                            "protocol": lan.PROTOCOL_VERSION,
+                            "p1_character": p1_key,
+                            "stage_key": stage_key,
+                            "palette_key": palette_key,
+                        },
+                        waiting_message="WAITING FOR GUEST TO CHOOSE FIGHTER",
+                    )
+                    if remote_choice is None:
+                        continue
                     p2_key = remote_choice.get("p2_character")
                     if (
                         remote_choice.get("role") != "guest"
@@ -100,16 +106,22 @@ def main():
                     peer.send_setup(setup)
                     local_player = 1
                 else:
-                    p2_key = character_select.run_character_select(
+                    guest_character = character_select.run_character_select(
                         screen, clock, title="GUEST: CHOOSE YOUR FIGHTER"
                     )
-                    if p2_key is None:
+                    if guest_character is None:
                         continue
-                    host_choice = peer.exchange_setup({
-                        "role": "guest",
-                        "protocol": lan.PROTOCOL_VERSION,
-                        "p2_character": p2_key,
-                    })
+                    host_choice = lan_lobby.exchange_setup_with_ui(
+                        peer, screen, clock,
+                        {
+                            "role": "guest",
+                            "protocol": lan.PROTOCOL_VERSION,
+                            "p2_character": guest_character,
+                        },
+                        waiting_message="WAITING FOR HOST TO SELECT STAGE",
+                    )
+                    if host_choice is None:
+                        continue
                     if (
                         host_choice.get("role") != "host"
                         or host_choice.get("protocol") != lan.PROTOCOL_VERSION
@@ -117,7 +129,12 @@ def main():
                         not in character_data.ROSTER_ORDER
                     ):
                         raise ValueError("The host sent an invalid lobby selection.")
-                    setup = peer.receive_setup()
+                    setup = lan_lobby.receive_setup_with_ui(
+                        peer, screen, clock,
+                        waiting_message="STARTING MATCH",
+                    )
+                    if setup is None:
+                        continue
                     p1_key = setup.get("p1_character")
                     p2_key = setup.get("p2_character")
                     stage_key = setup.get("stage_key")
@@ -132,7 +149,7 @@ def main():
                         or palette_key != host_choice.get("palette_key")
                     ):
                         raise ValueError("The host sent an invalid match setup.")
-                    if p2_key != host_choice.get("p2_character"):
+                    if p2_key != guest_character:
                         raise ValueError("The host's setup does not match your fighter choice.")
                     local_player = 2
 
@@ -150,6 +167,12 @@ def main():
             except (ConnectionError, OSError, ValueError) as error:
                 lan_lobby.show_lan_message(
                     screen, clock, "LAN MATCH ENDED", str(error)
+                )
+            except Exception as error:
+                import traceback
+                traceback.print_exc()
+                lan_lobby.show_lan_message(
+                    screen, clock, "LAN ERROR", f"Match error: {error}"
                 )
             finally:
                 peer.close()

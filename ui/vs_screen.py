@@ -47,7 +47,8 @@ def _draw_preview(surface, rect, character, t, facing=1):
 
 def _draw_side(surface, side_rect, character, t, facing, side):
     """side: 'left' or 'right'."""
-    portrait = portrait_loader.load_portrait(character["key"])
+    portrait = (None if sprite_fighter.is_generated_asset(character.get("sprite_asset"))
+                else portrait_loader.load_portrait(character["key"]))
     inner = side_rect.inflate(-40, -40)
     pygame.draw.rect(surface, (25, 25, 45), inner)
     pygame.draw.rect(surface, character["colors"]["accent"], inner, 3)
@@ -111,6 +112,9 @@ def run_vs_screen(screen, clock, p1_key, p2_key,
                     return None
                 if event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     return "start"
+
+        if frame >= 180:
+            return "start"
 
         # Side rects
         side_w = int(settings.WINDOW_WIDTH * 0.34)

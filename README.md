@@ -41,6 +41,10 @@ training mode, or connect to another player over a local network.
   and victory poses.
 - **Fighter animation:** idle breathing, attack lunges, guard poses, and
   block/parry effects.
+- **Sprite artwork:** Rook, Vex, and Golem use matching generated pose sheets;
+  Saikyo, Renegade, and Soldier use imported pixel sprites. The remaining nine
+  fighters currently use procedural artwork. See the
+  [sprite audit](assets/characters/SPRITE_AUDIT.md) for coverage and prompts.
 
 ### Stages, presentation, and settings
 
@@ -109,8 +113,15 @@ in-match controls overlay. A LAN player uses their local Player 1 controls.
 | Rematch after a local match | Enter, Space, or R |
 | Return to menu after a local match | Escape |
 
-Player 1 bindings can be changed from **Settings → Player 1 Controls**. The
-in-game controls overlay shows the active bindings.
+From the start menu, click **Options → Player 1 Controls**, click a key box,
+and press any keyboard key to bind it. Press **Escape while a box is listening**
+to unbind that action; Escape otherwise returns to the previous menu. Changes
+save automatically. Assigning a key already in use swaps the two bindings.
+Choose **Restore Default Controls** to reset just the bindings.
+
+The in-game controls overlay shows active bindings and labels cleared actions
+as **UNBOUND**. When P, R, H, T, or V is assigned to a combat action, that action
+takes priority over the corresponding shortcut; Escape still opens pause.
 In LAN matches, Escape leaves the match instead of opening the pause menu.
 
 ## LAN matches

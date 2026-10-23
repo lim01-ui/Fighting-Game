@@ -1,6 +1,6 @@
 import pygame
 import settings
-from audio import sound_fx
+from audio import sound_fx, preferences
 from ui.text_layout import draw_text_fit
 
 
@@ -35,15 +35,25 @@ def run_main_menu(screen, clock):
         "HOST LAN MATCH",
         "JOIN LAN MATCH",
         "HOW TO PLAY",
-        "SETTINGS",
+        "OPTIONS",
         "EXIT GAME",
     ]
     selected = 0
+    rows = [pygame.Rect(87, 245 + index * 49, 506, 42)
+            for index in range(len(choices))]
+    results = ("1VBOT", "TRAINING", "LAN_HOST", "LAN_JOIN", "TUTORIAL", "SETTINGS", "EXIT")
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "EXIT"
+            if event.type in (pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN):
+                for index, row in enumerate(rows):
+                    if row.collidepoint(event.pos):
+                        selected = index
+                        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                            sound_fx.play("menu_confirm")
+                            return results[selected]
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     sound_fx.play("menu_back")
@@ -124,7 +134,7 @@ def run_main_menu(screen, clock):
         )
         draw_text_fit(
             screen, hint_font,
-            "UP/DOWN or W/S: navigate    ENTER: select    ESC: quit",
+            "CLICK or ENTER: select    UP/DOWN or W/S: navigate    ESC: quit",
             (185, 195, 215),
             pygame.Rect(20, settings.WINDOW_HEIGHT - 56,
                         settings.WINDOW_WIDTH - 40, 42),
@@ -160,7 +170,7 @@ def run_tutorial(screen, clock):
         ),
         (
             "BLOCK AND FIND AN OPENING",
-            f"Hold {settings.P1_KEYS['block'].upper()} or move away to block.",
+            f"Hold {preferences.binding_label(settings.P1_KEYS['block'])} or move away to block.",
             "Tap block just before impact for a perfect parry.",
             "Parries cancel the attack and leave the opponent open.",
         ),
@@ -217,15 +227,15 @@ def run_tutorial(screen, clock):
             )
 
         movement = (
-            f"MOVE {settings.P1_KEYS['left'].upper()}/{settings.P1_KEYS['right'].upper()}   "
-            f"JUMP {settings.P1_KEYS['jump'].upper()}   "
-            f"CROUCH {settings.P1_KEYS['crouch'].upper()}   "
-            f"BLOCK {settings.P1_KEYS['block'].upper()}"
+            f"MOVE {preferences.binding_label(settings.P1_KEYS['left'])}/{preferences.binding_label(settings.P1_KEYS['right'])}   "
+            f"JUMP {preferences.binding_label(settings.P1_KEYS['jump'])}   "
+            f"CROUCH {preferences.binding_label(settings.P1_KEYS['crouch'])}   "
+            f"BLOCK {preferences.binding_label(settings.P1_KEYS['block'])}"
         )
         attacks = (
-            f"LIGHT {settings.P1_KEYS['light'].upper()}   "
-            f"HEAVY {settings.P1_KEYS['heavy'].upper()}   "
-            f"SPECIAL {settings.P1_KEYS['special'].upper()}"
+            f"LIGHT {preferences.binding_label(settings.P1_KEYS['light'])}   "
+            f"HEAVY {preferences.binding_label(settings.P1_KEYS['heavy'])}   "
+            f"SPECIAL {preferences.binding_label(settings.P1_KEYS['special'])}"
         )
         controls_font = pygame.font.SysFont("Arial", 19, bold=True)
         for index, text in enumerate((movement, attacks)):
