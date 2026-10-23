@@ -29,6 +29,8 @@ class SpriteTests(unittest.TestCase):
                     right = sprite_fighter._load_frame(asset, pose, 0, 1)
                     left = sprite_fighter._load_frame(asset, pose, 0, -1)
                     self.assertGreater(pygame.mask.from_surface(right).count(), 100)
+                    self.assertLess(right.get_height(), manifest['body_height'] * 1.8,
+                                    'Pose may include pixels from a neighboring atlas row')
                     self.assertTrue(right.get_flags() & pygame.SRCALPHA)
                     self.assertEqual(pygame.image.tostring(left, 'RGBA'),
                                      pygame.image.tostring(pygame.transform.flip(right, True, False), 'RGBA'))
