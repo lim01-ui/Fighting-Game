@@ -106,17 +106,17 @@ def main():
                     peer.send_setup(setup)
                     local_player = 1
                 else:
-                    p2_key = character_select.run_character_select(
+                    guest_character = character_select.run_character_select(
                         screen, clock, title="GUEST: CHOOSE YOUR FIGHTER"
                     )
-                    if p2_key is None:
+                    if guest_character is None:
                         continue
                     host_choice = lan_lobby.exchange_setup_with_ui(
                         peer, screen, clock,
                         {
                             "role": "guest",
                             "protocol": lan.PROTOCOL_VERSION,
-                            "p2_character": p2_key,
+                            "p2_character": guest_character,
                         },
                         waiting_message="WAITING FOR HOST TO SELECT STAGE",
                     )
@@ -149,7 +149,7 @@ def main():
                         or palette_key != host_choice.get("palette_key")
                     ):
                         raise ValueError("The host sent an invalid match setup.")
-                    if p2_key != host_choice.get("p2_character"):
+                    if p2_key != guest_character:
                         raise ValueError("The host's setup does not match your fighter choice.")
                     local_player = 2
 
