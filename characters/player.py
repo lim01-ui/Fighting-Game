@@ -940,7 +940,6 @@ class Player:
         image = sprite_fighter.frame_for_player(
             self.character["sprite_asset"], self
         )
-<<<<<<< HEAD
         sprite_scale = self.character.get("sprite_scale", 1.0)
         target_scale = 0.9 * sprite_scale
         # Only procedural fallback fighters need artificial squashing during attacks;
@@ -952,18 +951,9 @@ class Player:
                     target_scale = 0.70 * sprite_scale
                 elif name.startswith("air_"):
                     target_scale = 0.86 * sprite_scale
-=======
-        target_scale = 0.9
-        if self.state == S_ATTACK and self.current_attack is not None:
-            name = self.current_attack.data.name
-            if name.startswith("crouch_"):
-                target_scale = 0.70
-            elif name.startswith("air_"):
-                target_scale = 0.86
         reference_height = sprite_fighter.body_height(self.character["sprite_asset"])
         if self.state == S_KNOCKDOWN and reference_height is None:
-            target_scale = 0.42
->>>>>>> 8cf8aa8ce015fb771b27b8d3978721ae1a74a1a7
+            target_scale = 0.42 * sprite_scale
         target_h = int(self.height * target_scale)
         if reference_height:
             target_h = max(1, int(image.get_height() * self.height * target_scale / reference_height))
