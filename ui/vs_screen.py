@@ -15,7 +15,9 @@ Returns "start" when the player presses Enter/Space, or None on ESC.
 
 import math
 import pygame
+from ui import retro
 import settings
+from stages import stages
 from characters import character_data
 from characters import pixel_fighter
 from characters import sprite_fighter
@@ -57,7 +59,8 @@ def _draw_side(surface, side_rect, character, t, facing, side):
         iw, ih = portrait.get_size()
         sc = min(inner.width / iw, inner.height / ih)
         new_size = (int(iw * sc), int(ih * sc))
-        scaled = pygame.transform.smoothscale(portrait, new_size)
+        scaled = pygame.transform.scale(portrait, new_size)
+        retro.pixelate(scaled, 2)
         r = scaled.get_rect(center=inner.center)
         surface.blit(scaled, r)
     elif character.get("sprite_sheet"):
@@ -74,7 +77,7 @@ def _draw_side(surface, side_rect, character, t, facing, side):
     else:
         _draw_preview(surface, inner, character, t, facing=facing)
 
-    name_font = pygame.font.SysFont("Arial", 36, bold=True)
+    name_font = retro.font("Arial", 36, bold=True)
     strip = pygame.Rect(inner.x, inner.bottom + 10, inner.width, name_font.get_height() + 8)
     pygame.draw.rect(surface, (0, 0, 0, 160), strip)
     draw_text_fit(
@@ -85,17 +88,17 @@ def _draw_side(surface, side_rect, character, t, facing, side):
 
 def run_vs_screen(screen, clock, p1_key, p2_key,
                   p1_label="PLAYER 1", p2_label="PLAYER 2",
-                  stage_key="sunset"):
+                  stage_key="sunset", palette_key="classic"):
     """
     Show the VS screen. Blocking loop. Returns "start" or None.
     """
     ch1 = character_data.get(p1_key)
     ch2 = character_data.get(p2_key)
 
-    title_font = pygame.font.SysFont("Arial", 34, bold=True)
-    vs_font = pygame.font.SysFont("Arial", 120, bold=True)
-    hint_font = pygame.font.SysFont("Arial", 22, bold=True)
-    small_font = pygame.font.SysFont("Arial", 18, bold=True)
+    title_font = retro.font("Arial", 34, bold=True)
+    vs_font = retro.font("Arial", 120, bold=True)
+    hint_font = retro.font("Arial", 22, bold=True)
+    small_font = retro.font("Arial", 18, bold=True)
 
     total_frames = 60
     frame = 0
@@ -155,7 +158,7 @@ def run_vs_screen(screen, clock, p1_key, p2_key,
         vs_img = vs_font.render("VS", True, vs_color)
         # Pulse
         pulse = 1.0 + 0.08 * math.sin(t * 4.0)
-        vs_scaled = pygame.transform.smoothscale(
+        vs_scaled = pygame.transform.scale(
             vs_img,
             (int(vs_img.get_width() * pulse),
              int(vs_img.get_height() * pulse)))
@@ -172,7 +175,7 @@ def run_vs_screen(screen, clock, p1_key, p2_key,
 
         # Stage name at bottom
         draw_text_fit(
-            screen, small_font, "STAGE: " + stage_key.upper(),
+            screen, small_font, "STAGE: " + stages.display_name(stage_key, palette_key),
             (200, 220, 255),
             pygame.Rect(40, settings.WINDOW_HEIGHT - 108,
                         settings.WINDOW_WIDTH - 80, 36),
@@ -188,5 +191,5 @@ def run_vs_screen(screen, clock, p1_key, p2_key,
                 alpha=alpha,
             )
 
-        pygame.display.flip()
+        retro.present(screen)
         clock.tick(settings.FPS)

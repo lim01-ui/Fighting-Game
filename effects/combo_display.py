@@ -1,5 +1,6 @@
 # effects/combo_display.py
 import pygame
+from ui import retro
 import settings
 
 
@@ -60,8 +61,8 @@ class ComboDisplay:
         color = style["color"]
 
         scale = 1.0 + 0.35 * self.pop
-        big_font = pygame.font.SysFont("Arial", int(size * scale), bold=True)
-        small_font = pygame.font.SysFont("Arial", int(20 * scale), bold=True)
+        big_font = retro.font("Arial", int(size * scale), bold=True)
+        small_font = retro.font("Arial", int(20 * scale), bold=True)
 
         big_text = "{} HIT".format(self.hits)
         label_text = f"{self.damage} DAMAGE"

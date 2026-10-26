@@ -5,6 +5,7 @@ Round transitions are animated via ui/transitions.py.
 """
 
 import pygame
+from ui import retro
 
 import settings
 from characters import character_data
@@ -49,9 +50,9 @@ _SPECIAL_KINDS = {
     "jinx": "knife_fan",
     "kestrel": "prismatic_wave",
     "bramble": "leafburst",
-    "ash": "afterimage",
-    "ryoko": "spin_kick",
-    "volt": "meteor_burst",
+    "raguel": "afterimage",
+    "sanya": "spin_kick",
+    "choom": "meteor_burst",
     "saikyo": "spin_kick",
     "renegade": "double_slash",
     "soldier": "void_ring",
@@ -59,9 +60,90 @@ _SPECIAL_KINDS = {
 
 
 # ---- HUD helpers ----
+def _make_keybind_overlay(width, players, networked=False, training=False,
+                          pressed_keys=frozenset()):
+    """A compact arcade keyboard: movement cluster, guard, and attack keys."""
+    panel_width = 700
+    row_height = 88
+    footer_height = 42 if training else 24
+    panel = pygame.Surface((panel_width, len(players) * row_height + footer_height), pygame.SRCALPHA)
+    highlights = pygame.Surface(panel.get_size(), pygame.SRCALPHA)
+    panel.fill((10, 8, 24, 235))
+    pygame.draw.rect(panel, (104, 96, 144), panel.get_rect(), 2)
+    key_font = retro.font(size=18)
+    label_font = retro.font(size=14)
+
+    def keycap(binding, rect, color):
+        # Stepped bevels evoke the chunky keyboard in the reference.
+        pygame.draw.rect(panel, (4, 4, 12), rect.move(2, 3))
+        pygame.draw.rect(panel, (216, 216, 232), rect)
+        pygame.draw.rect(panel, (64, 56, 88), rect.inflate(-4, -4))
+        pygame.draw.rect(panel, color, rect.inflate(-8, -8))
+        pygame.draw.line(panel, (248, 240, 255), rect.topleft, (rect.right - 2, rect.top), 2)
+        draw_text_fit(panel, key_font, preferences.binding_label(binding), retro.INK,
+                      rect.inflate(-10, -6))
+        if preferences.key_code_from_name(binding) in pressed_keys:
+            # Bright, opaque caps sit over the dim HUD while a key is held.
+            pygame.draw.rect(highlights, (*color, 110), rect.inflate(8, 8))
+            pressed_rect = rect.move(0, 2)
+            pygame.draw.rect(highlights, (255, 255, 255), pressed_rect)
+            pygame.draw.rect(highlights, color, pressed_rect.inflate(-4, -4))
+            draw_text_fit(highlights, key_font, preferences.binding_label(binding), retro.INK,
+                          pressed_rect.inflate(-10, -6))
+
+    # Work in a fixed compact layout, then shrink only for smaller displays.
+    for row, (name, keymap, color) in enumerate(players):
+        top = row * row_height
+        draw_text_fit(panel, label_font, name, color, pygame.Rect(8, top + 35, 46, 24))
+        draw_text_fit(panel, label_font, "MOVE", retro.GREEN, pygame.Rect(62, top + 4, 180, 16))
+        positions = {"jump": (126, 24), "left": (66, 54), "crouch": (126, 54), "right": (186, 54)}
+        for action, (x, y) in positions.items():
+            if keymap.get(action):
+                keycap(keymap[action], pygame.Rect(x, top + y, 54, 26), retro.GREEN)
+        for index, (action, label, accent) in enumerate((
+            ("block", "GUARD", retro.PINK), ("light", "LIGHT", retro.GOLD),
+            ("heavy", "HEAVY", retro.GOLD), ("special", "SPECIAL", retro.CYAN),
+        )):
+            if not keymap.get(action):
+                continue
+            x = 274 + index * 104
+            draw_text_fit(panel, label_font, label, accent, pygame.Rect(x - 12, top + 16, 98, 18))
+            keycap(keymap[action], pygame.Rect(x, top + 40, 72, 34), accent)
+    bound = {preferences.key_code_from_name(binding)
+             for binding in settings.P1_KEYS.values() if binding}
+    shortcuts = []
+    if pygame.K_h not in bound:
+        shortcuts.append("H: HELP")
+    shortcuts.append("ESC: LEAVE" if networked else "ESC: PAUSE")
+    if not networked:
+        shortcuts.extend(label for key, label in ((pygame.K_p, "P: PAUSE"), (pygame.K_r, "R: RESET"))
+                         if key not in bound)
+    hint = "  ".join(shortcuts)
+    footer_y = len(players) * row_height
+    draw_text_fit(panel, label_font, hint, (192, 184, 216),
+                  pygame.Rect(10, footer_y, panel_width - 20, 20))
+    if training:
+        training_hints = "  ".join(label for key, label in ((pygame.K_t, "T: DUMMY"), (pygame.K_v, "V: MOVES"))
+                                   if key not in bound)
+        draw_text_fit(panel, label_font, training_hints, retro.CYAN,
+                      pygame.Rect(10, footer_y + 20, panel_width - 20, 20))
+    # Apply opacity to the whole keyboard, including otherwise opaque keycaps.
+    panel.set_alpha(145)
+    if pressed_keys:
+        combined = pygame.Surface(panel.get_size(), pygame.SRCALPHA)
+        combined.blit(panel, (0, 0))
+        combined.blit(highlights, (0, 0))
+        panel = combined
+    if width < panel_width:
+        opacity = panel.get_alpha()
+        panel = pygame.transform.scale(panel, (width, round(panel.get_height() * width / panel_width)))
+        panel.set_alpha(opacity)
+    return panel
+
+
 def draw_health_bar(surface, x, y, w, h, current, maxv, color, flip=False,
                     trail_current=None):
-    pygame.draw.rect(surface, (15, 18, 28), (x, y, w, h), border_radius=7)
+    pygame.draw.rect(surface, (15, 18, 28), (x, y, w, h), border_radius=0)
     ratio = max(0.0, current / maxv)
     fg = int(w * ratio)
     fx = x + (w - fg) if flip else x
@@ -71,25 +153,28 @@ def draw_health_bar(surface, x, y, w, h, current, maxv, color, flip=False,
         if trail_width > fg:
             pygame.draw.rect(
                 surface, (255, 184, 66),
-                (trail_x, y, trail_width, h), border_radius=6,
+                (trail_x, y, trail_width, h), border_radius=0,
             )
     if fg > 0:
-        pygame.draw.rect(surface, color, (fx, y, fg, h), border_radius=6)
+        pygame.draw.rect(surface, color, (fx, y, fg, h), border_radius=0)
     if fg > 8:
         pygame.draw.line(surface, tuple(min(255, c + 45) for c in color),
                          (fx + 4, y + 3), (fx + max(4, fg - 4), y + 3), 2)
-    pygame.draw.rect(surface, (220, 225, 240), (x, y, w, h), 2, border_radius=7)
+    for notch in range(16, w, 16):
+        pygame.draw.line(surface, (15, 18, 28), (x + notch, y + 2),
+                         (x + notch, y + h - 3), 2)
+    pygame.draw.rect(surface, (220, 225, 240), (x, y, w, h), 2, border_radius=0)
 
 
 def draw_ultimate_meter(surface, x, y, w, value, color, flip=False):
     """Draw the meter that powers each fighter's ultimate move."""
     h = 11
-    pygame.draw.rect(surface, (18, 20, 31), (x, y, w, h), border_radius=5)
+    pygame.draw.rect(surface, (18, 20, 31), (x, y, w, h), border_radius=0)
     fill = int(w * max(0.0, min(100.0, value)) / 100)
     fill_x = x + w - fill if flip else x
     if fill:
-        pygame.draw.rect(surface, color, (fill_x, y, fill, h), border_radius=5)
-    pygame.draw.rect(surface, (195, 205, 225), (x, y, w, h), 1, border_radius=5)
+        pygame.draw.rect(surface, color, (fill_x, y, fill, h), border_radius=0)
+    pygame.draw.rect(surface, (195, 205, 225), (x, y, w, h), 1, border_radius=0)
 
 
 def draw_round_pips(surface, x, y, wins, wins_needed, color, right_align=False):
@@ -288,13 +373,13 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
         raise ValueError("local_player must be 1 or 2 for a LAN match")
 
     fonts = {
-        "small": pygame.font.SysFont("Arial", 20),
-        "mid":   pygame.font.SysFont("Arial", 30, bold=True),
-        "big":   pygame.font.SysFont("Arial", 44, bold=True),
-        "huge":  pygame.font.SysFont("Arial", 96, bold=True),
+        "small": retro.font("Arial", 20),
+        "mid":   retro.font("Arial", 30, bold=True),
+        "big":   retro.font("Arial", 44, bold=True),
+        "huge":  retro.font("Arial", 96, bold=True),
     }
     font = fonts["mid"]
-    timer_font = pygame.font.SysFont("Arial", 56, bold=True)
+    timer_font = retro.font("Arial", 56, bold=True)
 
     match = MatchManager()
     bot = None
@@ -329,6 +414,22 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
     if difficulty_name:
         bot = Bot(player=p2, opponent=p1, difficulty_name=difficulty_name)
 
+    overlay_players: list[tuple[str, dict[str, str], tuple[int, int, int]]] = [
+        ("YOU" if network_peer else "P1", settings.P1_KEYS, settings.P1_COLOR)
+    ]
+    if network_peer is None and not training_mode and bot is None:
+        overlay_players.append(("P2", settings.P2_KEYS, settings.P2_COLOR))
+    keybind_overlay = _make_keybind_overlay(
+        screen.get_width() - 24, overlay_players,
+        networked=network_peer is not None, training=training_mode,
+    )
+    keybind_pressed = frozenset()
+    overlay_key_codes = {
+        preferences.key_code_from_name(binding)
+        for _, keymap, _ in overlay_players
+        for binding in keymap.values() if binding
+    }
+
     # Show the VS intro screen once, at the start of the match
     p2_label = (
         "LAN PLAYER 2" if network_peer is not None
@@ -342,6 +443,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
         p1_label="PLAYER 1",
         p2_label=p2_label,
         stage_key=stage_key,
+        palette_key=palette_key,
     )
     if vs_result is None:
         return "MENU"
@@ -541,7 +643,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                 round_event = None if training_mode else round_mgr.update(p1, p2)
                 if training_mode:
                     round_mgr.state = ROUND_FIGHTING
-                _prev = getattr(round_mgr, "_prev_state", None)
+                _prev = round_mgr._prev_state
                 if _prev is None:
                     if round_mgr.state == ROUND_COUNTDOWN:
                         sound_fx.play("round_ready", volume=0.7)
@@ -579,7 +681,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                         atk = attacker.current_attack
                         if atk is None:
                             attacker._special_spawned = False
-                            if getattr(attacker, "_projectile_fired", False):
+                            if attacker._projectile_fired:
                                 attacker._projectile_fired = False
                             continue
                         eff = attacker.character.get("weapon_effect", {})
@@ -602,7 +704,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                             and atk.in_active
                         )
                         if (special_active
-                                and not getattr(attacker, "_special_spawned", False)):
+                                and not attacker._special_spawned):
                             char_key = attacker.character["key"]
                             kind = (
                                 ultimate["effect"]
@@ -620,7 +722,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                             attacker._special_spawned = True
 
                         if (special_active and proj_kind
-                                and not getattr(attacker, "_projectile_fired", False)):
+                                and not attacker._projectile_fired):
                             muzzle_x = attacker.rect.centerx + attacker.facing * (attacker.width // 2 + 15)
                             muzzle_y = attacker.rect.centery - 20
                             speed = {"orb": 10, "knife": 14, "spark": 11, "arrow": 15}.get(
@@ -675,10 +777,11 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                             and round_mgr.timer_frames % 60 == 0):
                         sound_fx.play("timer_warn")
                     for _f in (p1, p2):
-                        _was = getattr(_f, "_was_attacking", False)
+                        _was = _f._was_attacking
                         _now = _f.is_attacking
-                        if _now and not _was:
-                            attack_name = _f.current_attack.data.name
+                        attack = _f.current_attack
+                        if _now and not _was and attack is not None:
+                            attack_name = attack.data.name
                             sound_category = (
                                 "special" if attack_name in ("special", "ultimate")
                                 else "light" if attack_name.endswith("light")
@@ -920,6 +1023,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
         for d in damage_numbers_list:
             d.draw(world)
 
+        retro.pixelate(world)
         screen.fill((0, 0, 0))
         camera_punch.draw(world, screen, (ox, oy))
         for presentation in ultimate_presentations:
@@ -1031,12 +1135,12 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             else "PLAYER 2"
         )
         pygame.draw.rect(
-            screen, (12, 16, 28), (left_x, 2, bar_w, 33), border_radius=7,
+            screen, (12, 16, 28), (left_x, 2, bar_w, 33), border_radius=0,
         )
         pygame.draw.rect(
-            screen, (12, 16, 28), (right_x, 2, bar_w, 33), border_radius=7,
+            screen, (12, 16, 28), (right_x, 2, bar_w, 33), border_radius=0,
         )
-        name_font = pygame.font.SysFont("Arial", 23, bold=True)
+        name_font = retro.font("Arial", 23, bold=True)
         draw_text_fit(
             screen, name_font, f"P1  {p1_name}", settings.WHITE,
             pygame.Rect(left_x + 10, 4, bar_w - 20, 28), align="left",
@@ -1078,10 +1182,10 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             settings.WINDOW_WIDTH // 2 - 58, 25, 116, 68,
         )
         pygame.draw.rect(
-            screen, (12, 16, 28), timer_badge, border_radius=14,
+            screen, (12, 16, 28), timer_badge, border_radius=0,
         )
         pygame.draw.rect(
-            screen, (180, 195, 220), timer_badge, 2, border_radius=14,
+            screen, (180, 195, 220), timer_badge, 2, border_radius=0,
         )
         if training_mode:
             draw_text_fit(
@@ -1104,24 +1208,24 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
         if training_mode:
             best_combo = combo_display_p1.best_hits
             draw_text_fit(
-                screen, pygame.font.SysFont("Arial", 17, bold=True),
+                screen, retro.font("Arial", 17, bold=True),
                 f"BEST {best_combo} HITS   DAMAGE {training_damage}   "
-                f"DUMMY {training_dummy_mode} [T]   MOVES [V]   RESET [R]   HELP [H]",
+                f"DUMMY {training_dummy_mode}",
                 (230, 235, 250),
-                pygame.Rect(20, settings.WINDOW_HEIGHT - 45,
-                            settings.WINDOW_WIDTH - 40, 40),
+                pygame.Rect(20, screen.get_height() - keybind_overlay.get_height() - 38,
+                            screen.get_width() - 40, 28),
             )
-        elif not show_controls:
-            hint_text = (
-                "H: CONTROLS   ESC: LEAVE MATCH"
-                if network_peer is not None
-                else "H: CONTROLS   ESC: PAUSE"
-            )
-            draw_text_fit(
-                screen, health_font, hint_text, (210, 215, 230),
-                pygame.Rect(20, settings.WINDOW_HEIGHT - 42,
-                            settings.WINDOW_WIDTH - 40, 34),
-            )
+        if round_mgr.is_fighting and not match.match_over and not paused:
+            pressed = frozenset(code for code in overlay_key_codes if keys[code])
+            if pressed != keybind_pressed:
+                keybind_pressed = pressed
+                keybind_overlay = _make_keybind_overlay(
+                    screen.get_width() - 24, overlay_players,
+                    networked=network_peer is not None, training=training_mode,
+                    pressed_keys=pressed,
+                )
+            screen.blit(keybind_overlay, ((screen.get_width() - keybind_overlay.get_width()) // 2,
+                                         screen.get_height() - keybind_overlay.get_height() - 6))
 
         if combat_callout_timer > 0 and round_mgr.is_fighting:
             draw_text_fit(
@@ -1134,7 +1238,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             panel.fill((8, 10, 22, 225))
             panel_rect = panel.get_rect(center=(settings.WINDOW_WIDTH // 2, 365))
             screen.blit(panel, panel_rect)
-            control_font = pygame.font.SysFont("Arial", 18)
+            control_font = retro.font("Arial", 18)
             draw_text_fit(
                 screen, fonts["mid"], "CONTROLS", (255, 225, 110),
                 pygame.Rect(panel_rect.x + 20, panel_rect.y + 14,
@@ -1172,7 +1276,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                                 panel_rect.width - 56, 24), align="left",
                 )
             draw_text_fit(
-                screen, pygame.font.SysFont("Arial", 15, bold=True),
+                screen, retro.font("Arial", 15, bold=True),
                 "Deal and take damage to charge meter; at 100%, SPECIAL uses your ULTIMATE.",
                 (255, 220, 115),
                 pygame.Rect(panel_rect.x + 20, panel_rect.bottom - 62,
@@ -1194,7 +1298,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                 pygame.Rect(panel_rect.x + 18, panel_rect.y + 8,
                             panel_rect.width - 36, 26), align="left",
             )
-            move_font = pygame.font.SysFont("Arial", 17)
+            move_font = retro.font("Arial", 17)
             actions = ("light", "heavy", "special", "ultimate")
             for index, action in enumerate(actions):
                 data = p1.attacks[action]
@@ -1227,4 +1331,4 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                     align="left",
                 )
 
-        pygame.display.flip()
+        retro.present(screen)

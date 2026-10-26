@@ -9,6 +9,7 @@ around it — never stretched.
 
 import math
 import pygame
+from ui import retro
 
 import settings
 from characters import character_data
@@ -30,7 +31,7 @@ GRID_TOP = 140
 PANEL_LEFT = GRID_LEFT + GRID_COLS * (CELL_W + CELL_GAP) + 35
 PANEL_TOP = 140
 PANEL_W = settings.WINDOW_WIDTH - PANEL_LEFT - 50
-PANEL_H = GRID_ROWS * (CELL_H + CELL_GAP) - CELL_GAP
+PANEL_H = max(452, GRID_ROWS * (CELL_H + CELL_GAP) - CELL_GAP)
 
 
 def _cell_rect(index):
@@ -76,7 +77,8 @@ def _blit_fit(surface, image, box_rect, border_color=None):
     scale = min(box_rect.width / iw, box_rect.height / ih)
     new_w = max(1, int(iw * scale))
     new_h = max(1, int(ih * scale))
-    scaled = pygame.transform.smoothscale(image, (new_w, new_h))
+    scaled = pygame.transform.scale(image, (new_w, new_h))
+    retro.pixelate(scaled, 2)
     r = scaled.get_rect(center=box_rect.center)
     surface.blit(scaled, r)
     if border_color is not None:
@@ -99,10 +101,10 @@ def _draw_stat_bar(surface, font, x, y, w, label, value, max_value):
 
 def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
                          allow_random=False):
-    title_font = pygame.font.SysFont("Arial", 44, bold=True)
-    item_font  = pygame.font.SysFont("Arial", 20, bold=True)
-    small_font = pygame.font.SysFont("Arial", 16, bold=True)
-    hint_font  = pygame.font.SysFont("Arial", 18)
+    title_font = retro.font("Arial", 44, bold=True)
+    item_font  = retro.font("Arial", 20, bold=True)
+    small_font = retro.font("Arial", 16, bold=True)
+    hint_font  = retro.font("Arial", 18)
 
     roster = character_data.all_characters()
     total = len(roster)
@@ -186,7 +188,7 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
             name_img = item_font.render(ch["name"], True, settings.WHITE)
             name_rect = name_img.get_rect(center=(cell.centerx, cell.bottom - 12))
             if name_rect.width > cell.width - 12:
-                name_img = pygame.transform.smoothscale(
+                name_img = pygame.transform.scale(
                     name_img,
                     (cell.width - 12, max(1, int(name_img.get_height()
                                                   * (cell.width - 12) / name_rect.width))),
@@ -272,5 +274,5 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
                         settings.WINDOW_WIDTH - 40, 40),
         )
 
-        pygame.display.flip()
+        retro.present(screen)
         clock.tick(settings.FPS)

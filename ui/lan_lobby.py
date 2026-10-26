@@ -3,6 +3,7 @@
 import queue
 import threading
 import pygame
+from ui import retro
 
 import settings
 from audio import sound_fx
@@ -15,16 +16,16 @@ def _draw_panel(screen, title, lines, hint, accent=(70, 205, 255)):
     pygame.draw.rect(
         screen, (17, 24, 44),
         pygame.Rect(100, 75, settings.WINDOW_WIDTH - 200, settings.WINDOW_HEIGHT - 150),
-        border_radius=22,
+        border_radius=0,
     )
     pygame.draw.rect(
         screen, accent,
         pygame.Rect(100, 75, settings.WINDOW_WIDTH - 200, settings.WINDOW_HEIGHT - 150),
-        2, border_radius=22,
+        2, border_radius=0,
     )
-    title_font = pygame.font.SysFont("Arial", 48, bold=True)
-    body_font = pygame.font.SysFont("Arial", 27, bold=True)
-    hint_font = pygame.font.SysFont("Arial", 19)
+    title_font = retro.font("Arial", 48, bold=True)
+    body_font = retro.font("Arial", 27, bold=True)
+    hint_font = retro.font("Arial", 19)
     panel = pygame.Rect(100, 75, settings.WINDOW_WIDTH - 200,
                         settings.WINDOW_HEIGHT - 150)
     draw_text_fit(
@@ -42,7 +43,7 @@ def _draw_panel(screen, title, lines, hint, accent=(70, 205, 255)):
         pygame.Rect(panel.x + 30, settings.WINDOW_HEIGHT - 172,
                     panel.width - 60, 42),
     )
-    pygame.display.flip()
+    retro.present(screen)
 
 
 def run_host_lobby(screen, clock):

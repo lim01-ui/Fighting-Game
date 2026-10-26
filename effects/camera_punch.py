@@ -39,7 +39,7 @@ class CameraPunch:
             int(world.get_width() * scale),
             int(world.get_height() * scale),
         )
-        scaled_world = pygame.transform.smoothscale(world, size)
+        scaled_world = pygame.transform.scale(world, size)
         focus_x, focus_y = self.focus
         x = int(focus_x + offset[0] - focus_x * scale)
         y = int(focus_y + offset[1] - focus_y * scale)

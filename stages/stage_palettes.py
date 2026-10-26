@@ -183,4 +183,5 @@ def get(stage_key, palette_key):
 
 
 def display_name(stage_key, palette_key):
-    return f"{stage_key.upper()} {palette_key.upper()}"
+    from stages.stages import display_name as background_name
+    return background_name(stage_key, palette_key)

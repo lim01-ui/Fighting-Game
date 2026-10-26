@@ -1,5 +1,6 @@
 # effects/damage_numbers.py
 import pygame
+from ui import retro
 import settings
 
 
@@ -29,10 +30,10 @@ class DamageNumber:
         self.pop = 0.0
         self.color = _color_for_damage(self.value, blocked)
         if style == "chunky":
-            self.font = pygame.font.SysFont("Arial", 34, bold=True)
+            self.font = retro.font("Arial", 34, bold=True)
             self.outline_thickness = 3
         else:
-            self.font = pygame.font.SysFont("Arial", 20, bold=True)
+            self.font = retro.font("Arial", 20, bold=True)
             self.outline_thickness = 1
 
     def update(self):
@@ -54,11 +55,11 @@ class DamageNumber:
         if scale != 1.0:
             w = max(1, int(base.get_width() * scale))
             h = max(1, int(base.get_height() * scale))
-            base = pygame.transform.smoothscale(base, (w, h))
+            base = pygame.transform.scale(base, (w, h))
         if self.outline_thickness > 0 and self.style == "chunky":
             outline_surf = self.font.render(str(self.value), True, (0, 0, 0))
             if scale != 1.0:
-                outline_surf = pygame.transform.smoothscale(
+                outline_surf = pygame.transform.scale(
                     outline_surf,
                     (int(outline_surf.get_width() * scale),
                      int(outline_surf.get_height() * scale)))

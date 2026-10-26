@@ -56,7 +56,7 @@ def scaled_portrait(character_key, size):
     original = load_portrait(character_key)
     if original is None:
         return None
-    return pygame.transform.smoothscale(original, size)
+    return pygame.transform.scale(original, size)
 
 
 def clear_cache():

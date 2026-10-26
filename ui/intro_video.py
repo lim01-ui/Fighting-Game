@@ -5,6 +5,7 @@ from bisect import bisect_right
 import time
 
 import pygame
+from ui import retro
 
 import settings
 
@@ -44,13 +45,14 @@ def _video_surface(screen, frame):
         max(1, int(frame.width * scale)),
         max(1, int(frame.height * scale)),
     )
-    return pygame.transform.smoothscale(image, size)
+    return pygame.transform.scale(image, size)
 
 
 def _draw_surface(screen, image):
     screen.fill((0, 0, 0))
     screen.blit(image, image.get_rect(center=screen.get_rect().center))
-    pygame.display.flip()
+    retro.pixelate(screen, 4)
+    retro.present(screen)
 
 
 def _frame_timestamp(frame, first_pts, frame_index, rate):

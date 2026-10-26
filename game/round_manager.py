@@ -15,6 +15,7 @@ class RoundManager:
         self.timer_seconds = timer_seconds
         self.timer_frames = timer_seconds * 60
         self.state = ROUND_COUNTDOWN
+        self._prev_state: str | None = None
         self.state_timer = COUNTDOWN_FRAMES
         self.winner = None
 

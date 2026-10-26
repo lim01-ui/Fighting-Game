@@ -1,6 +1,6 @@
 # ui/stage_select.py
 """
-Stage pick screen with 21 tiles (3 stages x 7 palettes).
+Stage pick screen for the imported City and Ocean backgrounds.
 
 - Live arena preview and a wall-clock 15-second countdown
 - Arrow keys / WASD to move cursor
@@ -13,6 +13,7 @@ Stage pick screen with 21 tiles (3 stages x 7 palettes).
 import math
 import random
 import pygame
+from ui import retro
 
 import settings
 from stages import stages, stage_palettes
@@ -44,16 +45,16 @@ def _make_thumbnail(stage_key, palette_key):
     # Render at full size, then downscale
     full = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     stages.draw(full, stage_key, t=0.0, scroll=0.0, palette_key=palette_key)
-    thumb = pygame.transform.smoothscale(full, (TILE_W, TILE_H - 22))
+    thumb = pygame.transform.scale(full, (TILE_W, TILE_H - 22))
     return thumb
 
 
 def run_stage_select(screen, clock, title="CHOOSE YOUR STAGE"):
     """Browse all arenas with an animated preview and mouse or keyboard input."""
-    fonts = {name: pygame.font.SysFont("Arial", size, bold=True)
+    fonts = {name: retro.font("Arial", size, bold=True)
              for name, size in (("title", 38), ("heading", 30), ("body", 19), ("small", 14))}
     combos = stages.all_stage_combos()
-    thumbnails = [pygame.transform.smoothscale(_make_thumbnail(*combo), (TILE_W, 42))
+    thumbnails = [pygame.transform.scale(_make_thumbnail(*combo), (TILE_W, 42))
                   for combo in combos]
     selected = 0
     elapsed = 0.0
@@ -62,11 +63,6 @@ def run_stage_select(screen, clock, title="CHOOSE YOUR STAGE"):
     preview = pygame.Surface((650, 300))
     confirm = pygame.Rect(850, 338, 330, 48)
     tiles = [_tile_rect(i) for i in range(len(combos))]
-    descriptions = {
-        "sunset": ("CITY ROOFTOPS", "Above the skyline. Under an open sky.", "Drifting embers and layers of city lights."),
-        "dojo": ("THE QUIET DOJO", "A place for discipline. An arena for rivals.", "Windborne petals cross the mountain view."),
-        "neon": ("NEON CIRCUIT", "Step inside a charged digital arena.", "Pulsing energy and holographic scan lines."),
-    }
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -103,24 +99,30 @@ def run_stage_select(screen, clock, title="CHOOSE YOUR STAGE"):
         screen.fill((8, 12, 24))
         def text(key, value, color, rect, align="left"):
             draw_text_fit(screen, fonts[key], value, color, pygame.Rect(rect), align=align)
-        text("small", "ARENA SELECT / 21 STAGE VARIANTS", (85, 215, 250), (48, 18, 900, 24))
+        text("small", f"ARENA SELECT / {len(combos)} BACKGROUNDS", (85, 215, 250), (48, 18, 900, 24))
         text("title", title, (238, 242, 251), (46, 46, 1040, 55))
         text("heading", f"{math.ceil(remaining):02}s", (255, 185, 99), (1120, 46, 110, 55), "right")
         pygame.draw.rect(screen, (31, 44, 64), (48, 112, 1184, 3))
         pygame.draw.rect(screen, (85, 215, 250), (48, 112, round(1184 * remaining / COUNTDOWN_SECONDS), 3))
         sk, pk = combos[selected]
         stages.draw(world, sk, elapsed, scroll=math.sin(elapsed * 0.25) * 0.3, palette_key=pk)
-        pygame.transform.smoothscale(world, preview.get_size(), preview)
+        pygame.transform.scale(world, preview.get_size(), preview)
+        retro.pixelate(preview, 3)
         screen.blit(preview, (48, 128))
         pygame.draw.rect(screen, (85, 215, 250), (48, 128, 650, 300), 1)
-        pygame.draw.rect(screen, (16, 23, 39), (720, 128, 512, 300), border_radius=14)
-        heading, line1, line2 = descriptions[sk]
+        pygame.draw.rect(screen, (16, 23, 39), (720, 128, 512, 300), border_radius=0)
+        group, _, _ = stages.background_info(sk, pk)
+        heading, line1, line2 = (
+            ("CITY ROOFTOPS", "Fight above a layered pixel skyline.", "Eight cityscapes. One rooftop arena.")
+            if group == "City" else
+            ("OCEAN FRONT", "Face your rival beside the open sea.", "Eight ocean views. A dockside arena.")
+        )
         text("small", heading, (85, 215, 250), (748, 148, 450, 28))
         text("heading", stage_palettes.display_name(sk, pk), (238, 242, 251), (748, 184, 450, 46))
         text("body", line1, (170, 184, 205), (748, 242, 450, 28))
         text("body", line2, (170, 184, 205), (748, 275, 450, 28))
-        pygame.draw.rect(screen, (33, 76, 96), confirm, border_radius=8)
-        pygame.draw.rect(screen, (85, 215, 250), confirm, 1, border_radius=8)
+        pygame.draw.rect(screen, (33, 76, 96), confirm, border_radius=0)
+        pygame.draw.rect(screen, (85, 215, 250), confirm, 1, border_radius=0)
         text("body", "ENTER / CLICK: LOCK IN ARENA", (238, 242, 251), confirm, "center")
         for i, ((stage, palette), thumb) in enumerate(zip(combos, thumbnails)):
             tile = tiles[i]
@@ -129,5 +131,5 @@ def run_stage_select(screen, clock, title="CHOOSE YOUR STAGE"):
             text("small", stage_palettes.display_name(stage, palette), (238, 242, 251), (tile.x + 4, tile.y + 40, tile.w - 8, 22), "center")
             pygame.draw.rect(screen, (85, 215, 250) if i == selected else (49, 62, 83), tile, 3 if i == selected else 1)
         text("small", "ARROWS / WASD: BROWSE    MOUSE: PREVIEW    R: RANDOM    ENTER: CONFIRM    ESC: USE CURRENT", (155, 172, 195), (40, 661, 1200, 40), "center")
-        pygame.display.flip()
+        retro.present(screen)
         elapsed += clock.tick(settings.FPS) / 1000.0

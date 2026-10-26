@@ -1,6 +1,7 @@
 """Presentation for the main arcade lobby."""
 import math
 import pygame
+from ui import retro
 import settings
 from characters.player import Player
 from stages import stages
@@ -21,20 +22,23 @@ MODES = (
 class LobbyView:
     def __init__(self):
         self.fonts = {
-            'title': pygame.font.SysFont('Arial', 60, bold=True),
-            'heading': pygame.font.SysFont('Arial', 32, bold=True),
-            'item': pygame.font.SysFont('Arial', 24, bold=True),
-            'body': pygame.font.SysFont('Arial', 19),
-            'small': pygame.font.SysFont('Arial', 15, bold=True),
+            'title': retro.font('Arial', 60, bold=True),
+            'heading': retro.font('Arial', 32, bold=True),
+            'item': retro.font('Arial', 24, bold=True),
+            'body': retro.font('Arial', 19),
+            'small': retro.font('Arial', 15, bold=True),
         }
         # One set of rectangles drives drawing and mouse hit testing.
         self.rows = [pygame.Rect(87, 245 + i * 49, 506, 42) for i in range(len(MODES))]
         self.background = pygame.Surface((1280, 720))
-        for y in range(720):
-            fraction = y / 720
-            pygame.draw.line(self.background, (8 + int(8 * fraction), 12 + int(5 * fraction), 24 + int(12 * fraction)), (0, y), (1280, y))
-        for x in range(-720, 1400, 100):
-            pygame.draw.line(self.background, (21, 29, 45), (x, 720), (x + 720, 0))
+        self.background.fill(retro.INK)
+        for y in range(0, 720, 40):
+            pygame.draw.line(self.background, (40, 24, 64), (0, y), (1280, y), 2)
+        for x in range(0, 1280, 40):
+            pygame.draw.line(self.background, (40, 24, 64), (x, 0), (x, 720), 2)
+        for index in range(48):
+            x, y = (index * 173 + 18) % 1280, (index * 97 + 10) % 720
+            pygame.draw.rect(self.background, (104, 80, 136), (x, y, 4, 4))
         self.arena = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
         stages.draw(self.arena, 'sunset', 0, palette_key='classic')
         self.world = self.arena.copy()
@@ -50,35 +54,36 @@ class LobbyView:
         draw_text_fit(surface, self.fonts[font], text, color, pygame.Rect(rect), align=align)
 
     def draw(self, screen, selected, elapsed, dt):
-        cyan, white, muted = (85, 215, 250), (238, 242, 251), (147, 162, 188)
-        accent = (255, 185, 99) if selected == 6 else cyan
+        cyan, white, muted = retro.CYAN, (248, 240, 224), (168, 152, 192)
+        accent = retro.PINK if selected == 6 else retro.GOLD
         screen.blit(self.background, (0, 0))
-        pygame.draw.rect(screen, accent, (70, 47, 5, 82), border_radius=2)
-        self.text(screen, 'small', 'THE ARENA IS YOURS', accent, (94, 31, 600, 24))
+        pygame.draw.rect(screen, accent, (70, 47, 5, 82), border_radius=0)
+        self.text(screen, 'small', '2D ARCADE / READY PLAYER ONE', accent, (94, 31, 600, 24))
+        self.text(screen, 'title', 'PYTHON FIGHTERS', retro.PINK, (94, 59, 780, 72))
         self.text(screen, 'title', 'PYTHON FIGHTERS', white, (90, 55, 780, 72))
-        self.text(screen, 'body', 'Pick your mode. Find your rhythm. Own the fight.', muted, (96, 131, 760, 28))
+        self.text(screen, 'body', 'SELECT YOUR MODE. PRESS START. FIGHT!', cyan, (96, 131, 760, 28))
         pygame.draw.circle(screen, cyan, (1090, 77), 4 + int(math.sin(elapsed * 2) > 0))
         self.text(screen, 'small', 'ARCADE LOBBY', muted, (1105, 65, 140, 26))
         pygame.draw.line(screen, (45, 57, 79), (70, 178), (1210, 178))
 
-        pygame.draw.rect(screen, (14, 21, 36), (70, 190, 540, 438), border_radius=16)
+        pygame.draw.rect(screen, (14, 21, 36), (70, 190, 540, 438), border_radius=0)
         self.text(screen, 'small', 'SELECT GAME MODE', muted, (99, 207, 350, 24))
         self.text(screen, 'small', f'{selected + 1:02} / 07', accent, (510, 207, 70, 24), 'right')
         self.highlight_y += (self.rows[selected].y - self.highlight_y) * min(1.0, dt * 18)
         trail = pygame.Rect(87, round(self.highlight_y), 506, 42)
-        pygame.draw.rect(screen, (23, 43, 62), trail, border_radius=8)
+        pygame.draw.rect(screen, (23, 43, 62), trail, border_radius=0)
         for index, row in enumerate(self.rows):
             active = index == selected
             if active:
-                pygame.draw.rect(screen, (30, 61, 80), row, border_radius=8)
-                pygame.draw.rect(screen, accent, row, 1, border_radius=8)
-                pygame.draw.rect(screen, accent, (row.x, row.y + 9, 3, 24), border_radius=1)
+                pygame.draw.rect(screen, (30, 61, 80), row, border_radius=0)
+                pygame.draw.rect(screen, accent, row, 1, border_radius=0)
+                pygame.draw.rect(screen, accent, (row.x, row.y + 9, 3, 24), border_radius=0)
             self.text(screen, 'small', f'{index + 1:02}', accent if active else (84, 105, 131), (row.x + 16, row.y + 8, 32, 26))
             self.text(screen, 'item', MODES[index][0], white if active else muted, (row.x + 62, row.y + 3, 390, 36))
             if active:
                 self.text(screen, 'item', '>', accent, (row.right - 34, row.y + 3, 22, 36))
 
-        pygame.draw.rect(screen, (16, 23, 39), (636, 190, 574, 438), border_radius=16)
+        pygame.draw.rect(screen, (16, 23, 39), (636, 190, 574, 438), border_radius=0)
         self.text(screen, 'small', 'FIGHTER SHOWCASE', accent, (662, 205, 400, 26))
         self.animation_accumulator += min(dt, 0.1) * settings.FPS
         while self.animation_accumulator >= 1:
@@ -89,9 +94,10 @@ class LobbyView:
         for fighter in self.fighters:
             fighter.draw(self.world)
         arena_crop = self.world.subsurface((160, 150, 960, settings.WINDOW_HEIGHT - 150))
-        pygame.transform.smoothscale(arena_crop, self.preview.get_size(), self.preview)
+        pygame.transform.scale(arena_crop, self.preview.get_size(), self.preview)
+        retro.pixelate(self.preview)
         screen.blit(self.preview, (663, 243))
-        pygame.draw.rect(screen, (65, 77, 100), (663, 243, 520, 218), 1, border_radius=2)
+        pygame.draw.rect(screen, (65, 77, 100), (663, 243, 520, 218), 1, border_radius=0)
         self.text(screen, 'small', 'ROOK', white, (677, 251, 180, 24))
         self.text(screen, 'small', 'VEX', white, (990, 251, 180, 24), 'right')
         # A solid caption strip gives mode details a consistent readable backdrop.

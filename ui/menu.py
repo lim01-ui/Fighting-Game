@@ -1,4 +1,5 @@
 import pygame
+from ui import retro
 import settings
 from audio import sound_fx, preferences
 from ui.text_layout import draw_text_fit
@@ -68,7 +69,7 @@ def run_main_menu(screen, clock):
                     )[selected]
 
         view.draw(screen, selected, elapsed, dt)
-        pygame.display.flip()
+        retro.present(screen)
         dt = clock.tick(settings.FPS) / 1000.0
         elapsed += dt
 
@@ -76,10 +77,10 @@ def run_main_menu(screen, clock):
 
 def run_tutorial(screen, clock):
     """Show a short controls-aware introduction to fighting."""
-    title_font = pygame.font.SysFont("Arial", 48, bold=True)
-    heading_font = pygame.font.SysFont("Arial", 30, bold=True)
-    body_font = pygame.font.SysFont("Arial", 23)
-    hint_font = pygame.font.SysFont("Arial", 18)
+    title_font = retro.font("Arial", 48, bold=True)
+    heading_font = retro.font("Arial", 30, bold=True)
+    body_font = retro.font("Arial", 23)
+    hint_font = retro.font("Arial", 18)
     pages = (
         (
             "MOVE AND FACE YOUR OPPONENT",
@@ -143,8 +144,8 @@ def run_tutorial(screen, clock):
         )
 
         panel = pygame.Rect(150, 195, settings.WINDOW_WIDTH - 300, 380)
-        pygame.draw.rect(screen, (13, 20, 38), panel, border_radius=18)
-        pygame.draw.rect(screen, (45, 65, 98), panel, 2, border_radius=18)
+        pygame.draw.rect(screen, (13, 20, 38), panel, border_radius=0)
+        pygame.draw.rect(screen, (45, 65, 98), panel, 2, border_radius=0)
         heading, *lines = pages[page]
         draw_text_fit(
             screen, heading_font, heading, (255, 230, 125),
@@ -168,7 +169,7 @@ def run_tutorial(screen, clock):
             f"HEAVY {preferences.binding_label(settings.P1_KEYS['heavy'])}   "
             f"SPECIAL {preferences.binding_label(settings.P1_KEYS['special'])}"
         )
-        controls_font = pygame.font.SysFont("Arial", 19, bold=True)
+        controls_font = retro.font("Arial", 19, bold=True)
         for index, text in enumerate((movement, attacks)):
             draw_text_fit(
                 screen, controls_font, text, (100, 215, 255),
@@ -186,14 +187,14 @@ def run_tutorial(screen, clock):
             (175, 190, 215),
             pygame.Rect(20, 690, settings.WINDOW_WIDTH - 40, 26),
         )
-        pygame.display.flip()
+        retro.present(screen)
         clock.tick(settings.FPS)
 
 
 def run_difficulty_menu(screen, clock):
-    title_font = pygame.font.SysFont("Arial", 56, bold=True)
-    item_font = pygame.font.SysFont("Arial", 34, bold=True)
-    hint_font = pygame.font.SysFont("Arial", 20)
+    title_font = retro.font("Arial", 56, bold=True)
+    item_font = retro.font("Arial", 34, bold=True)
+    hint_font = retro.font("Arial", 20)
     choices = ["EASY", "NORMAL", "HARD"]
     selected = 1
 
@@ -226,5 +227,5 @@ def run_difficulty_menu(screen, clock):
                         settings.WINDOW_WIDTH - 40, 38),
             align="left",
         )
-        pygame.display.flip()
+        retro.present(screen)
         clock.tick(settings.FPS)

@@ -12,7 +12,7 @@ def draw_text_fit(surface, font, text, color, rect, align="center", alpha=None):
     max_height = max(1, rect.height)
     scale = min(1.0, max_width / image.get_width(), max_height / image.get_height())
     if scale < 1.0:
-        image = pygame.transform.smoothscale(
+        image = pygame.transform.scale(
             image,
             (max(1, int(image.get_width() * scale)),
              max(1, int(image.get_height() * scale))),

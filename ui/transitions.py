@@ -37,7 +37,7 @@ def draw_countdown(surface, round_number, progress, fonts):
         scale = easing.ease_out_back(p, overshoot=1.6)
         img = huge_font.render("FIGHT!", True, (255, 80, 80))
         base_size = img.get_size()
-        scaled = pygame.transform.smoothscale(
+        scaled = pygame.transform.scale(
             img, (int(base_size[0] * scale), int(base_size[1] * scale)))
         r = scaled.get_rect(center=(settings.WINDOW_WIDTH // 2,
                                     settings.WINDOW_HEIGHT // 2))
@@ -54,7 +54,7 @@ def draw_round_over(surface, winner, round_end_reason, progress, fonts):
     scale = easing.ease_out_back(min(1.0, progress / 0.30), overshoot=1.4)
     img = fonts["huge"].render(head, True, (255, 80, 80))
     base_size = img.get_size()
-    scaled = pygame.transform.smoothscale(
+    scaled = pygame.transform.scale(
         img, (int(base_size[0] * scale), int(base_size[1] * scale)))
     r = scaled.get_rect(center=(settings.WINDOW_WIDTH // 2, 230))
     surface.blit(scaled, r)
@@ -82,7 +82,7 @@ def draw_match_over(surface, header, rounds_text, progress, fonts,
     scale = easing.ease_out_back(min(1.0, progress / 0.35), overshoot=1.5)
     img = fonts["huge"].render("MATCH OVER", True, (255, 80, 80))
     base_size = img.get_size()
-    scaled = pygame.transform.smoothscale(
+    scaled = pygame.transform.scale(
         img, (int(base_size[0] * scale), int(base_size[1] * scale)))
     r = scaled.get_rect(center=(settings.WINDOW_WIDTH // 2,
                                 settings.WINDOW_HEIGHT // 2 - 80))

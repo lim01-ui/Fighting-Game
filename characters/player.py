@@ -222,6 +222,9 @@ class Player:
         self.super_armor_frames = 0
         self._opponent_ref = None
         self._stun_on_hit = 0
+        self._special_spawned: bool = False
+        self._projectile_fired: bool = False
+        self._was_attacking: bool = False
         self.ultimate_meter = 0.0
 
     def _key(self, name):
@@ -480,6 +483,10 @@ class Player:
         self.weapon_trail = []
         self.super_armor_frames = 0
         self._stun_on_hit = 0
+
+        self._special_spawned = False
+        self._projectile_fired = False
+        self._was_attacking = False
 
     def _compute_pose(self):
         pose = {
@@ -970,11 +977,14 @@ class Player:
             self.state == S_ATTACK and self.current_attack is not None
             and self.current_attack.in_active
         ) else 0
+        foot_padding = round(image.get_height() * sprite_fighter.foot_padding_ratio(
+            self.character["sprite_asset"]
+        ))
         surface.blit(
             image,
             image.get_rect(
                 midbottom=(self.rect.centerx + self.facing * lunge,
-                           self.rect.bottom + bob),
+                           self.rect.bottom + bob + foot_padding),
             ),
         )
 

@@ -1,6 +1,7 @@
 """Mouse and keyboard options, including click-to-bind controls."""
 
 import pygame
+from ui import retro
 
 import settings
 from audio import music, preferences, sound_fx
@@ -33,9 +34,9 @@ def _refresh_audio():
 
 
 def run_controls_menu(screen, clock):
-    title_font = pygame.font.SysFont("Arial", 46, bold=True)
-    item_font = pygame.font.SysFont("Arial", 25, bold=True)
-    hint_font = pygame.font.SysFont("Arial", 18)
+    title_font = retro.font("Arial", 46, bold=True)
+    item_font = retro.font("Arial", 25, bold=True)
+    hint_font = retro.font("Arial", 18)
     actions = tuple(settings.P1_KEYS)
     selected = 0
     listening_action = None
@@ -113,8 +114,8 @@ def run_controls_menu(screen, clock):
             binding = ("PRESS A KEY..." if action == listening_action
                        else preferences.binding_label(settings.P1_KEYS[action]))
             pygame.draw.rect(screen, (27, 75, 105) if action == listening_action
-                             else (24, 32, 52), boxes[index], border_radius=8)
-            pygame.draw.rect(screen, color, boxes[index], 2, border_radius=8)
+                             else (24, 32, 52), boxes[index], border_radius=0)
+            pygame.draw.rect(screen, color, boxes[index], 2, border_radius=0)
             draw_text_fit(
                 screen, item_font, label, color,
                 pygame.Rect(300, y, 390, 36), align="left",
@@ -143,14 +144,14 @@ def run_controls_menu(screen, clock):
             pygame.Rect(20, settings.WINDOW_HEIGHT - 50,
                         settings.WINDOW_WIDTH - 40, 36),
         )
-        pygame.display.flip()
+        retro.present(screen)
         clock.tick(settings.FPS)
 
 
 def run_settings_menu(screen, clock):
-    title_font = pygame.font.SysFont("Arial", 52, bold=True)
-    item_font = pygame.font.SysFont("Arial", 26, bold=True)
-    hint_font = pygame.font.SysFont("Arial", 18)
+    title_font = retro.font("Arial", 52, bold=True)
+    item_font = retro.font("Arial", 26, bold=True)
+    hint_font = retro.font("Arial", 18)
     selected = 0
     row_y = 185
     row_gap = 62
@@ -244,30 +245,29 @@ def run_settings_menu(screen, clock):
             y = row_y + index * row_gap
             color = (255, 230, 110) if index == selected else settings.WHITE
             if index == selected:
-                pygame.draw.rect(screen, (24, 38, 58), rows[index], border_radius=8)
+                pygame.draw.rect(screen, (24, 38, 58), rows[index], border_radius=0)
             label_image = item_font.render(label, True, color)
             screen.blit(label_image, (settings.WINDOW_WIDTH // 2 - 310, y))
 
             if index < len(VOLUME_KEYS):
                 value = preferences.get(VOLUME_KEYS[index])
                 track = pygame.Rect(settings.WINDOW_WIDTH // 2 + 25, y + 4, 300, 20)
-                pygame.draw.rect(screen, (35, 38, 55), track, border_radius=8)
+                pygame.draw.rect(screen, (35, 38, 55), track, border_radius=0)
                 fill = track.copy()
                 fill.width = int(track.width * value)
-                pygame.draw.rect(screen, (75, 190, 245), fill, border_radius=8)
-                pygame.draw.rect(screen, (190, 200, 220), track, 2, border_radius=8)
+                pygame.draw.rect(screen, (75, 190, 245), fill, border_radius=0)
+                pygame.draw.rect(screen, (190, 200, 220), track, 2, border_radius=0)
                 percent = item_font.render(f"{round(value * 100)}%", True, settings.WHITE)
                 screen.blit(percent, (track.right + 18, y - 1))
             elif index == 3:
                 status = "ON" if preferences.get("fullscreen") else "OFF"
                 screen.blit(item_font.render(status, True, color), (settings.WINDOW_WIDTH // 2 + 25, y))
 
-        hint = hint_font.render(
-            "CLICK: select / set volume   UP/DOWN: select   LEFT/RIGHT: adjust   ESC: back",
-            True, (195, 200, 215),
+        draw_text_fit(
+            screen, hint_font,
+            "CLICK: SELECT / SET VOLUME   UP/DOWN: SELECT   LEFT/RIGHT: ADJUST   ESC: BACK",
+            (195, 200, 215),
+            pygame.Rect(24, settings.WINDOW_HEIGHT - 64, settings.WINDOW_WIDTH - 48, 32),
         )
-        screen.blit(hint, hint.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 48)
-        ))
-        pygame.display.flip()
+        retro.present(screen)
         clock.tick(settings.FPS)

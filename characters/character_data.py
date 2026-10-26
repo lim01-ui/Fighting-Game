@@ -118,6 +118,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "sable": {
         "key": "sable",
+        "sprite_asset": "swordsman",
         "name": "SABLE",
         "archetype": "Zoner",
         "special_behavior": {'type': 'long_swipe', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
@@ -143,6 +144,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "nova": {
         "key": "nova",
+        "sprite_asset": "wizard",
         "name": "NOVA",
         "archetype": "Technical",
         "special_behavior": {'type': 'projectile', 'dash': 0, 'extra_hits': 0, 'projectiles': 1, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
@@ -168,6 +170,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "iron": {
         "key": "iron",
+        "sprite_asset": "knight",
         "name": "IRON",
         "archetype": "Tank",
         "special_behavior": {'type': 'armored_bash', 'dash': 60, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 48, 'stun_frames': 0, 'pierce': False},
@@ -193,6 +196,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "jinx": {
         "key": "jinx",
+        "sprite_asset": "musketeer",
         "name": "JINX",
         "archetype": "Trickster",
         "special_behavior": {'type': 'fan_throw', 'dash': 0, 'extra_hits': 0, 'projectiles': 3, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
@@ -218,6 +222,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "kestrel": {
         "key": "kestrel",
+        "sprite_asset": "archer",
         "name": "KESTREL",
         "archetype": "Aerial",
         "special_behavior": {'type': 'pierce_thrust', 'dash': 30, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': True},
@@ -243,6 +248,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "bramble": {
         "key": "bramble",
+        "sprite_asset": "enchantress",
         "name": "BRAMBLE",
         "archetype": "Defensive",
         "special_behavior": {'type': 'multi_hit', 'dash': 0, 'extra_hits': 2, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
@@ -264,14 +270,14 @@ ROSTER = {
     },
 
     # ---------------------------------------------------------
-    # 10. ASH — stance. Balanced but with a distinct quiet look.
+    # 10. RAGUEL — stance. Balanced but with a distinct quiet look.
     # ---------------------------------------------------------
-    "ash": {
-        "key": "ash",
-        "name": "ASH",
+    "raguel": {
+        "key": "raguel",
+        "name": "RAGUEL",
         "archetype": "Stance",
-        "sprite_asset": "ash",
-        "sprite_scale": 1.60,
+        "sprite_asset": "raguel",
+        "sprite_scale": 1.0,
         "special_behavior": {'type': 'teleport_slash', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': True, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
         "weapon": "katana",
         "weapon_color": (230, 230, 240),
@@ -291,11 +297,12 @@ ROSTER = {
     },
 
     # ---------------------------------------------------------
-    # 11. RYOKO — kick specialist. Long legs, longer reach, medium speed.
+    # 11. SANYA — kick specialist. Long legs, longer reach, medium speed.
     # ---------------------------------------------------------
-    "ryoko": {
-        "key": "ryoko",
-        "name": "RYOKO",
+    "sanya": {
+        "key": "sanya",
+        "sprite_asset": "sanya",
+        "name": "SANYA",
         "archetype": "Kicks",
         "special_behavior": {'type': 'spin_kick', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': True, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
         "weapon": "gauntlets",
@@ -316,11 +323,12 @@ ROSTER = {
     },
 
     # ---------------------------------------------------------
-    # 12. VOLT — fast special. Fast, medium damage, short reach.
+    # 12. CHOOM — fast special. Fast, medium damage, short reach.
     # ---------------------------------------------------------
-    "volt": {
-        "key": "volt",
-        "name": "VOLT",
+    "choom": {
+        "key": "choom",
+        "sprite_asset": "choom",
+        "name": "CHOOM",
         "archetype": "Specialist",
         "special_behavior": {'type': 'stun_bolt', 'dash': 0, 'extra_hits': 0, 'projectiles': 1, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 60, 'pierce': False},
         "weapon": "baton",
@@ -514,7 +522,7 @@ ROSTER_ORDER = [
     # Original fighters are kept together.
     "rook", "vex", "golem", "sable",
     "nova", "iron", "jinx", "kestrel",
-    "bramble", "ash", "ryoko", "volt",
+    "bramble", "raguel", "sanya", "choom",
     # Imported open-source fighters are kept together.
     "saikyo", "renegade", "soldier", "chib", "minamoto",
 ]
@@ -562,17 +570,17 @@ ULTIMATES = {
         "damage_mult": 1.8, "reach_mult": 1.35, "extra_hits": 2,
         "armor_frames": 28,
     },
-    "ash": {
+    "raguel": {
         "name": "SILENT CROSSING", "effect": "afterimage",
         "damage_mult": 2.0, "reach_mult": 1.25, "extra_hits": 1,
         "teleport": True,
     },
-    "ryoko": {
+    "sanya": {
         "name": "SPIRAL COMET", "effect": "spin_kick",
         "damage_mult": 2.0, "reach_mult": 1.5, "extra_hits": 3,
         "dash": 44,
     },
-    "volt": {
+    "choom": {
         "name": "STORM CAGE", "effect": "spark",
         "damage_mult": 1.6, "projectile": "spark", "projectiles": 5,
         "projectile_spread": 56, "stun_frames": 42,

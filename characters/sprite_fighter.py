@@ -8,6 +8,45 @@ import pygame
 
 ASSET_ROOT = Path(__file__).resolve().parent.parent / "assets" / "characters"
 _SPECS = {
+    "raguel": {
+        "folder": "Battle_maid",
+        "height": 128,
+        "body_height": 56,
+        "crop": (96, 24, 192, 80),
+        "foot_padding_ratio": 0.1,
+        "trim_preview": True,
+        "directional": False,
+        "animations": {
+            action: ((filename, 384),)
+            for action, filename in {
+                "idle": "idle.png", "walk": "running.png", "run": "running.png",
+                "block": "idle.png", "jump": "idle.png", "hit": "idle.png",
+                "knockdown": "idle.png", "light": "attack_1.png",
+                "heavy": "attack_1.png", "special": "attack_1.png",
+            }.items()
+        },
+    },
+    "choom": {
+        "folder": "Choom",
+        "height": 42,
+        "directional": False,
+        "animations": {
+            "idle": (("Idle.png", 42),),
+            "walk": (("Walk.png", 42),),
+            "run": (("Run.png", 42),),
+            "block": (("Idle.png", 42),),
+            "light": (("Attack1.png", 42),),
+            "heavy": (("Attack2.png", 42),),
+            "special": (("RunAttack2.png", 42),),
+            "crouch_light": (("SquatAttack.png", 42),),
+            "crouch_heavy": (("SquatAttack.png", 42),),
+            "air_light": (("JumpAttack.png", 42),),
+            "air_heavy": (("FallAttack.png", 42),),
+            "hit": (("Hurt.png", 42),),
+            "knockdown": (("Death.png", 42),),
+            "jump": (("Jump.png", 42),),
+        },
+    },
     "renegade": {
         "folder": "renegade",
         "height": 32,
@@ -94,6 +133,32 @@ _SPECS = {
         },
     },
 }
+# Sanya and Choom use the same 42px strip layout and animation filenames.
+_SPECS["sanya"] = {**_SPECS["choom"], "folder": "Sanya"}
+
+# These packs share 128px cells, with transparent padding above the body.
+for _asset, _folder, _body_height, _heavy, _special in (
+    ("swordsman", "Swordsman", 73, "Attack_2.png", "Attack_3.png"),
+    ("wizard", "Wizard", 76, "Attack_2.png", "Attack_3.png"),
+    ("knight", "Knight", 68, "Attack_2.png", "Attack_4.png"),
+    ("musketeer", "Musketeer", 72, "Attack_2.png", "Attack_4.png"),
+    ("archer", "Archer", 74, "Shot_1.png", "Shot_2.png"),
+    ("enchantress", "Enchantress", 70, "Attack_2.png", "Attack_4.png"),
+):
+    _SPECS[_asset] = {
+        "folder": _folder, "height": 128, "body_height": _body_height,
+        "directional": False, "trim_preview": True,
+        "animations": {
+            action: ((filename, 128),)
+            for action, filename in {
+                "idle": "Idle.png", "walk": "Walk.png", "run": "Run.png",
+                "block": "Idle.png", "light": "Attack_1.png", "heavy": _heavy,
+                "special": _special, "hit": "Hurt.png", "knockdown": "Dead.png",
+                "jump": "Jump.png",
+            }.items()
+        },
+    }
+
 _sheets = {}
 _frames = {}
 _manifests = {}
@@ -113,7 +178,13 @@ def _manifest(asset):
 
 def body_height(asset):
     """Use one scale for a generated fighter's body, weapons, and effects."""
-    return _manifest(asset)["body_height"] if is_generated_asset(asset) else None
+    return (_manifest(asset)["body_height"] if is_generated_asset(asset)
+            else _SPECS.get(asset, {}).get("body_height"))
+
+
+def foot_padding_ratio(asset):
+    """Transparent space below the foot baseline in an imported frame."""
+    return _SPECS.get(asset, {}).get("foot_padding_ratio", 0.0)
 
 
 def _generated_frame(asset, animation, facing):
@@ -164,6 +235,8 @@ def _load_frame(asset, animation, frame_index, facing):
     frame = sheet.subsurface(
         (column * frame_width, 0, frame_width, spec["height"])
     ).copy()
+    if spec.get("crop"):
+        frame = frame.subsurface(spec["crop"]).copy()
     if not spec["directional"] and facing < 0:
         frame = pygame.transform.flip(frame, True, False)
     _frames[key] = frame
@@ -190,6 +263,8 @@ def frame_for_player(asset, player):
             else "heavy" if attack_name.endswith("heavy")
             else "special"
         )
+        if attack_name in _SPECS.get(asset, {}).get("animations", {}):
+            animation = attack_name
         frame_index = player.current_attack.frame // 3
     elif not player.on_ground:
         animation = "jump"
@@ -244,9 +319,12 @@ def frame_for_player(asset, player):
 
 def preview_frame(asset, facing=1):
     """Return an animated idle pose for character-selection previews."""
-    return _load_frame(
+    frame = _load_frame(
         asset, "idle", pygame.time.get_ticks() // 180, facing
     )
+    if _SPECS.get(asset, {}).get("trim_preview"):
+        return frame.subsurface(frame.get_bounding_rect(min_alpha=16)).copy()
+    return frame
 
 
 def blit_fit(surface, image, rect):
