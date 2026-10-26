@@ -2,11 +2,12 @@
 """
 Stage pick screen with 21 tiles (3 stages x 7 palettes).
 
-- 15-second countdown at the top
+- Live arena preview and a wall-clock 15-second countdown
 - Arrow keys / WASD to move cursor
 - Enter confirms and locks in
 - When time expires, a random stage is picked
 - Returns (stage_key, palette_key) as a tuple
+- Mouse hover previews a tile; the lock-in button confirms it
 """
 
 import math
@@ -20,12 +21,12 @@ from ui.text_layout import draw_text_fit
 
 
 TILE_W = 160
-TILE_H = 110
+TILE_H = 62
 TILE_GAP = 12
 COLS = 7
 ROWS = 3
 GRID_LEFT = (settings.WINDOW_WIDTH - (COLS * (TILE_W + TILE_GAP) - TILE_GAP)) // 2
-GRID_TOP = 130
+GRID_TOP = 435
 
 COUNTDOWN_SECONDS = 15
 
@@ -34,13 +35,12 @@ def _tile_rect(index):
     row = index // COLS
     col = index % COLS
     x = GRID_LEFT + col * (TILE_W + TILE_GAP)
-    y = GRID_TOP + row * (TILE_H + TILE_GAP)
+    y = GRID_TOP + row * (TILE_H + 8)
     return pygame.Rect(x, y, TILE_W, TILE_H)
 
 
 def _make_thumbnail(stage_key, palette_key):
     """Render a small preview of the stage in that palette."""
-    surf = pygame.Surface((TILE_W, TILE_H))
     # Render at full size, then downscale
     full = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     stages.draw(full, stage_key, t=0.0, scroll=0.0, palette_key=palette_key)
@@ -49,105 +49,85 @@ def _make_thumbnail(stage_key, palette_key):
 
 
 def run_stage_select(screen, clock, title="CHOOSE YOUR STAGE"):
-    """
-    Show the stage pick screen.
-    Returns (stage_key, palette_key) as a tuple.
-    """
-    title_font = pygame.font.SysFont("Arial", 40, bold=True)
-    timer_font = pygame.font.SysFont("Arial", 44, bold=True)
-    small_font = pygame.font.SysFont("Arial", 14, bold=True)
-    hint_font  = pygame.font.SysFont("Arial", 18)
-
-    combos = stages.all_stage_combos()   # list of (stage, palette)
-    total = len(combos)
+    """Browse all arenas with an animated preview and mouse or keyboard input."""
+    fonts = {name: pygame.font.SysFont("Arial", size, bold=True)
+             for name, size in (("title", 38), ("heading", 30), ("body", 19), ("small", 14))}
+    combos = stages.all_stage_combos()
+    thumbnails = [pygame.transform.smoothscale(_make_thumbnail(*combo), (TILE_W, 42))
+                  for combo in combos]
     selected = 0
-
-    # Build thumbnails once (they don't change)
-    thumbnails = [_make_thumbnail(s, p) for (s, p) in combos]
-
-    # Countdown in frames (60 fps)
-    timer_frames = COUNTDOWN_SECONDS * 60
-
+    elapsed = 0.0
+    deadline = pygame.time.get_ticks() + COUNTDOWN_SECONDS * 1000
+    world = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
+    preview = pygame.Surface((650, 300))
+    confirm = pygame.Rect(850, 338, 330, 48)
+    tiles = [_tile_rect(i) for i in range(len(combos))]
+    descriptions = {
+        "sunset": ("CITY ROOFTOPS", "Above the skyline. Under an open sky.", "Drifting embers and layers of city lights."),
+        "dojo": ("THE QUIET DOJO", "A place for discipline. An arena for rivals.", "Windborne petals cross the mountain view."),
+        "neon": ("NEON CIRCUIT", "Step inside a charged digital arena.", "Pulsing energy and holographic scan lines."),
+    }
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return combos[selected]
+            if event.type in (pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN):
+                for index, tile in enumerate(tiles):
+                    if tile.collidepoint(event.pos):
+                        if selected != index:
+                            sound_fx.play("menu_move")
+                        selected = index
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if confirm.collidepoint(event.pos):
+                        sound_fx.play("menu_confirm")
+                        return combos[selected]
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return combos[selected]
-                if event.key in (pygame.K_RIGHT, pygame.K_d):
-                    selected = (selected + 1) % total
+                offsets = {pygame.K_RIGHT: 1, pygame.K_d: 1, pygame.K_LEFT: -1,
+                           pygame.K_a: -1, pygame.K_DOWN: COLS, pygame.K_s: COLS,
+                           pygame.K_UP: -COLS, pygame.K_w: -COLS}
+                if event.key in offsets:
+                    selected = (selected + offsets[event.key]) % len(combos)
                     sound_fx.play("menu_move")
-                if event.key in (pygame.K_LEFT, pygame.K_a):
-                    selected = (selected - 1) % total
+                elif event.key == pygame.K_r:
+                    selected = random.randrange(len(combos))
                     sound_fx.play("menu_move")
-                if event.key in (pygame.K_DOWN, pygame.K_s):
-                    selected = (selected + COLS) % total
-                    sound_fx.play("menu_move")
-                if event.key in (pygame.K_UP, pygame.K_w):
-                    selected = (selected - COLS) % total
-                    sound_fx.play("menu_move")
-                if event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     sound_fx.play("menu_confirm")
                     return combos[selected]
-
-        # Tick countdown
-        timer_frames -= 1
-        if timer_frames <= 0:
-            # Auto-pick random
-            random_pick = random.choice(combos)
+        remaining = max(0, (deadline - pygame.time.get_ticks()) / 1000)
+        if remaining <= 0:
             sound_fx.play("menu_confirm")
-            return random_pick
-
-        # Warn at 5s and 10s
-        secs_left = max(0, timer_frames // 60)
-
-        # ---- Draw ----
-        screen.fill((12, 12, 26))
-
-        # Title
-        draw_text_fit(
-            screen, title_font, title, settings.WHITE,
-            pygame.Rect(30, 18, settings.WINDOW_WIDTH - 60, 70),
-        )
-
-        # Timer
-        timer_color = (255, 80, 80) if secs_left <= 5 else (255, 240, 120)
-        timer_img = timer_font.render(f"{secs_left}", True, timer_color)
-        screen.blit(timer_img, timer_img.get_rect(
-            center=(settings.WINDOW_WIDTH // 2, 100)))
-
-        # Grid
-        for i, ((sk, pk), thumb) in enumerate(zip(combos, thumbnails)):
-            tile = _tile_rect(i)
-            is_sel = (i == selected)
-            # 1. Background
-            pygame.draw.rect(screen, (30, 30, 50), tile)
-            # 2. Thumbnail
-            screen.blit(thumb, tile.topleft)
-            # 3. Dark strip under the label
-            strip = pygame.Rect(tile.x, tile.bottom - 22, tile.width, 22)
-            s = pygame.Surface((strip.width, strip.height), pygame.SRCALPHA)
-            s.fill((0, 0, 0, 210))
-            screen.blit(s, strip.topleft)
-            # 4. Label text on top of strip
-            label = stage_palettes.display_name(sk, pk)
-            draw_text_fit(
-                screen, small_font, label, (240, 240, 240), strip.inflate(-8, -2),
-            )
-            # 5. Border last (so it outlines everything cleanly)
-            border_color = (255, 240, 100) if is_sel else (90, 90, 120)
-            thickness = 4 if is_sel else 2
-            pygame.draw.rect(screen, border_color, tile, thickness)
-
-        # Hint
-        draw_text_fit(
-            screen, hint_font,
-            "Arrows / WASD to move    ENTER to lock in    Auto-pick when timer hits 0",
-            (200, 200, 200),
-            pygame.Rect(20, settings.WINDOW_HEIGHT - 52,
-                        settings.WINDOW_WIDTH - 40, 40),
-        )
-
+            return random.choice(combos)
+        screen.fill((8, 12, 24))
+        def text(key, value, color, rect, align="left"):
+            draw_text_fit(screen, fonts[key], value, color, pygame.Rect(rect), align=align)
+        text("small", "ARENA SELECT / 21 STAGE VARIANTS", (85, 215, 250), (48, 18, 900, 24))
+        text("title", title, (238, 242, 251), (46, 46, 1040, 55))
+        text("heading", f"{math.ceil(remaining):02}s", (255, 185, 99), (1120, 46, 110, 55), "right")
+        pygame.draw.rect(screen, (31, 44, 64), (48, 112, 1184, 3))
+        pygame.draw.rect(screen, (85, 215, 250), (48, 112, round(1184 * remaining / COUNTDOWN_SECONDS), 3))
+        sk, pk = combos[selected]
+        stages.draw(world, sk, elapsed, scroll=math.sin(elapsed * 0.25) * 0.3, palette_key=pk)
+        pygame.transform.smoothscale(world, preview.get_size(), preview)
+        screen.blit(preview, (48, 128))
+        pygame.draw.rect(screen, (85, 215, 250), (48, 128, 650, 300), 1)
+        pygame.draw.rect(screen, (16, 23, 39), (720, 128, 512, 300), border_radius=14)
+        heading, line1, line2 = descriptions[sk]
+        text("small", heading, (85, 215, 250), (748, 148, 450, 28))
+        text("heading", stage_palettes.display_name(sk, pk), (238, 242, 251), (748, 184, 450, 46))
+        text("body", line1, (170, 184, 205), (748, 242, 450, 28))
+        text("body", line2, (170, 184, 205), (748, 275, 450, 28))
+        pygame.draw.rect(screen, (33, 76, 96), confirm, border_radius=8)
+        pygame.draw.rect(screen, (85, 215, 250), confirm, 1, border_radius=8)
+        text("body", "ENTER / CLICK: LOCK IN ARENA", (238, 242, 251), confirm, "center")
+        for i, ((stage, palette), thumb) in enumerate(zip(combos, thumbnails)):
+            tile = tiles[i]
+            screen.blit(thumb, tile)
+            pygame.draw.rect(screen, (16, 23, 39), (tile.x, tile.y + 40, tile.w, 22))
+            text("small", stage_palettes.display_name(stage, palette), (238, 242, 251), (tile.x + 4, tile.y + 40, tile.w - 8, 22), "center")
+            pygame.draw.rect(screen, (85, 215, 250) if i == selected else (49, 62, 83), tile, 3 if i == selected else 1)
+        text("small", "ARROWS / WASD: BROWSE    MOUSE: PREVIEW    R: RANDOM    ENTER: CONFIRM    ESC: USE CURRENT", (155, 172, 195), (40, 661, 1200, 40), "center")
         pygame.display.flip()
-        clock.tick(settings.FPS)
+        elapsed += clock.tick(settings.FPS) / 1000.0

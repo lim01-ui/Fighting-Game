@@ -20,6 +20,9 @@ class HitSpark:
         self.life = life
         self.max_life = life
         self.particles = []
+        self.glow = pygame.Surface((96, 96), pygame.SRCALPHA)
+        for radius in range(46, 2, -4):
+            pygame.draw.circle(self.glow, (*color, 3 + (46 - radius) // 2), (48, 48), radius)
         for _ in range(count):
             angle = random.uniform(0, math.tau)
             spd = random.uniform(speed * 0.4, speed)
@@ -42,6 +45,8 @@ class HitSpark:
     def draw(self, surface):
         ratio = max(0.0, self.life / self.max_life)
         alpha = int(255 * ratio)
+        self.glow.set_alpha(int(170 * ratio * ratio))
+        surface.blit(self.glow, (int(self.x) - 48, int(self.y) - 48), special_flags=pygame.BLEND_ADD)
 
         # An expanding ring and sharp rays make heavy impacts read at a glance.
         radius = int((1.0 - ratio) * (self.speed * 4 + 14))
@@ -66,6 +71,10 @@ class HitSpark:
                     pygame.draw.line(surface, ray_color, start, end, 2)
 
         for (px, py, _vx, _vy, size) in self.particles:
+            # Velocity-aligned streaks make direction and impact speed readable.
+            end = (int(px - _vx * 2.5), int(py - _vy * 2.5))
+            streak_color = tuple(int(channel * ratio) for channel in self.color)
+            pygame.draw.line(surface, streak_color, (int(px), int(py)), end, max(1, int(size * ratio / 2)))
             # Cheap alpha: draw a smaller circle as life fades
             r = max(1, int(size * ratio))
             s = pygame.Surface((r * 2, r * 2), pygame.SRCALPHA)
@@ -98,4 +107,9 @@ class BlockSpark:
         alpha = int(200 * ratio)
         s = pygame.Surface((r * 2 + 8, r * 2 + 8), pygame.SRCALPHA)
         pygame.draw.circle(s, (140, 210, 255, alpha), (r + 4, r + 4), r, 3)
+        center = r + 4
+        points = [(center + math.cos(i * math.tau / 6) * r * 0.75,
+                   center + math.sin(i * math.tau / 6) * r * 0.75) for i in range(6)]
+        pygame.draw.polygon(s, (190, 235, 255, alpha), points, 2)
+        pygame.draw.circle(s, (170, 225, 255, alpha // 4), (center, center), max(1, r - 4))
         surface.blit(s, (int(self.x) - r - 4, int(self.y) - r - 4))

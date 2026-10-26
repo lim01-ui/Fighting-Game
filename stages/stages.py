@@ -207,6 +207,13 @@ def _draw_atmosphere(surface, stage_key, t, scroll, pal):
             )
 
     if stage_key == "neon":
+        # Rotating energy segments give the arena a distinct animated silhouette.
+        center = (size[0] // 2 - _scroll_offset(scroll, 40), settings.GROUND_Y - 120)
+        for index in range(8):
+            angle = t * 0.4 + index * math.tau / 8
+            rect = pygame.Rect(0, 0, 432, 432)
+            rect.center = center
+            pygame.draw.arc(atmosphere, (*glow_color, 110), rect, angle, angle + 0.26, 5)
         for index in range(5):
             y = int((index * 137 + t * 18) % settings.GROUND_Y)
             x = (index * 251 - _scroll_offset(scroll, 12)) % size[0]
@@ -214,6 +221,19 @@ def _draw_atmosphere(surface, stage_key, t, scroll, pal):
                 atmosphere, (*glow_color, 18),
                 (x, y), (x + 26, y - 8), 2,
             )
+    elif stage_key == "dojo":
+        for index in range(30):
+            phase = t * 1.3 + index * 1.71
+            x = int((index * 193 + t * (18 + index % 7) + math.sin(phase) * 25) % size[0])
+            y = int((index * 79 + t * (11 + index % 5)) % settings.GROUND_Y)
+            petal = (255, 178 + index % 40, 207, 115)
+            pygame.draw.ellipse(atmosphere, petal, (x, y, 7, 3 if math.sin(phase) > 0 else 5))
+    else:
+        # Warm rising embers stay behind the fighters and HUD.
+        for index in range(26):
+            x = int((index * 157 + math.sin(t * 0.7 + index) * 32) % size[0])
+            y = int(settings.GROUND_Y - ((index * 53 + t * (13 + index % 7)) % 350))
+            pygame.draw.line(atmosphere, (255, 205, 139, 80), (x, y), (x - 2, y + 5), 2)
     surface.blit(atmosphere, (0, 0))
 
 

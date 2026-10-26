@@ -14,6 +14,7 @@ from ai.bot import Bot
 from effects.hit_spark import HitSpark, BlockSpark
 from effects.screen_shake import ScreenShake
 from effects.camera_punch import CameraPunch
+from effects.footwork import Footwork
 from effects.flash import Flash
 from effects import damage_numbers
 from effects.projectiles import Projectile
@@ -302,6 +303,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
     # Rendering can precede the first update while a LAN peer is pending.
     ox, oy = 0, 0
     camera_punch = CameraPunch()
+    footwork = Footwork()
     flashes = []
     damage_numbers_list = []
     projectiles = []
@@ -891,6 +893,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             p1_health_trail = max(p1.health, p1_health_trail - 0.6)
             p2_health_trail = max(p2.health, p2_health_trail - 0.6)
             ox, oy = shake.update()
+            footwork.update((p1, p2))
 
         # DRAW world
         world = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
@@ -906,6 +909,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             world.blit(sh, (fighter.rect.centerx - (fighter.width + 20) // 2,
                             settings.GROUND_Y - 6))
 
+        footwork.draw(world)
         p1.draw(world); p2.draw(world)
         for s in sparks:
             s.draw(world)

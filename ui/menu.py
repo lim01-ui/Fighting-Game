@@ -25,23 +25,14 @@ def _draw_choices(surface, font, choices, selected):
 
 
 def run_main_menu(screen, clock):
-    title_font = pygame.font.SysFont("Arial", 62, bold=True)
-    item_font = pygame.font.SysFont("Arial", 30, bold=True)
-    subtitle_font = pygame.font.SysFont("Arial", 19, bold=True)
-    hint_font = pygame.font.SysFont("Arial", 18)
-    choices = [
-        "LOCAL VS CPU",
-        "TRAINING MODE",
-        "HOST LAN MATCH",
-        "JOIN LAN MATCH",
-        "HOW TO PLAY",
-        "OPTIONS",
-        "EXIT GAME",
-    ]
+    from ui.lobby_view import LobbyView, MODES
+    view = LobbyView()
+    choices = [mode[0] for mode in MODES]
     selected = 0
-    rows = [pygame.Rect(87, 245 + index * 49, 506, 42)
-            for index in range(len(choices))]
+    rows = view.rows
     results = ("1VBOT", "TRAINING", "LAN_HOST", "LAN_JOIN", "TUTORIAL", "SETTINGS", "EXIT")
+    elapsed = 0.0
+    dt = 1.0 / settings.FPS
 
     while True:
         for event in pygame.event.get():
@@ -76,71 +67,11 @@ def run_main_menu(screen, clock):
                         "EXIT",
                     )[selected]
 
-        screen.fill((7, 10, 23))
-        pygame.draw.rect(screen, (14, 20, 38), (0, 0, settings.WINDOW_WIDTH, 150))
-        pygame.draw.line(screen, (42, 190, 255), (0, 150), (settings.WINDOW_WIDTH, 150), 2)
-        draw_text_fit(
-            screen, title_font, "PYTHON FIGHTERS", settings.WHITE,
-            pygame.Rect(72, 36, 560, 64), align="left",
-        )
-        draw_text_fit(
-            screen, subtitle_font, "ARCADE LOBBY   /   SELECT YOUR NEXT FIGHT",
-            (105, 215, 255), pygame.Rect(78, 100, 550, 26), align="left",
-        )
-
-        left_panel = pygame.Rect(70, 190, 540, 438)
-        pygame.draw.rect(screen, (13, 20, 38), left_panel, border_radius=18)
-        pygame.draw.rect(screen, (45, 65, 98), left_panel, 2, border_radius=18)
-        section = subtitle_font.render("GAME MODES", True, (150, 170, 205))
-        screen.blit(section, (left_panel.x + 28, left_panel.y + 20))
-        for index, label in enumerate(choices):
-            row = pygame.Rect(left_panel.x + 17, left_panel.y + 55 + index * 49,
-                              left_panel.width - 34, 42)
-            if index == selected:
-                pygame.draw.rect(screen, (27, 75, 105), row, border_radius=10)
-                pygame.draw.rect(screen, (70, 205, 255), row, 2, border_radius=10)
-                color = (255, 236, 145)
-            else:
-                color = (220, 226, 242)
-            number = subtitle_font.render(f"{index + 1:02}", True, (100, 190, 225))
-            screen.blit(number, (row.x + 15, row.y + 9))
-            draw_text_fit(
-                screen, pygame.font.SysFont("Arial", 26, bold=True),
-                label, color,
-                pygame.Rect(row.x + 64, row.y + 2, row.width - 78, row.height - 4),
-                align="left",
-            )
-
-        right_panel = pygame.Rect(650, 190, 560, 438)
-        pygame.draw.rect(screen, (13, 20, 38), right_panel, border_radius=18)
-        pygame.draw.rect(screen, (45, 65, 98), right_panel, 2, border_radius=18)
-        pygame.draw.rect(screen, (22, 32, 54), (690, 260, 480, 230), border_radius=14)
-        pygame.draw.line(screen, (45, 65, 98), (930, 270), (930, 480), 2)
-        for center, color in (((815, 360), (74, 178, 255)), ((1045, 360), (255, 91, 118))):
-            pygame.draw.circle(screen, color, center, 57, 3)
-            pygame.draw.circle(screen, (35, 48, 72), center, 41)
-            pygame.draw.circle(screen, color, (center[0], center[1] - 7), 15)
-            pygame.draw.line(screen, color, (center[0], center[1] + 10),
-                             (center[0], center[1] + 42), 7)
-            pygame.draw.line(screen, color, (center[0] - 20, center[1] + 25),
-                             (center[0] + 20, center[1] + 25), 6)
-        versus = title_font.render("VS", True, (255, 228, 118))
-        screen.blit(versus, versus.get_rect(center=(930, 365)))
-        ready = item_font.render("FIGHTERS READY", True, settings.WHITE)
-        screen.blit(ready, ready.get_rect(center=(930, 535)))
-        draw_text_fit(
-            screen, subtitle_font, "LOCAL PLAY  |  TRAINING  |  DIRECT-IP LAN",
-            (150, 170, 205), pygame.Rect(670, 552, 520, 36),
-        )
-        draw_text_fit(
-            screen, hint_font,
-            "CLICK or ENTER: select    UP/DOWN or W/S: navigate    ESC: quit",
-            (185, 195, 215),
-            pygame.Rect(20, settings.WINDOW_HEIGHT - 56,
-                        settings.WINDOW_WIDTH - 40, 42),
-        )
+        view.draw(screen, selected, elapsed, dt)
         pygame.display.flip()
-        clock.tick(settings.FPS)
+        dt = clock.tick(settings.FPS) / 1000.0
+        elapsed += dt
+
 
 
 def run_tutorial(screen, clock):
