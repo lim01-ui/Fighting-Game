@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pygame
 import settings
 from characters import character_data, sprite_fighter, pixel_fighter
-from characters.player import Player, S_IDLE, S_WALK, S_GUARD, S_HITSTUN, S_BLOCKSTUN, S_KNOCKDOWN
+from characters.player import Player, S_IDLE, S_WALK, S_CROUCH, S_GUARD, S_HITSTUN, S_BLOCKSTUN, S_KNOCKDOWN
 
 
 class SpriteTests(unittest.TestCase):
@@ -52,6 +52,33 @@ class SpriteTests(unittest.TestCase):
                         surface.fill((0, 0, 0, 0))
                         player.draw(surface)
                         self.assertGreater(surface.get_bounding_rect().height, 0)
+
+    def test_crouching_shortens_sprites_without_widening_them(self):
+        surface = pygame.Surface((1280, 720), pygame.SRCALPHA)
+        for key in character_data.ROSTER_ORDER:
+            if not character_data.get(key).get('sprite_asset'):
+                continue
+            for facing in (-1, 1):
+                with self.subTest(fighter=key, facing=facing), \
+                     patch('pygame.time.get_ticks', return_value=0):
+                    player = Player(500, 350, key, settings.P1_KEYS, facing=facing)
+                    player.rect.bottom = settings.GROUND_Y
+                    surface.fill((0, 0, 0, 0))
+                    player._draw_sprite_asset(surface)
+                    standing = surface.get_bounding_rect(min_alpha=16)
+                    player.state = S_CROUCH
+                    player.is_crouching = True
+                    surface.fill((0, 0, 0, 0))
+                    player._draw_sprite_asset(surface)
+                    crouching = surface.get_bounding_rect(min_alpha=16)
+                    # Allow a few pixels of nearest-neighbor raster rounding.
+                    self.assertAlmostEqual(crouching.width, standing.width, delta=4)
+                    self.assertAlmostEqual(crouching.height,
+                                           standing.height * player.crouch_ratio, delta=4)
+                    self.assertAlmostEqual(
+                        settings.GROUND_Y - crouching.bottom,
+                        (settings.GROUND_Y - standing.bottom) * player.crouch_ratio,
+                        delta=4)
 
     def test_guard_uses_the_block_pose_and_saikyo_ultimate_uses_special(self):
         for asset in sprite_fighter.GENERATED_ASSETS + ('renegade', 'soldier'):

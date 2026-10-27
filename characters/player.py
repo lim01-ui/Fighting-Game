@@ -964,6 +964,10 @@ class Player:
         target_h = int(self.height * target_scale)
         if reference_height:
             target_h = max(1, int(image.get_height() * self.height * target_scale / reference_height))
+        elif self.is_crouching and self.state != S_ATTACK:
+            # frame_for_player already shortened the frame. Match its target
+            # height so scaling does not undo the crouch and widen the body.
+            target_h = max(1, int(target_h * self.crouch_ratio))
         size = (
             max(1, int(image.get_width() * target_h / image.get_height())),
             target_h,
