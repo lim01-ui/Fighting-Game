@@ -3,10 +3,12 @@ import os
 os.environ.setdefault('SDL_VIDEODRIVER', 'dummy')
 os.environ.setdefault('SDL_AUDIODRIVER', 'dummy')
 import unittest
+import hashlib
+import json
 from unittest.mock import patch
 import pygame
 import settings
-from characters import character_data, sprite_fighter, pixel_fighter
+from characters import character_data, sprite_fighter
 from characters.player import Player, S_IDLE, S_WALK, S_CROUCH, S_GUARD, S_HITSTUN, S_BLOCKSTUN, S_KNOCKDOWN
 
 
@@ -20,16 +22,50 @@ class SpriteTests(unittest.TestCase):
     def tearDownClass(cls):
         pygame.quit()
 
+    def test_reference_fighters_keep_their_original_sprite_packs(self):
+        expected = {'iron': 'knight', 'sable': 'swordsman', 'nova': 'wizard',
+                    'jinx': 'musketeer', 'kestrel': 'archer',
+                    'bramble': 'enchantress', 'raguel': 'raguel'}
+        for fighter, asset in expected.items():
+            self.assertEqual(character_data.get(fighter)['sprite_asset'], asset)
+            self.assertFalse(sprite_fighter.is_generated_asset(asset))
+        self.assertEqual(set(character_data.ROSTER_ORDER) - set(expected),
+                         set(sprite_fighter.GENERATED_ASSETS))
+
+    def test_original_sprite_backups_match_the_recorded_hashes(self):
+        backup = sprite_fighter.ASSET_ROOT / 'backups' / 'pre-style-rework'
+        manifest = json.loads((backup / 'manifest.json').read_text(encoding='utf-8'))
+        self.assertEqual(set(manifest['fighters']), set(sprite_fighter.GENERATED_ASSETS))
+        for relative, digest in manifest['sha256'].items():
+            if relative.lower().endswith(('.png', '.gif')):
+                with self.subTest(file=relative):
+                    self.assertEqual(hashlib.sha256((backup / relative).read_bytes()).hexdigest(),
+                                     digest)
+
+    def test_reworked_atlas_cells_are_in_bounds_and_do_not_overlap(self):
+        for asset in sprite_fighter.GENERATED_ASSETS:
+            manifest = sprite_fighter._manifest(asset)
+            image = pygame.image.load(str(sprite_fighter.ASSET_ROOT / 'style-v2' / manifest['image']))
+            cells = [pygame.Rect(rect) for pose, rect in manifest['poses'].items()
+                     if pose != 'knockdown']
+            self.assertEqual(len(cells), 12)
+            for index, rect in enumerate(cells):
+                with self.subTest(fighter=asset, cell=index):
+                    self.assertTrue(image.get_rect().contains(rect))
+                    self.assertFalse(any(rect.colliderect(other) for other in cells[index + 1:]))
+            self.assertEqual(sprite_fighter._load_frame(asset, 'idle', 0, 1).get_height(),
+                             manifest['pixel_height'])
+
     def test_generated_poses_are_nonempty_and_flip_correctly(self):
         for asset in sprite_fighter.GENERATED_ASSETS:
             manifest = sprite_fighter._manifest(asset)
             self.assertGreater(manifest['body_height'], 0)
-            for pose in ('idle', 'walk', 'block', 'jump', 'light', 'heavy', 'special', 'hit'):
+            for pose in manifest['poses']:
                 with self.subTest(asset=asset, pose=pose):
                     right = sprite_fighter._load_frame(asset, pose, 0, 1)
                     left = sprite_fighter._load_frame(asset, pose, 0, -1)
                     self.assertGreater(pygame.mask.from_surface(right).count(), 100)
-                    self.assertLess(right.get_height(), manifest['body_height'] * 1.8,
+                    self.assertLess(right.get_height(), sprite_fighter.body_height(asset) * 1.8,
                                     'Pose may include pixels from a neighboring atlas row')
                     self.assertTrue(right.get_flags() & pygame.SRCALPHA)
                     self.assertEqual(pygame.image.tostring(left, 'RGBA'),
@@ -72,7 +108,13 @@ class SpriteTests(unittest.TestCase):
                     player._draw_sprite_asset(surface)
                     crouching = surface.get_bounding_rect(min_alpha=16)
                     # Allow a few pixels of nearest-neighbor raster rounding.
-                    self.assertAlmostEqual(crouching.width, standing.width, delta=4)
+                    if sprite_fighter.is_generated_asset(player.character['sprite_asset']):
+                        # Dedicated crouch poses may spread arms/knees, but must
+                        # not be stretched to nearly twice the standing width.
+                        self.assertLessEqual(crouching.width, standing.width * 1.5)
+                        self.assertGreaterEqual(crouching.width, standing.width * 0.65)
+                    else:
+                        self.assertAlmostEqual(crouching.width, standing.width, delta=4)
                     self.assertAlmostEqual(crouching.height,
                                            standing.height * player.crouch_ratio, delta=4)
                     self.assertAlmostEqual(
@@ -80,8 +122,8 @@ class SpriteTests(unittest.TestCase):
                         (settings.GROUND_Y - standing.bottom) * player.crouch_ratio,
                         delta=4)
 
-    def test_guard_uses_the_block_pose_and_saikyo_ultimate_uses_special(self):
-        for asset in sprite_fighter.GENERATED_ASSETS + ('renegade', 'soldier'):
+    def test_guard_and_ultimate_use_matching_poses(self):
+        for asset in sprite_fighter.GENERATED_ASSETS:
             player = Player(100, 200, asset, settings.P1_KEYS)
             player.state = S_GUARD
             with patch('pygame.time.get_ticks', return_value=0):
@@ -90,9 +132,27 @@ class SpriteTests(unittest.TestCase):
             self.assertEqual(pygame.image.tostring(image, 'RGBA'), pygame.image.tostring(block, 'RGBA'))
         player = Player(100, 200, 'saikyo', settings.P1_KEYS)
         player._start_attack('ultimate')
-        with patch.object(pixel_fighter, 'get_frame', wraps=pixel_fighter.get_frame) as frame:
-            pixel_fighter.frame_for_player(player)
-        frame.assert_called_once_with(2, 2)
+        with patch.object(sprite_fighter, '_load_frame', wraps=sprite_fighter._load_frame) as frame:
+            sprite_fighter.frame_for_player('saikyo', player)
+        frame.assert_called_once_with('saikyo', 'special', 0, 1)
+
+    def test_reworked_fighters_use_walk_cycles_and_attack_phase_poses(self):
+        for asset in sprite_fighter.GENERATED_ASSETS:
+            with self.subTest(fighter=asset):
+                player = Player(100, 200, asset, settings.P1_KEYS)
+                self.assertEqual(player.character['sprite_asset'], asset)
+                self.assertFalse(player.character.get('sprite_sheet'))
+                walk = [sprite_fighter._load_frame(asset, 'walk', i, 1) for i in range(3)]
+                self.assertIs(walk[0], walk[2])
+                self.assertNotEqual(pygame.image.tobytes(walk[0], 'RGBA'),
+                                    pygame.image.tobytes(walk[1], 'RGBA'))
+                for attack in ('light', 'heavy'):
+                    player._start_attack(attack)
+                    windup = sprite_fighter.frame_for_player(asset, player)
+                    player.current_attack.frame = player.current_attack.data.startup
+                    active = sprite_fighter.frame_for_player(asset, player)
+                    self.assertIs(active, sprite_fighter._load_frame(asset, attack, 1, 1))
+                    self.assertIsNot(windup, active)
 
 
 if __name__ == '__main__':

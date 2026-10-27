@@ -951,7 +951,8 @@ class Player:
         target_scale = 0.9 * sprite_scale
         # Only procedural fallback fighters need artificial squashing during attacks;
         # sprite characters with dedicated attack animations remain at consistent size.
-        if self.character.get("sprite_asset") in ("soldier", "renegade"):
+        if (not sprite_fighter.is_generated_asset(self.character.get("sprite_asset"))
+                and self.character.get("sprite_asset") in ("soldier", "renegade")):
             if self.state == S_ATTACK and self.current_attack is not None:
                 name = self.current_attack.data.name
                 if name.startswith("crouch_"):

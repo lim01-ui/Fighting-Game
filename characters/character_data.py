@@ -355,7 +355,7 @@ ROSTER = {
         "key": "saikyo",
         "name": "SAIKYO",
         "archetype": "Pixel Brawler",
-        "sprite_sheet": True,
+        "sprite_asset": "saikyo",
         "special_behavior": {'type': 'slash', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
         "weapon": "fists",
         "weapon_color": (245, 220, 170),
@@ -478,7 +478,6 @@ ROSTER = {
         "name": "MINAMOTO",
         "archetype": "Archer",
         "sprite_asset": "minamoto",
-        "sprite_scale": 1.28,
         "special_behavior": {
             'type': 'projectile',
             'dash': 0,

@@ -21,10 +21,10 @@ training mode, or connect to another player over a local network.
 
 ### Fighting and match features
 
-- **15 fighters**, each with their own archetype, stats, weapon, and signature
+- **17 fighters**, each with their own archetype, stats, weapon, and signature
   special/ultimate behavior:
-  Rook, Vex, Golem, Sable, Nova, Iron, Jinx, Kestrel, Bramble, Ash, Ryoko,
-  Volt, Saikyo, Renegade, and Soldier.
+  Rook, Vex, Golem, Sable, Nova, Iron, Jinx, Kestrel, Bramble, Raguel, Sanya,
+  Choom, Saikyo, Renegade, Soldier, Chib, and Minamoto.
 - **Different attack options:** light and heavy attacks, crouching and aerial
   attacks, character-specific special moves, and a unique ultimate for every
   fighter.
@@ -41,9 +41,9 @@ training mode, or connect to another player over a local network.
   and victory poses.
 - **Fighter animation:** idle breathing, attack lunges, guard poses, and
   block/parry effects.
-- **Sprite artwork:** Rook, Vex, and Golem use matching generated pose sheets;
-  Saikyo, Renegade, and Soldier use imported pixel sprites. The remaining nine
-  fighters currently use procedural artwork. See the
+- **Sprite artwork:** all fighters use pixel sprites. Ten fighters have chibi
+  replacement atlases styled after Iron, Sable, Nova, Jinx, Kestrel, Bramble,
+  and Raguel. The original artwork is preserved in a dedicated backup. See the
   [sprite audit](assets/characters/SPRITE_AUDIT.md) for coverage and prompts.
 
 ### Stages, presentation, and settings

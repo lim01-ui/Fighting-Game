@@ -162,7 +162,10 @@ for _asset, _folder, _body_height, _heavy, _special in (
 _sheets = {}
 _frames = {}
 _manifests = {}
-GENERATED_ASSETS = ("rook", "vex", "golem")
+GENERATED_ASSETS = (
+    "rook", "vex", "golem", "sanya", "choom", "saikyo", "renegade",
+    "soldier", "chib", "minamoto",
+)
 
 
 def is_generated_asset(asset):
@@ -171,14 +174,14 @@ def is_generated_asset(asset):
 
 def _manifest(asset):
     if asset not in _manifests:
-        path = ASSET_ROOT / asset / "fighter-v1.json"
+        path = ASSET_ROOT / "style-v2" / f"{asset}.json"
         _manifests[asset] = json.loads(path.read_text(encoding="utf-8"))
     return _manifests[asset]
 
 
 def body_height(asset):
     """Use one scale for a generated fighter's body, weapons, and effects."""
-    return (_manifest(asset)["body_height"] if is_generated_asset(asset)
+    return (_manifest(asset)["pixel_height"] if is_generated_asset(asset)
             else _SPECS.get(asset, {}).get("body_height"))
 
 
@@ -187,14 +190,16 @@ def foot_padding_ratio(asset):
     return _SPECS.get(asset, {}).get("foot_padding_ratio", 0.0)
 
 
-def _generated_frame(asset, animation, facing):
+def _generated_frame(asset, animation, frame_index, facing):
     manifest = _manifest(asset)
-    pose = manifest["poses"].get(animation, manifest["poses"]["idle"])
-    key = (asset, animation, facing)
+    sequence = manifest.get("animations", {}).get(animation, [animation])
+    pose_name = sequence[frame_index % len(sequence)]
+    pose = manifest["poses"].get(pose_name, manifest["poses"]["idle"])
+    key = (asset, pose_name, facing)
     if key not in _frames:
         if asset not in _sheets:
             _sheets[asset] = pygame.image.load(
-                str(ASSET_ROOT / asset / manifest["image"])
+                str(ASSET_ROOT / "style-v2" / manifest["image"])
             ).convert_alpha()
         frame = _sheets[asset].subsurface(pygame.Rect(pose)).copy()
         # Remove atlas padding without rescaling the character between poses.
@@ -202,17 +207,23 @@ def _generated_frame(asset, animation, facing):
         if not bounds.width or not bounds.height:
             raise ValueError(f"Empty sprite pose: {asset}/{animation}")
         frame = frame.subsurface(bounds).copy()
+        # Match the reference packs' native pixel density before display scaling.
+        scale = manifest["pixel_height"] / manifest["body_height"]
+        frame = pygame.transform.scale(frame, (
+            max(1, round(frame.get_width() * scale)),
+            max(1, round(frame.get_height() * scale)),
+        ))
+        if animation == "knockdown":
+            frame = pygame.transform.rotate(frame, 80)
         if facing < 0:
             frame = pygame.transform.flip(frame, True, False)
-        if animation == "knockdown":
-            frame = pygame.transform.rotate(frame, 80 * facing)
         _frames[key] = frame
     return _frames[key]
 
 
 def _load_frame(asset, animation, frame_index, facing):
     if is_generated_asset(asset):
-        return _generated_frame(asset, animation, facing)
+        return _generated_frame(asset, animation, frame_index, facing)
     spec = _SPECS[asset]
     animation_specs = spec["animations"][animation]
     direction = "EAST" if facing >= 0 else "WEST"
@@ -263,9 +274,12 @@ def frame_for_player(asset, player):
             else "heavy" if attack_name.endswith("heavy")
             else "special"
         )
-        if attack_name in _SPECS.get(asset, {}).get("animations", {}):
+        if not is_generated_asset(asset) and attack_name in _SPECS.get(asset, {}).get("animations", {}):
             animation = attack_name
-        frame_index = player.current_attack.frame // 3
+        if is_generated_asset(asset):
+            frame_index = 0 if player.current_attack.in_startup else 1
+        else:
+            frame_index = player.current_attack.frame // 3
     elif not player.on_ground:
         animation = "jump"
         # Progress through jump frames based on vertical velocity trajectory:
@@ -290,13 +304,18 @@ def frame_for_player(asset, player):
         animation = "idle"
         frame_index = pygame.time.get_ticks() // 180
 
+    if (is_generated_asset(asset) and player.is_crouching and player.on_ground
+            and player.state not in (S_ATTACK, S_HITSTUN, S_KNOCKDOWN)):
+        animation = "crouch"
     frame = _load_frame(asset, animation, frame_index, player.facing)
     if player.is_crouching and player.state != S_ATTACK:
+        height = (round(body_height(asset) * player.crouch_ratio)
+                  if animation == "crouch" else int(frame.get_height() * player.crouch_ratio))
         frame = pygame.transform.scale(
-            frame, (frame.get_width(), max(1, int(frame.get_height() * player.crouch_ratio)))
+            frame, (frame.get_width(), max(1, height))
         )
     if player.state == S_ATTACK and player.current_attack is not None:
-        if asset in ("soldier", "renegade"):
+        if not is_generated_asset(asset) and asset in ("soldier", "renegade"):
             attack_name = player.current_attack.data.name
             progress = player.current_attack.frame / max(
                 1, player.current_attack.total - 1

@@ -1,69 +1,54 @@
 # Fighter sprite audit
 
-Reviewed 2026-10-23. Initially, 12 fighters had no sprite sheets and rendered
-procedurally. Only Saikyo, Renegade, and Soldier had imported sprite sets.
-Rook also had a portrait depicting a different outfit and face from the new
-sword fighter. Selection and VS now use the generated sprite preview for
-generated fighters, keeping their appearance consistent with combat.
+Updated 2026-10-27. All 17 fighters use pixel sprites. The style rework replaces
+only the ten fighters outside the requested reference group.
 
-## Current coverage
+## Reference fighters: unchanged
 
-| Fighter | Combat artwork | Status |
-| --- | --- | --- |
-| Rook | Blue/gold swordsman | Generated v1 integrated |
-| Vex | Red/orange dual-dagger fighter | Generated v1 integrated |
-| Golem | Stone/bronze hammer fighter | Generated v1 integrated |
-| Sable | Procedural whip fighter | Needs sprite sheet |
-| Nova | Procedural orb fighter | Needs sprite sheet |
-| Iron | Procedural shield fighter | Needs sprite sheet |
-| Jinx | Procedural knife fighter | Needs sprite sheet |
-| Kestrel | Procedural spear fighter | Needs sprite sheet |
-| Bramble | Procedural club fighter | Needs sprite sheet |
-| Ash | Procedural katana fighter | Needs sprite sheet |
-| Ryoko | Procedural gauntlet fighter | Needs sprite sheet |
-| Volt | Procedural baton fighter | Needs sprite sheet |
-| Saikyo | Imported CC0 pixel art | Guard and ultimate pose selection fixed |
-| Renegade | Imported CC0 pixel art | Guard and knockdown scaling fixed |
-| Soldier | Imported CC0 pixel art | Guard and knockdown scaling fixed |
+| Fighter | Original pack |
+| --- | --- |
+| Iron | Knight |
+| Sable | Swordsman |
+| Nova | Wizard |
+| Jinx | Musketeer |
+| Kestrel | Archer |
+| Bramble | Enchantress |
+| Raguel | Battle_maid |
 
-The three imported sets use different pixel densities and art styles from the
-generated set. Their source artwork remains available and its existing CC0
-documentation is in README.txt and saikyo/README.txt.
+## Replacement fighters
 
-## First generated batch
+Rook, Vex, Golem, Sanya, Choom, Saikyo, Renegade, Soldier, Chib and Minamoto
+use the [style-v2 atlases](style-v2/README.md). Each has twelve poses, a two-step
+walk cycle, light/heavy windup and strike poses, guard, jump, crouch, special and
+hurt artwork. Knockdown rotates the hurt pose; ultimate uses the special pose.
+These are compact pose atlases rather than full high-frame-count animations.
 
-Generated with the built-in image_gen tool. Each transparent PNG contains
-eight poses: idle, walk, block, jump, light, heavy, special, and hit. These are
-single poses per state, not full multi-frame walk or attack cycles. Existing
-bobbing, attack lunges, crouch/aerial transforms, and mirrored facing remain;
-knockdown uses a rotated hit pose and ultimate uses the special pose.
+The built-in image_gen tool generated every replacement sheet separately,
+using the original Knight/Swordsman sprites and the simplified new Rook sheet
+as style references. [generation.json](style-v2/generation.json) records the
+exact final prompts and provenance. Each PNG has a matching JSON manifest
+with measured source rectangles and a common 72-pixel native body height.
 
-| Fighter | Sheet | Frame manifest | Exact generation and revision prompts |
-| --- | --- | --- | --- |
-| Rook | [PNG](rook/fighter-v1.png) | [JSON](rook/fighter-v1.json) | [Prompts](rook/fighter-v1.prompt.json) |
-| Vex | [PNG](vex/fighter-v1.png) | [JSON](vex/fighter-v1.json) | [Prompts](vex/fighter-v1.prompt.json) |
-| Golem | [PNG](golem/fighter-v1.png) | [JSON](golem/fighter-v1.json) | [Prompts](golem/fighter-v1.prompt.json) |
+The loader preserves body scale between poses and aligns light/heavy strike
+poses with active attack frames. Crouching uses its own pose with the existing
+hurtbox height ratio. Character select and VS use these same sprites so old
+portraits cannot conflict with the new combat artwork. Gameplay stats, combat
+rules, keys and projectile behavior are unchanged.
 
-Manifests contain source-pixel rectangles and a reference body height. The
-loader trims transparent padding, flips facing, and uses one body scale per
-fighter so large weapons/effects do not shrink the body. Rectangles were
-checked against the actual output dimensions rather than assuming generated
-images exactly match the requested dimensions or grid.
+## Original artwork and restoration
 
-## Continuing the batch
-
-Use Rook's final sheet as the style reference. Keep each remaining fighter's
-existing weapon, palette, and silhouette from characters/character_data.py.
-Generate each sheet separately with transparent alpha and ample space between
-all poses. Inspect the actual output before writing its manifest, particularly
-weapon tips, effects, and the gap between atlas rows. Save the exact prompts.
-Add the fighter to GENERATED_ASSETS in characters/sprite_fighter.py and set
-its roster sprite_asset to its key once the PNG and manifest are ready.
+All original source folders remain in place. An additional independent copy
+of the ten replaced fighters is in
+[backups/pre-style-rework](backups/pre-style-rework/README.md). Its manifest
+records the original roster entries, loader specifications, source commit and
+SHA-256 file hashes. Source attribution files, old generated prompts, atlas
+manifests and loader snapshots are included.
 
 ## Verification
 
-Run `python -m unittest discover -s tests -v`. Sprite checks render all 15
-fighters in both directions, all combat states, and all attack variants.
-Generated poses are checked for transparency, populated frames, facing
-flips, and accidental inclusion of another atlas row. Selection, training,
-and a contact sheet of all 24 generated poses were also rendered and inspected.
+Run `python -m unittest discover -s tests -v` from the repository root. Sprite
+checks cover all 17 fighters, both facing directions, all combat states and
+attack variants, populated transparent frames, atlas bounds and cell overlap,
+walk cycles, attack-phase selection, crouching proportions, reference fighter
+mappings and original sprite backup hashes. Visual checks compare the full
+roster and individual pose sheets and render the selection, VS and fight UI.

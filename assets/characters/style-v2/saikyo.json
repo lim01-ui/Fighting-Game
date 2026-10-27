@@ -1,0 +1,103 @@
+{
+  "image": "saikyo.png",
+  "body_height": 241,
+  "pixel_height": 72,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      362,
+      400
+    ],
+    "step_left": [
+      362,
+      0,
+      362,
+      400
+    ],
+    "step_right": [
+      724,
+      0,
+      362,
+      400
+    ],
+    "block": [
+      1086,
+      0,
+      360,
+      400
+    ],
+    "jump": [
+      0,
+      400,
+      362,
+      320
+    ],
+    "crouch": [
+      362,
+      400,
+      362,
+      320
+    ],
+    "light_start": [
+      724,
+      400,
+      362,
+      320
+    ],
+    "light": [
+      1086,
+      400,
+      360,
+      320
+    ],
+    "heavy_start": [
+      0,
+      720,
+      362,
+      367
+    ],
+    "heavy": [
+      362,
+      720,
+      362,
+      367
+    ],
+    "special": [
+      724,
+      720,
+      362,
+      367
+    ],
+    "hit": [
+      1086,
+      720,
+      360,
+      367
+    ],
+    "knockdown": [
+      1086,
+      720,
+      360,
+      367
+    ]
+  },
+  "animations": {
+    "walk": [
+      "step_left",
+      "step_right"
+    ],
+    "run": [
+      "step_left",
+      "step_right"
+    ],
+    "light": [
+      "light_start",
+      "light"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy"
+    ]
+  }
+}
