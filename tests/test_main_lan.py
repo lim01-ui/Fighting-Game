@@ -36,13 +36,17 @@ class LanRenderingTests(unittest.TestCase):
 
 
 class JoinSetupTests(unittest.TestCase):
-    def run_join(self, final_fighter):
+    def run_join(self, final_fighter, host_protocol=None, final_protocol=None):
         peer = Mock()
         host_choice = {
             'role': 'host', 'protocol': lan.PROTOCOL_VERSION,
             'p1_character': 'rook', 'stage_key': 'sunset', 'palette_key': 'classic',
         }
         final_setup = {**host_choice, 'p2_character': final_fighter}
+        if host_protocol is not None:
+            host_choice['protocol'] = host_protocol
+        if final_protocol is not None:
+            final_setup['protocol'] = final_protocol
         with ExitStack() as stack:
             stack.enter_context(patch.object(main.preferences, 'load'))
             stack.enter_context(patch('audio.sound_fx.init'))
@@ -72,6 +76,14 @@ class JoinSetupTests(unittest.TestCase):
         fight, error = self.run_join('golem')
         fight.assert_not_called()
         self.assertIn('does not match your fighter', error.call_args.args[3])
+
+    def test_previous_combat_protocol_is_rejected_before_match_start(self):
+        for packet in ('host_protocol', 'final_protocol'):
+            with self.subTest(packet=packet):
+                fight, error = self.run_join('vex', **{packet: 3})
+                fight.assert_not_called()
+                error.assert_called_once()
+                self.assertIn('invalid', error.call_args.args[3])
 
 
 if __name__ == '__main__':
