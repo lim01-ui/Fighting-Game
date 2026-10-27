@@ -164,7 +164,7 @@ _frames = {}
 _manifests = {}
 GENERATED_ASSETS = (
     "rook", "vex", "golem", "sanya", "choom", "saikyo", "renegade",
-    "soldier", "chib", "minamoto",
+    "soldier", "chib", "minamoto", "raguel",
 )
 
 
@@ -187,6 +187,8 @@ def body_height(asset):
 
 def foot_padding_ratio(asset):
     """Transparent space below the foot baseline in an imported frame."""
+    if is_generated_asset(asset):
+        return 0.0
     return _SPECS.get(asset, {}).get("foot_padding_ratio", 0.0)
 
 
@@ -372,7 +374,7 @@ def preview_frame(asset, facing=1):
     frame = _load_frame(
         asset, "idle", pygame.time.get_ticks() // 180, facing
     )
-    if _SPECS.get(asset, {}).get("trim_preview"):
+    if not is_generated_asset(asset) and _SPECS.get(asset, {}).get("trim_preview"):
         return frame.subsurface(frame.get_bounding_rect(min_alpha=16)).copy()
     return frame
 

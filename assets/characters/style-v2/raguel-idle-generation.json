@@ -1,0 +1,6 @@
+{
+  "tool": "built-in image_gen",
+  "prompt": "Use case: style-transfer. Create a four-frame idle breathing sprite strip for Raguel using the supplied Raguel action atlas as strict character identity and rendering reference. Use the FIRST idle pose only: blonde chibi maid, white headband, white apron over navy dress, navy bow/cape behind hair, blue eyes, dark shoes, silver-blue sword held horizontally to the right. Exactly four whole-body sprites arranged in one evenly spaced horizontal row, each isolated in equal-width cells with large transparent gutters. All face right, all feet on the identical baseline, all heads same size, all bodies same size. Subtle but visible breathing frames: neutral, chest/hair slightly raised, inhale peak with tiny head/hair/torso lift, exhale with slight bow/skirt relaxation. Legs and sword grip stay at rest. Preserve style and head-to-body ratio of reference, large expressive head occupying about45% height, compact chibi body. Crisp pixel-art edges and two-tone shading. No labels no text no ground shadows, real transparent background. Never output duplicate frames; differences must be visible at game sprite size. No attack effects.",
+  "reference": "raguel.png",
+  "output": "raguel-idle.png"
+}

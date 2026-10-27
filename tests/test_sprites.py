@@ -26,7 +26,7 @@ class SpriteTests(unittest.TestCase):
     def test_reference_fighters_keep_their_original_sprite_packs(self):
         expected = {'iron': 'knight', 'sable': 'swordsman', 'nova': 'wizard',
                     'jinx': 'musketeer', 'kestrel': 'archer',
-                    'bramble': 'enchantress', 'raguel': 'raguel'}
+                    'bramble': 'enchantress'}
         for fighter, asset in expected.items():
             self.assertEqual(character_data.get(fighter)['sprite_asset'], asset)
             self.assertFalse(sprite_fighter.is_generated_asset(asset))
@@ -34,14 +34,17 @@ class SpriteTests(unittest.TestCase):
                          set(sprite_fighter.GENERATED_ASSETS))
 
     def test_original_sprite_backups_match_the_recorded_hashes(self):
-        backup = sprite_fighter.ASSET_ROOT / 'backups' / 'pre-style-rework'
-        manifest = json.loads((backup / 'manifest.json').read_text(encoding='utf-8'))
-        self.assertEqual(set(manifest['fighters']), set(sprite_fighter.GENERATED_ASSETS))
-        for relative, digest in manifest['sha256'].items():
-            if relative.lower().endswith(('.png', '.gif')):
-                with self.subTest(file=relative):
-                    self.assertEqual(hashlib.sha256((backup / relative).read_bytes()).hexdigest(),
-                                     digest)
+        fighters = set()
+        for directory in ('pre-style-rework', 'pre-raguel-rework'):
+            backup = sprite_fighter.ASSET_ROOT / 'backups' / directory
+            manifest = json.loads((backup / 'manifest.json').read_text(encoding='utf-8'))
+            fighters.update(manifest['fighters'])
+            for relative, digest in manifest['sha256'].items():
+                if relative.lower().endswith(('.png', '.gif')):
+                    with self.subTest(file=relative):
+                        self.assertEqual(hashlib.sha256((backup / relative).read_bytes()).hexdigest(),
+                                         digest)
+        self.assertEqual(fighters, set(sprite_fighter.GENERATED_ASSETS))
 
     def test_reworked_atlas_cells_are_in_bounds_and_do_not_overlap(self):
         for asset in sprite_fighter.GENERATED_ASSETS:

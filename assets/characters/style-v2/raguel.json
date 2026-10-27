@@ -1,0 +1,133 @@
+{
+  "image": "raguel.png",
+  "body_height": 237,
+  "pixel_height": 72,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      390,
+      380
+    ],
+    "step_left": [
+      390,
+      0,
+      360,
+      380
+    ],
+    "step_right": [
+      750,
+      0,
+      370,
+      380
+    ],
+    "block": [
+      1120,
+      0,
+      326,
+      380
+    ],
+    "jump": [
+      0,
+      380,
+      380,
+      355
+    ],
+    "crouch": [
+      380,
+      380,
+      355,
+      355
+    ],
+    "light_start": [
+      735,
+      380,
+      345,
+      355
+    ],
+    "light": [
+      1080,
+      380,
+      366,
+      355
+    ],
+    "heavy_start": [
+      0,
+      735,
+      370,
+      352
+    ],
+    "heavy": [
+      370,
+      735,
+      374,
+      352
+    ],
+    "special": [
+      744,
+      735,
+      380,
+      352
+    ],
+    "hit": [
+      1124,
+      735,
+      322,
+      352
+    ],
+    "knockdown": [
+      1124,
+      735,
+      322,
+      352
+    ]
+  },
+  "animations": {
+    "walk": [
+      "step_left",
+      "step_right"
+    ],
+    "run": [
+      "step_left",
+      "step_right"
+    ],
+    "light": [
+      "light_start",
+      "light"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy"
+    ]
+  },
+  "idle_animation": {
+    "image": "raguel-idle.png",
+    "body_height": 410,
+    "frames": [
+      [
+        80,
+        191,
+        426,
+        410
+      ],
+      [
+        635,
+        177,
+        433,
+        424
+      ],
+      [
+        1164,
+        171,
+        438,
+        430
+      ],
+      [
+        1701,
+        205,
+        431,
+        396
+      ]
+    ]
+  }
+}

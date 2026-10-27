@@ -1,5 +1,5 @@
 import pygame
-from ui import retro
+from ui import retro, theme
 import settings
 from audio import sound_fx, preferences
 from ui.text_layout import draw_text_fit
@@ -17,7 +17,7 @@ def _draw_choices(surface, font, choices, selected):
     start_y = 260
     gap = 70
     for i, label in enumerate(choices):
-        color = (255, 240, 120) if i == selected else settings.WHITE
+        color = theme.GOLD if i == selected else settings.WHITE
         draw_text_fit(
             surface, font, label, color,
             pygame.Rect(30, start_y + i * gap - font.get_height() // 2,
@@ -133,8 +133,8 @@ def run_tutorial(screen, clock):
                 sound_fx.play("menu_confirm")
                 return "TRAINING"
 
-        screen.fill((7, 10, 23))
-        pygame.draw.rect(screen, (14, 20, 38), (0, 0, settings.WINDOW_WIDTH, 150))
+        theme.background(screen, shade=130)
+        pygame.draw.rect(screen, theme.PANEL, (0, 0, settings.WINDOW_WIDTH, 150))
         pygame.draw.line(screen, (42, 190, 255), (0, 150),
                          (settings.WINDOW_WIDTH, 150), 2)
         title = title_font.render("FIGHTER FIELD GUIDE", True, settings.WHITE)
@@ -144,11 +144,11 @@ def run_tutorial(screen, clock):
         )
 
         panel = pygame.Rect(150, 195, settings.WINDOW_WIDTH - 300, 380)
-        pygame.draw.rect(screen, (13, 20, 38), panel, border_radius=0)
+        pygame.draw.rect(screen, theme.PANEL, panel, border_radius=0)
         pygame.draw.rect(screen, (45, 65, 98), panel, 2, border_radius=0)
         heading, *lines = pages[page]
         draw_text_fit(
-            screen, heading_font, heading, (255, 230, 125),
+            screen, heading_font, heading, theme.GOLD,
             pygame.Rect(panel.x + 24, panel.y + 32, panel.width - 48, 60),
         )
         for index, text in enumerate(lines):
@@ -187,6 +187,7 @@ def run_tutorial(screen, clock):
             (175, 190, 215),
             pygame.Rect(20, 690, settings.WINDOW_WIDTH - 40, 26),
         )
+        theme.footer(screen, f"PAGE {page + 1}/{len(pages)}   LEFT / RIGHT: BROWSE   ENTER: TRAINING   ESC: BACK")
         retro.present(screen)
         clock.tick(settings.FPS)
 
@@ -216,16 +217,18 @@ def run_difficulty_menu(screen, clock):
                     sound_fx.play("menu_confirm")
                     return choices[selected]
 
-        screen.fill((20, 20, 40))
+        theme.background(screen, shade=130)
+        theme.panel(screen, (310, 220, 660, 235))
         _draw_title(screen, title_font, "SELECT DIFFICULTY", 150)
         _draw_choices(screen, item_font, choices, selected)
         draw_text_fit(
             screen, hint_font,
             "Up/Down to move   Enter to confirm   ESC to go back",
-            (200, 200, 200),
+            theme.PALE,
             pygame.Rect(20, settings.WINDOW_HEIGHT - 58,
                         settings.WINDOW_WIDTH - 40, 38),
             align="left",
         )
+        theme.footer(screen, "UP / DOWN: SELECT     ENTER: CONFIRM     ESC: BACK")
         retro.present(screen)
         clock.tick(settings.FPS)

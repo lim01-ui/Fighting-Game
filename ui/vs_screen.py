@@ -15,7 +15,7 @@ Returns "start" when the player presses Enter/Space, or None on ESC.
 
 import math
 import pygame
-from ui import retro
+from ui import retro, theme
 import settings
 from stages import stages
 from characters import character_data
@@ -52,7 +52,7 @@ def _draw_side(surface, side_rect, character, t, facing, side):
     portrait = (None if sprite_fighter.is_generated_asset(character.get("sprite_asset"))
                 else portrait_loader.load_portrait(character["key"]))
     inner = side_rect.inflate(-40, -40)
-    pygame.draw.rect(surface, (25, 25, 45), inner)
+    pygame.draw.rect(surface, theme.PANEL, inner)
     pygame.draw.rect(surface, character["colors"]["accent"], inner, 3)
 
     if portrait is not None:
@@ -128,12 +128,7 @@ def run_vs_screen(screen, clock, p1_key, p2_key,
                                  side_y, side_w, side_h)
 
         # Background
-        screen.fill((10, 10, 24))
-        for y in range(0, settings.WINDOW_HEIGHT, 6):
-            shade = 10 + int(y * 0.03)
-            pygame.draw.rect(screen, (shade, shade // 2, shade + 20),
-                             (0, y, settings.WINDOW_WIDTH, 6))
-
+        theme.background(screen, shade=130)
         # Slide-in: first 30 frames
         p = easing.ease_out_cubic(min(1.0, frame / 30))
         offset = int((1.0 - p) * 400)
@@ -145,8 +140,8 @@ def run_vs_screen(screen, clock, p1_key, p2_key,
 
         # Player labels above portraits
         for (label, rect, color) in (
-            (p1_label, left_pos, (255, 240, 120)),
-            (p2_label, right_pos, (255, 240, 120)),
+            (p1_label, left_pos, theme.GOLD),
+            (p2_label, right_pos, theme.GOLD),
         ):
             label_rect = pygame.Rect(
                 rect.left + 8, rect.top - 58, rect.width - 16, 50
@@ -191,5 +186,6 @@ def run_vs_screen(screen, clock, p1_key, p2_key,
                 alpha=alpha,
             )
 
+        theme.footer(screen, "ENTER / SPACE: BEGIN MATCH     ESC: BACK")
         retro.present(screen)
         clock.tick(settings.FPS)

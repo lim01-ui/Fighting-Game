@@ -1,8 +1,13 @@
 # Chibi fighter replacement atlases
 
 Rook, Vex, Golem, Sanya, Choom, Saikyo, Renegade, Soldier, Chib and Minamoto
-use these new sheets. Iron, Sable, Nova, Jinx, Kestrel, Bramble and Raguel
+use these new sheets. Iron, Sable, Nova, Jinx, Kestrel and Bramble
 retain their original artwork and loader specifications.
+
+Raguel now uses `raguel.png` and `raguel.json` to match the roster's chibi
+proportions, 72-pixel reference height, and action-pose rendering. The original
+Battle_maid strips remain available. Generation details and the exact prompt
+are recorded in `raguel-generation.json`.
 
 The built-in `image_gen` tool generated the transparent PNGs. Exact prompts,
 reference paths and generation provenance are recorded in `generation.json`.

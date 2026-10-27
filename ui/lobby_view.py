@@ -1,10 +1,9 @@
 """Presentation for the main arcade lobby."""
 import math
 import pygame
-from ui import retro
+from ui import retro, theme
 import settings
-from characters.player import Player
-from stages import stages
+from characters import sprite_fighter
 from ui.text_layout import draw_text_fit
 
 
@@ -21,93 +20,50 @@ MODES = (
 
 class LobbyView:
     def __init__(self):
-        self.fonts = {
-            'title': retro.font('Arial', 60, bold=True),
-            'heading': retro.font('Arial', 32, bold=True),
-            'item': retro.font('Arial', 24, bold=True),
-            'body': retro.font('Arial', 19),
-            'small': retro.font('Arial', 15, bold=True),
-        }
-        # One set of rectangles drives drawing and mouse hit testing.
+        # Shared drawing/hit rectangles preserve keyboard and mouse navigation.
         self.rows = [pygame.Rect(87, 245 + i * 49, 506, 42) for i in range(len(MODES))]
-        self.background = pygame.Surface((1280, 720))
-        self.background.fill(retro.INK)
-        for y in range(0, 720, 40):
-            pygame.draw.line(self.background, (40, 24, 64), (0, y), (1280, y), 2)
-        for x in range(0, 1280, 40):
-            pygame.draw.line(self.background, (40, 24, 64), (x, 0), (x, 720), 2)
-        for index in range(48):
-            x, y = (index * 173 + 18) % 1280, (index * 97 + 10) % 720
-            pygame.draw.rect(self.background, (104, 80, 136), (x, y, 4, 4))
-        self.arena = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
-        stages.draw(self.arena, 'sunset', 0, palette_key='classic')
-        self.world = self.arena.copy()
-        self.preview = pygame.Surface((520, 218))
-        self.fighters = (
-            Player(390, settings.GROUND_Y - 150, 'rook', settings.P1_KEYS, facing=1),
-            Player(800, settings.GROUND_Y - 150, 'vex', settings.P2_KEYS, facing=-1),
-        )
-        self.animation_accumulator = 0.0
-        self.highlight_y = float(self.rows[0].y)
+        self.fonts = {name: retro.font(size=size) for name, size in (
+            ('heading', 29), ('item', 25), ('body', 18), ('small', 15))}
 
     def text(self, surface, font, text, color, rect, align='left'):
         draw_text_fit(surface, self.fonts[font], text, color, pygame.Rect(rect), align=align)
 
     def draw(self, screen, selected, elapsed, dt):
-        cyan, white, muted = retro.CYAN, (248, 240, 224), (168, 152, 192)
-        accent = retro.PINK if selected == 6 else retro.GOLD
-        screen.blit(self.background, (0, 0))
-        pygame.draw.rect(screen, accent, (70, 47, 5, 82), border_radius=0)
-        self.text(screen, 'small', '2D ARCADE / READY PLAYER ONE', accent, (94, 31, 600, 24))
-        self.text(screen, 'title', 'PYTHON FIGHTERS', retro.PINK, (94, 59, 780, 72))
-        self.text(screen, 'title', 'PYTHON FIGHTERS', white, (90, 55, 780, 72))
-        self.text(screen, 'body', 'SELECT YOUR MODE. PRESS START. FIGHT!', cyan, (96, 131, 760, 28))
-        pygame.draw.circle(screen, cyan, (1090, 77), 4 + int(math.sin(elapsed * 2) > 0))
-        self.text(screen, 'small', 'ARCADE LOBBY', muted, (1105, 65, 140, 26))
-        pygame.draw.line(screen, (45, 57, 79), (70, 178), (1210, 178))
-
-        pygame.draw.rect(screen, (14, 21, 36), (70, 190, 540, 438), border_radius=0)
-        self.text(screen, 'small', 'SELECT GAME MODE', muted, (99, 207, 350, 24))
-        self.text(screen, 'small', f'{selected + 1:02} / 07', accent, (510, 207, 70, 24), 'right')
-        self.highlight_y += (self.rows[selected].y - self.highlight_y) * min(1.0, dt * 18)
-        trail = pygame.Rect(87, round(self.highlight_y), 506, 42)
-        pygame.draw.rect(screen, (23, 43, 62), trail, border_radius=0)
+        theme.background(screen, elapsed, shade=35)
+        theme.logo(screen, elapsed, y=12)
+        self.text(screen, 'small', 'NIGHT CITY / ARCADE', theme.PALE, (440, 207, 400, 24), 'center')
         for index, row in enumerate(self.rows):
             active = index == selected
             if active:
-                pygame.draw.rect(screen, (30, 61, 80), row, border_radius=0)
-                pygame.draw.rect(screen, accent, row, 1, border_radius=0)
-                pygame.draw.rect(screen, accent, (row.x, row.y + 9, 3, 24), border_radius=0)
-            self.text(screen, 'small', f'{index + 1:02}', accent if active else (84, 105, 131), (row.x + 16, row.y + 8, 32, 26))
-            self.text(screen, 'item', MODES[index][0], white if active else muted, (row.x + 62, row.y + 3, 390, 36))
-            if active:
-                self.text(screen, 'item', '>', accent, (row.right - 34, row.y + 3, 22, 36))
+                backing = pygame.Surface(row.size, pygame.SRCALPHA)
+                backing.fill((*theme.NAVY, 160))
+                screen.blit(backing, row)
+                pulse = 4 + round(math.sin(elapsed * 5) * 3)
+                self.text(screen, 'item', '>', theme.GOLD, (row.x + 14 + pulse, row.y, 30, 40))
+                pygame.draw.line(screen, theme.GOLD, (row.x + 52, row.bottom - 2),
+                                 (row.right - 24, row.bottom - 2), 2)
+            color = theme.GOLD if active else theme.PALE
+            self.text(screen, 'item', MODES[index][0], (12, 29, 49),
+                      (row.x + 63, row.y + 5, row.width - 80, 36), 'center')
+            self.text(screen, 'item', MODES[index][0], color,
+                      (row.x + 61, row.y + 3, row.width - 80, 36), 'center')
 
-        pygame.draw.rect(screen, (16, 23, 39), (636, 190, 574, 438), border_radius=0)
-        self.text(screen, 'small', 'FIGHTER SHOWCASE', accent, (662, 205, 400, 26))
-        self.animation_accumulator += min(dt, 0.1) * settings.FPS
-        while self.animation_accumulator >= 1:
-            for fighter in self.fighters:
-                fighter.update()
-            self.animation_accumulator -= 1
-        self.world.blit(self.arena, (0, 0))
-        for fighter in self.fighters:
-            fighter.draw(self.world)
-        arena_crop = self.world.subsurface((160, 150, 960, settings.WINDOW_HEIGHT - 150))
-        pygame.transform.scale(arena_crop, self.preview.get_size(), self.preview)
-        retro.pixelate(self.preview)
-        screen.blit(self.preview, (663, 243))
-        pygame.draw.rect(screen, (65, 77, 100), (663, 243, 520, 218), 1, border_radius=0)
-        self.text(screen, 'small', 'ROOK', white, (677, 251, 180, 24))
-        self.text(screen, 'small', 'VEX', white, (990, 251, 180, 24), 'right')
-        # A solid caption strip gives mode details a consistent readable backdrop.
-        pygame.draw.rect(screen, (16, 23, 39), (651, 462, 544, 155))
         _, heading, line1, line2, tag = MODES[selected]
-        self.text(screen, 'small', tag, accent, (663, 470, 520, 24))
-        self.text(screen, 'heading', heading, white, (663, 499, 520, 43))
-        self.text(screen, 'body', line1, muted, (663, 548, 520, 27))
-        self.text(screen, 'body', line2, muted, (663, 576, 520, 27))
-        pygame.draw.line(screen, (45, 57, 79), (70, 652), (1210, 652))
-        self.text(screen, 'small', 'W / S  OR  UP / DOWN', muted, (74, 668, 270, 26))
-        self.text(screen, 'small', 'ENTER / CLICK  SELECT', cyan, (405, 668, 340, 26))
-        self.text(screen, 'small', 'ESC  EXIT', muted, (1020, 668, 184, 26), 'right')
+        theme.panel(screen, (692, 270, 510, 172))
+        self.text(screen, 'small', tag, theme.GOLD, (716, 282, 462, 24))
+        self.text(screen, 'heading', heading, theme.PALE, (716, 311, 462, 40))
+        self.text(screen, 'body', line1, theme.MUTED, (716, 363, 462, 26))
+        self.text(screen, 'body', line2, theme.MUTED, (716, 399, 462, 26))
+        # Idle sprites and a rooftop recreate the title-screen diorama.
+        pygame.draw.rect(screen, (22, 40, 63), (726, 617, 494, 43))
+        pygame.draw.rect(screen, theme.PALE, (726, 615, 494, 4))
+        pygame.draw.rect(screen, theme.BLUE, (726, 621, 494, 7))
+        for x in range(738, 1220, 44):
+            pygame.draw.line(screen, (64, 98, 129), (x, 630), (x + 30, 658), 3)
+        for asset, x, facing, height in (('rook', 849, 1, 160), ('vex', 1098, -1, 151)):
+            frame = sprite_fighter.preview_frame(asset, facing)
+            bounds = frame.get_bounding_rect()
+            frame = frame.subsurface(bounds)
+            image = pygame.transform.scale(frame, (round(frame.get_width() * height / frame.get_height()), height))
+            screen.blit(image, image.get_rect(midbottom=(x, 615 + round(math.sin(elapsed * 2 + x) * 2))))
+        theme.footer(screen, 'W S / ARROWS: SELECT     ENTER / CLICK: START     ESC: QUIT')

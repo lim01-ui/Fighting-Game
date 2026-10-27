@@ -1,0 +1,11 @@
+{
+  "fighters": [
+    "raguel"
+  ],
+  "original_folder": "Battle_maid",
+  "sha256": {
+    "attack_1.png": "d1fbe7f94a4424a75c0203761a8d826a2fe3c2a94bf7936da403319b10664dcb",
+    "idle.png": "2ef0e2c3eff5861432059d725b7aae7c449413e8b0766427c51750906a480333",
+    "running.png": "f06bd240a7f1a0162eee225ae07a488c948248e6f3eeabecd478a481fba8d3fc"
+  }
+}

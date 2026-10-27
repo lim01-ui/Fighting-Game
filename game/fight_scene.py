@@ -5,7 +5,7 @@ Round transitions are animated via ui/transitions.py.
 """
 
 import pygame
-from ui import retro
+from ui import retro, theme
 
 import settings
 from characters import character_data
@@ -74,22 +74,38 @@ def _make_keybind_overlay(width, players, networked=False, training=False,
     label_font = retro.font(size=14)
 
     def keycap(binding, rect, color):
-        # Stepped bevels evoke the chunky keyboard in the reference.
-        pygame.draw.rect(panel, (4, 4, 12), rect.move(2, 3))
-        pygame.draw.rect(panel, (216, 216, 232), rect)
-        pygame.draw.rect(panel, (64, 56, 88), rect.inflate(-4, -4))
-        pygame.draw.rect(panel, color, rect.inflate(-8, -8))
-        pygame.draw.line(panel, (248, 240, 255), rect.topleft, (rect.right - 2, rect.top), 2)
-        draw_text_fit(panel, key_font, preferences.binding_label(binding), retro.INK,
-                      rect.inflate(-10, -6))
+        def draw_cap(target, pressed=False):
+            depth = 3 if pressed else 8
+            top = rect.top + (5 if pressed else 0)
+            left, right, bottom = rect.left, rect.right, rect.bottom
+            outline = [
+                (left + 8, top), (right - 8, top), (right - 8, top + 4),
+                (right - 4, top + 4), (right - 4, top + 8), (right, top + 8),
+                (right, bottom - 4), (right - 4, bottom - 4), (right - 4, bottom),
+                (left + 4, bottom), (left + 4, bottom - 4), (left, bottom - 4),
+                (left, top + 8), (left + 4, top + 8), (left + 4, top + 4),
+                (left + 8, top + 4),
+            ]
+            shadow = tuple(int(channel * 0.24) for channel in color)
+            side = tuple(int(channel * 0.42) for channel in color)
+            face = color if pressed else tuple(int(channel * 0.76) for channel in color)
+            shine = tuple(min(255, int(channel * 1.15) + 24) for channel in color)
+            pygame.draw.polygon(target, shadow, [(x + 3, y + 3) for x, y in outline])
+            pygame.draw.polygon(target, side, outline)
+            face_rect = pygame.Rect(left + 6, top + 3, rect.width - 12,
+                                    max(8, bottom - top - depth - 3))
+            pygame.draw.rect(target, face, face_rect)
+            pygame.draw.line(target, shine, (left + 9, top + 2), (right - 10, top + 2), 3)
+            pygame.draw.line(target, shine, (left + 4, top + 8), (left + 4, bottom - depth - 2), 2)
+            pygame.draw.rect(target, shadow, (left + 6, bottom - depth, rect.width - 12, depth))
+            draw_text_fit(target, key_font, preferences.binding_label(binding),
+                          (255, 250, 240), face_rect.inflate(-4, -2))
+
+        draw_cap(panel)
         if preferences.key_code_from_name(binding) in pressed_keys:
-            # Bright, opaque caps sit over the dim HUD while a key is held.
-            pygame.draw.rect(highlights, (*color, 110), rect.inflate(8, 8))
-            pressed_rect = rect.move(0, 2)
-            pygame.draw.rect(highlights, (255, 255, 255), pressed_rect)
-            pygame.draw.rect(highlights, color, pressed_rect.inflate(-4, -4))
-            draw_text_fit(highlights, key_font, preferences.binding_label(binding), retro.INK,
-                          pressed_rect.inflate(-10, -6))
+            # The opaque active face sinks into the base like a physical key.
+            pygame.draw.rect(highlights, (*color, 90), rect.inflate(6, 6))
+            draw_cap(highlights, pressed=True)
 
     # Work in a fixed compact layout, then shrink only for smaller displays.
     for row, (name, keymap, color) in enumerate(players):
@@ -101,14 +117,18 @@ def _make_keybind_overlay(width, players, networked=False, training=False,
             if keymap.get(action):
                 keycap(keymap[action], pygame.Rect(x, top + y, 54, 26), retro.GREEN)
         for index, (action, label, accent) in enumerate((
-            ("block", "GUARD", retro.PINK), ("light", "LIGHT", retro.GOLD),
-            ("heavy", "HEAVY", retro.GOLD), ("special", "SPECIAL", retro.CYAN),
+            ("block", "GUARD", retro.PINK), ("light", "LIGHT ATTACK", retro.GOLD),
+            ("heavy", "HEAVY ATTACK", retro.GOLD), ("special", "SPECIAL", retro.CYAN),
         )):
             if not keymap.get(action):
                 continue
             x = 274 + index * 104
-            draw_text_fit(panel, label_font, label, accent, pygame.Rect(x - 12, top + 16, 98, 18))
-            keycap(keymap[action], pygame.Rect(x, top + 40, 72, 34), accent)
+            lines = label.split() if action in ("light", "heavy") else [label]
+            for line_index, line in enumerate(lines):
+                label_y = top + 2 + line_index * 16 if len(lines) > 1 else top + 14
+                draw_text_fit(panel, label_font, line, accent,
+                              pygame.Rect(x - 12, label_y, 98, 16))
+            keycap(keymap[action], pygame.Rect(x + 4, top + 38, 64, 44), accent)
     bound = {preferences.key_code_from_name(binding)
              for binding in settings.P1_KEYS.values() if binding}
     shortcuts = []
@@ -143,7 +163,7 @@ def _make_keybind_overlay(width, players, networked=False, training=False,
 
 def draw_health_bar(surface, x, y, w, h, current, maxv, color, flip=False,
                     trail_current=None):
-    pygame.draw.rect(surface, (15, 18, 28), (x, y, w, h), border_radius=0)
+    pygame.draw.rect(surface, theme.NAVY, (x, y, w, h), border_radius=0)
     ratio = max(0.0, current / maxv)
     fg = int(w * ratio)
     fx = x + (w - fg) if flip else x
@@ -161,9 +181,9 @@ def draw_health_bar(surface, x, y, w, h, current, maxv, color, flip=False,
         pygame.draw.line(surface, tuple(min(255, c + 45) for c in color),
                          (fx + 4, y + 3), (fx + max(4, fg - 4), y + 3), 2)
     for notch in range(16, w, 16):
-        pygame.draw.line(surface, (15, 18, 28), (x + notch, y + 2),
+        pygame.draw.line(surface, theme.NAVY, (x + notch, y + 2),
                          (x + notch, y + h - 3), 2)
-    pygame.draw.rect(surface, (220, 225, 240), (x, y, w, h), 2, border_radius=0)
+    pygame.draw.rect(surface, theme.PALE, (x, y, w, h), 2, border_radius=0)
 
 
 def draw_ultimate_meter(surface, x, y, w, value, color, flip=False):
@@ -1135,10 +1155,10 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             else "PLAYER 2"
         )
         pygame.draw.rect(
-            screen, (12, 16, 28), (left_x, 2, bar_w, 33), border_radius=0,
+            screen, theme.PANEL, (left_x, 2, bar_w, 33), border_radius=0,
         )
         pygame.draw.rect(
-            screen, (12, 16, 28), (right_x, 2, bar_w, 33), border_radius=0,
+            screen, theme.PANEL, (right_x, 2, bar_w, 33), border_radius=0,
         )
         name_font = retro.font("Arial", 23, bold=True)
         draw_text_fit(
@@ -1182,10 +1202,10 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             settings.WINDOW_WIDTH // 2 - 58, 25, 116, 68,
         )
         pygame.draw.rect(
-            screen, (12, 16, 28), timer_badge, border_radius=0,
+            screen, theme.PANEL, timer_badge, border_radius=0,
         )
         pygame.draw.rect(
-            screen, (180, 195, 220), timer_badge, 2, border_radius=0,
+            screen, theme.GOLD, timer_badge, 2, border_radius=0,
         )
         if training_mode:
             draw_text_fit(
@@ -1325,7 +1345,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                     screen, move_font,
                     f"{data.startup} startup / {data.active} active / "
                     f"{data.recovery} recovery / {data.reach} reach",
-                    (180, 195, 220),
+                    theme.GOLD,
                     pygame.Rect(panel_rect.x + 18, y + 22,
                                 panel_rect.width - 36, 22),
                     align="left",

@@ -9,7 +9,7 @@ around it — never stretched.
 
 import math
 import pygame
-from ui import retro
+from ui import retro, theme
 
 import settings
 from characters import character_data
@@ -92,7 +92,7 @@ def _draw_stat_bar(surface, font, x, y, w, label, value, max_value):
     bar_y = y + 4
     bar_w = w - 100
     bar_h = 16
-    pygame.draw.rect(surface, (30, 30, 40), (bar_x, bar_y, bar_w, bar_h))
+    pygame.draw.rect(surface, theme.NAVY, (bar_x, bar_y, bar_w, bar_h))
     ratio = max(0.0, min(1.0, value / max_value))
     fill_w = int(bar_w * ratio)
     pygame.draw.rect(surface, (240, 200, 80), (bar_x, bar_y, fill_w, bar_h))
@@ -142,7 +142,7 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
                     return None
 
         # ---------------- DRAW ----------------
-        screen.fill((12, 12, 26))
+        theme.background(screen, shade=130)
 
         draw_text_fit(
             screen, title_font, title, settings.WHITE,
@@ -153,14 +153,14 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
         for i, ch in enumerate(roster):
             cell = _cell_rect(i)
             is_selected = (i == selected)
-            bg = (40, 40, 60) if not is_selected else (70, 70, 110)
+            bg = theme.PANEL if not is_selected else (56, 101, 143)
             pygame.draw.rect(screen, bg, cell)
 
             if is_selected:
                 pulse = int(3 + 2 * math.sin(cursor_angle * 4))
-                pygame.draw.rect(screen, (255, 240, 100), cell, 2 + pulse)
+                pygame.draw.rect(screen, theme.GOLD, cell, 2 + pulse)
             else:
-                pygame.draw.rect(screen, (90, 90, 120), cell, 2)
+                pygame.draw.rect(screen, theme.MUTED, cell, 2)
 
             # Cell art: portrait if available, else procedural preview
             cell_inner = pygame.Rect(
@@ -203,15 +203,15 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
 
         # ----- SIDE PANEL -----
         panel = pygame.Rect(PANEL_LEFT, PANEL_TOP, PANEL_W, PANEL_H)
-        pygame.draw.rect(screen, (25, 25, 45), panel)
-        pygame.draw.rect(screen, (90, 90, 120), panel, 2)
+        pygame.draw.rect(screen, theme.PANEL, panel)
+        pygame.draw.rect(screen, theme.MUTED, panel, 2)
 
         ch = roster[selected]
 
         # Portrait box (fixed shape, portrait centered inside, NOT stretched)
         portrait_area = pygame.Rect(panel.x + 20, panel.y + 20,
                                     panel.width - 40, 200)
-        pygame.draw.rect(screen, (15, 15, 30), portrait_area)
+        pygame.draw.rect(screen, theme.NAVY, portrait_area)
 
         big_portrait = (None if sprite_fighter.is_generated_asset(ch.get("sprite_asset"))
                         else portrait_loader.load_portrait(ch["key"]))
@@ -269,10 +269,11 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
         if allow_random:
             hint_text += "    R for random"
         draw_text_fit(
-            screen, hint_font, hint_text, (200, 200, 200),
+            screen, hint_font, hint_text, theme.PALE,
             pygame.Rect(20, settings.WINDOW_HEIGHT - 52,
                         settings.WINDOW_WIDTH - 40, 40),
         )
 
+        theme.footer(screen, "ARROWS / WASD: MOVE     ENTER: CONFIRM     ESC: BACK")
         retro.present(screen)
         clock.tick(settings.FPS)

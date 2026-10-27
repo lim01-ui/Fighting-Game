@@ -1,5 +1,6 @@
 # ui/transitions.py
 import pygame
+from ui import theme
 import settings
 from effects import easing
 from ui.text_layout import draw_text_fit
@@ -17,7 +18,7 @@ def _center_text(surface, font, text, y, color, alpha=255):
 def draw_countdown(surface, round_number, progress, fonts):
     overlay = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     overlay.set_alpha(160)
-    overlay.fill((0, 0, 0))
+    overlay.fill(theme.NAVY)
     surface.blit(overlay, (0, 0))
 
     big_font = fonts["big"]
@@ -26,7 +27,7 @@ def draw_countdown(surface, round_number, progress, fonts):
     if progress < 0.70:
         p = easing.ease_out_cubic(progress / 0.70)
         combined = "ROUND " + str(round_number)
-        img = big_font.render(combined, True, (255, 240, 120))
+        img = big_font.render(combined, True, theme.GOLD)
         start_x = settings.WINDOW_WIDTH // 2 - 500
         end_x = settings.WINDOW_WIDTH // 2
         cx = easing.lerp(start_x, end_x, p)
@@ -35,7 +36,7 @@ def draw_countdown(surface, round_number, progress, fonts):
     else:
         p = (progress - 0.70) / 0.30
         scale = easing.ease_out_back(p, overshoot=1.6)
-        img = huge_font.render("FIGHT!", True, (255, 80, 80))
+        img = huge_font.render("FIGHT!", True, theme.GOLD)
         base_size = img.get_size()
         scaled = pygame.transform.scale(
             img, (int(base_size[0] * scale), int(base_size[1] * scale)))
@@ -47,12 +48,12 @@ def draw_countdown(surface, round_number, progress, fonts):
 def draw_round_over(surface, winner, round_end_reason, progress, fonts):
     overlay = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     overlay.set_alpha(int(easing.lerp(0, 170, easing.ease_out_cubic(progress))))
-    overlay.fill((0, 0, 0))
+    overlay.fill(theme.NAVY)
     surface.blit(overlay, (0, 0))
 
     head = "K.O." if round_end_reason == "ko" else "TIME UP"
     scale = easing.ease_out_back(min(1.0, progress / 0.30), overshoot=1.4)
-    img = fonts["huge"].render(head, True, (255, 80, 80))
+    img = fonts["huge"].render(head, True, theme.GOLD)
     base_size = img.get_size()
     scaled = pygame.transform.scale(
         img, (int(base_size[0] * scale), int(base_size[1] * scale)))
@@ -69,18 +70,18 @@ def draw_round_over(surface, winner, round_end_reason, progress, fonts):
         else:
             msg = "DRAW"
         _center_text(surface, fonts["big"], msg, 340,
-                     (255, 240, 120), alpha=alpha)
+                     theme.GOLD, alpha=alpha)
 
 
 def draw_match_over(surface, header, rounds_text, progress, fonts,
                     winner_color=None, prompt="ENTER / R = new match     ESC = back to menu"):
     overlay = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     overlay.set_alpha(int(easing.lerp(0, 190, easing.ease_out_cubic(progress))))
-    overlay.fill((0, 0, 0))
+    overlay.fill(theme.NAVY)
     surface.blit(overlay, (0, 0))
 
     scale = easing.ease_out_back(min(1.0, progress / 0.35), overshoot=1.5)
-    img = fonts["huge"].render("MATCH OVER", True, (255, 80, 80))
+    img = fonts["huge"].render("MATCH OVER", True, theme.GOLD)
     base_size = img.get_size()
     scaled = pygame.transform.scale(
         img, (int(base_size[0] * scale), int(base_size[1] * scale)))
@@ -91,7 +92,7 @@ def draw_match_over(surface, header, rounds_text, progress, fonts,
     if progress > 0.30:
         p2 = (progress - 0.30) / 0.70
         alpha = int(255 * easing.ease_out_cubic(p2))
-        win_color = winner_color or (255, 240, 120)
+        win_color = winner_color or theme.GOLD
         _center_text(surface, fonts["big"], header,
                      settings.WINDOW_HEIGHT // 2 + 80, win_color, alpha=alpha)
         _center_text(surface, fonts["mid"], rounds_text,

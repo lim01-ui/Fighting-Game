@@ -1,0 +1,9 @@
+{
+  "tool": "built-in image_gen",
+  "prompt": "Use case: style-transfer. Asset: transparent pixel-art fighting-game animation atlas for Raguel. Image 1 is the STYLE AND GRID reference (Rook): match its large head, compact chibi body, oversized expressive eyes, dark thin pixel outline, simple 2-tone shading, native pixel density, consistent character body size. Image 2 is the CHARACTER IDENTITY reference: keep Raguel's blonde hair, white maid headband, navy/black maid dress, white apron, dark shoes and blue/silver blade. Redesign Raguel to fit Rook's roster proportions, head about 45% of total standing height, squat body and short limbs, same coherent face and outfit in every pose. Output a single 4-column by 3-row regularly spaced atlas of exactly 12 full-body poses, matching reference 1 grid: row1 idle facing right, walk left step, walk right step, guard; row2 jump, crouch, light attack windup, light strike; row3 heavy attack windup, heavy strike, magical blue crescent special slash, hurt. Each cell isolated with generous fully transparent gutters, no clipping, no overlapping adjacent cells, all standing bodies same height and foot baseline within each row. All poses facing right. No text, no labels, no ground shadows, no background, no UI. Actual alpha transparency. Preserve maid identity, change proportions and rendering to match the reference roster. Crisp pixel-like edges.",
+  "references": [
+    "rook.png",
+    "../Battle_maid/idle.png"
+  ],
+  "output": "raguel.png"
+}

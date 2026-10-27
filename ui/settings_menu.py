@@ -1,7 +1,7 @@
 """Mouse and keyboard options, including click-to-bind controls."""
 
 import pygame
-from ui import retro
+from ui import retro, theme
 
 import settings
 from audio import music, preferences, sound_fx
@@ -101,7 +101,8 @@ def run_controls_menu(screen, clock):
                 message = f"Press a key for {CONTROL_LABELS[listening_action]}"
                 sound_fx.play("menu_confirm")
 
-        screen.fill((12, 12, 26))
+        theme.background(screen, shade=130)
+        theme.panel(screen, (270, 130, 760, 520))
         draw_text_fit(
             screen, title_font, "PLAYER 1 CONTROLS", settings.WHITE,
             pygame.Rect(40, 75, settings.WINDOW_WIDTH - 80, 70),
@@ -114,7 +115,7 @@ def run_controls_menu(screen, clock):
             binding = ("PRESS A KEY..." if action == listening_action
                        else preferences.binding_label(settings.P1_KEYS[action]))
             pygame.draw.rect(screen, (27, 75, 105) if action == listening_action
-                             else (24, 32, 52), boxes[index], border_radius=0)
+                             else theme.PANEL, boxes[index], border_radius=0)
             pygame.draw.rect(screen, color, boxes[index], 2, border_radius=0)
             draw_text_fit(
                 screen, item_font, label, color,
@@ -140,10 +141,11 @@ def run_controls_menu(screen, clock):
             )
         draw_text_fit(
             screen, hint_font, "CLICK a box / ENTER: bind   ESC while binding: unbind   ESC: back",
-            (195, 200, 215),
+            theme.MUTED,
             pygame.Rect(20, settings.WINDOW_HEIGHT - 50,
                         settings.WINDOW_WIDTH - 40, 36),
         )
+        theme.footer(screen, "CLICK / ARROWS: SELECT     LEFT / RIGHT: ADJUST     ESC: BACK")
         retro.present(screen)
         clock.tick(settings.FPS)
 
@@ -235,7 +237,8 @@ def run_settings_menu(screen, clock):
                     sound_fx.play("menu_back")
                     return screen
 
-        screen.fill((12, 12, 26))
+        theme.background(screen, shade=130)
+        theme.panel(screen, (280, 160, 800, 460))
         draw_text_fit(
             screen, title_font, "OPTIONS", settings.WHITE,
             pygame.Rect(40, 75, settings.WINDOW_WIDTH - 80, 80),
@@ -245,17 +248,17 @@ def run_settings_menu(screen, clock):
             y = row_y + index * row_gap
             color = (255, 230, 110) if index == selected else settings.WHITE
             if index == selected:
-                pygame.draw.rect(screen, (24, 38, 58), rows[index], border_radius=0)
+                pygame.draw.rect(screen, theme.PANEL, rows[index], border_radius=0)
             label_image = item_font.render(label, True, color)
             screen.blit(label_image, (settings.WINDOW_WIDTH // 2 - 310, y))
 
             if index < len(VOLUME_KEYS):
                 value = preferences.get(VOLUME_KEYS[index])
                 track = pygame.Rect(settings.WINDOW_WIDTH // 2 + 25, y + 4, 300, 20)
-                pygame.draw.rect(screen, (35, 38, 55), track, border_radius=0)
+                pygame.draw.rect(screen, theme.NAVY, track, border_radius=0)
                 fill = track.copy()
                 fill.width = int(track.width * value)
-                pygame.draw.rect(screen, (75, 190, 245), fill, border_radius=0)
+                pygame.draw.rect(screen, theme.BLUE, fill, border_radius=0)
                 pygame.draw.rect(screen, (190, 200, 220), track, 2, border_radius=0)
                 percent = item_font.render(f"{round(value * 100)}%", True, settings.WHITE)
                 screen.blit(percent, (track.right + 18, y - 1))
@@ -266,8 +269,9 @@ def run_settings_menu(screen, clock):
         draw_text_fit(
             screen, hint_font,
             "CLICK: SELECT / SET VOLUME   UP/DOWN: SELECT   LEFT/RIGHT: ADJUST   ESC: BACK",
-            (195, 200, 215),
+            theme.MUTED,
             pygame.Rect(24, settings.WINDOW_HEIGHT - 64, settings.WINDOW_WIDTH - 48, 32),
         )
+        theme.footer(screen, "CLICK / ARROWS: SELECT     LEFT / RIGHT: ADJUST     ESC: BACK")
         retro.present(screen)
         clock.tick(settings.FPS)

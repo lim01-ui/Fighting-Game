@@ -3,7 +3,7 @@
 import queue
 import threading
 import pygame
-from ui import retro
+from ui import retro, theme
 
 import settings
 from audio import sound_fx
@@ -12,9 +12,9 @@ from ui.text_layout import draw_text_fit
 
 
 def _draw_panel(screen, title, lines, hint, accent=(70, 205, 255)):
-    screen.fill((9, 12, 26))
+    theme.background(screen, shade=130)
     pygame.draw.rect(
-        screen, (17, 24, 44),
+        screen, theme.PANEL,
         pygame.Rect(100, 75, settings.WINDOW_WIDTH - 200, settings.WINDOW_HEIGHT - 150),
         border_radius=0,
     )
@@ -43,6 +43,7 @@ def _draw_panel(screen, title, lines, hint, accent=(70, 205, 255)):
         pygame.Rect(panel.x + 30, settings.WINDOW_HEIGHT - 172,
                     panel.width - 60, 42),
     )
+    theme.footer(screen, hint)
     retro.present(screen)
 
 
