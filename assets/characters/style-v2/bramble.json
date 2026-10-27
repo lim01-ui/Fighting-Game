@@ -1,0 +1,134 @@
+{
+  "image": "bramble-chibi.png",
+  "body_height": 252,
+  "pixel_height": 72,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      313,
+      313
+    ],
+    "step_left": [
+      0,
+      313,
+      313,
+      314
+    ],
+    "step_right": [
+      313,
+      313,
+      314,
+      314
+    ],
+    "block": [
+      627,
+      313,
+      313,
+      314
+    ],
+    "jump": [
+      940,
+      313,
+      314,
+      314
+    ],
+    "crouch": [
+      0,
+      627,
+      313,
+      303
+    ],
+    "light_start": [
+      313,
+      627,
+      314,
+      303
+    ],
+    "light": [
+      627,
+      627,
+      340,
+      303
+    ],
+    "heavy_start": [
+      967,
+      627,
+      287,
+      303
+    ],
+    "heavy": [
+      0,
+      930,
+      352,
+      324
+    ],
+    "special": [
+      352,
+      930,
+      302,
+      324
+    ],
+    "hit": [
+      654,
+      930,
+      285,
+      324
+    ],
+    "knockdown": [
+      939,
+      930,
+      315,
+      324
+    ]
+  },
+  "dedicated_knockdown": true,
+  "animations": {
+    "walk": [
+      "step_left",
+      "step_right"
+    ],
+    "run": [
+      "step_left",
+      "step_right"
+    ],
+    "light": [
+      "light_start",
+      "light"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy"
+    ]
+  },
+  "idle_animation": {
+    "image": "bramble-chibi.png",
+    "body_height": 252,
+    "frames": [
+      [
+        32,
+        52,
+        276,
+        252
+      ],
+      [
+        347,
+        52,
+        277,
+        252
+      ],
+      [
+        657,
+        52,
+        275,
+        252
+      ],
+      [
+        973,
+        51,
+        270,
+        253
+      ]
+    ]
+  }
+}

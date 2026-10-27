@@ -1,0 +1,134 @@
+{
+  "image": "iron-chibi.png",
+  "body_height": 239,
+  "pixel_height": 72,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      313,
+      313
+    ],
+    "step_left": [
+      0,
+      313,
+      314,
+      314
+    ],
+    "step_right": [
+      314,
+      313,
+      313,
+      314
+    ],
+    "block": [
+      627,
+      313,
+      313,
+      314
+    ],
+    "jump": [
+      940,
+      313,
+      314,
+      314
+    ],
+    "crouch": [
+      0,
+      627,
+      324,
+      313
+    ],
+    "light_start": [
+      324,
+      627,
+      303,
+      313
+    ],
+    "light": [
+      627,
+      627,
+      341,
+      313
+    ],
+    "heavy_start": [
+      968,
+      627,
+      286,
+      313
+    ],
+    "heavy": [
+      0,
+      940,
+      329,
+      314
+    ],
+    "special": [
+      329,
+      940,
+      310,
+      314
+    ],
+    "hit": [
+      639,
+      940,
+      301,
+      314
+    ],
+    "knockdown": [
+      940,
+      940,
+      314,
+      314
+    ]
+  },
+  "dedicated_knockdown": true,
+  "animations": {
+    "walk": [
+      "step_left",
+      "step_right"
+    ],
+    "run": [
+      "step_left",
+      "step_right"
+    ],
+    "light": [
+      "light_start",
+      "light"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy"
+    ]
+  },
+  "idle_animation": {
+    "image": "iron-chibi.png",
+    "body_height": 239,
+    "frames": [
+      [
+        46,
+        67,
+        266,
+        239
+      ],
+      [
+        363,
+        65,
+        270,
+        241
+      ],
+      [
+        685,
+        65,
+        264,
+        241
+      ],
+      [
+        987,
+        71,
+        259,
+        235
+      ]
+    ]
+  }
+}

@@ -1,49 +1,42 @@
-# Chibi fighter replacement atlases
+# Shared chibi fighter artwork
 
-Rook, Vex, Golem, Sanya, Choom, Saikyo, Renegade, Soldier, Chib and Minamoto
-use these new sheets. Iron, Sable, Nova, Jinx, Kestrel and Bramble
-retain their original artwork and loader specifications.
+All seventeen fighters use the same transparent-sprite loader and a 72-pixel
+reference body height. Gameplay names, statistics, collision dimensions, moves,
+and damage are preserved. Raguel is the proportion/style reference for the
+latest roster update.
 
-Raguel now uses `raguel.png` and `raguel.json` to match the roster's chibi
-proportions, 72-pixel reference height, and action-pose rendering. The original
-Battle_maid strips remain available. Generation details and the exact prompt
-are recorded in `raguel-generation.json`.
+## Latest ten-character update
 
-The built-in `image_gen` tool generated the transparent PNGs. Exact prompts,
-reference paths and generation provenance are recorded in `generation.json`.
-The style targets large heads, compact bodies, simple two-tone shading and
-thin dark pixel outlines. Rook is the approved style anchor for this set.
+- Sable, Nova, Jinx, Kestrel, Bramble, and Iron use `<name>-chibi.png`.
+- Sanya uses `sanya-slime.png`: a blue jelly creature.
+- Choom uses `choom-robot.png`: a compact silver/cyan robot.
+- Renegade uses `renegade-treeman.png`: a bark-and-moss tree creature.
+- Chib uses `chib-panda.png`: a black-and-white panda sword fighter.
 
-Each sheet contains twelve distinct poses in four columns and three rows:
+These sheets contain four columns and four rows:
 
-| Row | Poses, left to right |
-| --- | --- |
-| 1 | Idle, left walk step, right walk step, guard |
-| 2 | Jump, crouch, light windup, light strike |
-| 3 | Heavy windup, heavy strike, special, hurt |
+1. Four distinct idle breathing frames.
+2. Two walk steps, guard, jump.
+3. Crouch, light windup, light strike, heavy windup.
+4. Heavy strike, special, hurt, knockdown.
 
-The JSON manifests record actual source rectangles, selected at clear alpha
-gutters rather than assuming the requested grid dimensions. `body_height`
-measures the visible idle body at alpha >= 16; `pixel_height` sets a shared
-72-pixel reference body height. The loader samples with nearest-neighbor
-scaling before fitting the fighter to its unchanged gameplay dimensions.
+The JSON manifests store source rectangles at measured alpha gutters. Idle
+frames share a canvas and foot baseline. Dedicated knockdown poses do not get
+rotated a second time. Combat frames are scaled relative to the idle body,
+so attack effects do not resize the fighter. `tools/register_roster_atlases.py`
+rebuilds the latest manifests without modifying source images.
 
-Walking alternates two frames. Light/heavy attacks select their windup during
-startup and strike during active/recovery frames. Ultimate uses the special
-pose, and knockdown uses the rotated hurt pose. Crouching uses its own pose
-with a height matched to the existing hurtbox ratio. These are compact pose
-atlases, not full high-frame-count animation packs.
+`roster-diversity-generation.json` records the exact prompts and built-in
+image_gen provenance. `roster-diversity-preview.png` shows the updated fighters.
 
-Each fighter also has a separate `<fighter>-idle.png` four-frame breathing
-strip, generated from its matching action atlas with the built-in `image_gen`
-tool. Exact prompts are in `idle-generation.json`. The manifest's
-`idle_animation` records this strip's frame bounds and reference body height.
-The loader aligns each frame at its feet on one shared canvas, then cycles at
-180 ms per frame. Character select (both cards and the large preview), VS and
-in-game idle states use this loop. Constant canvas dimensions keep preview
-fitting from cancelling the breathing motion or changing the character scale.
-The original twelve-pose sheets and earlier backups remain intact.
+## Earlier artwork
 
-The old source folders remain in place. A separate verified copy, including
-the original manifests and loader snapshots, is in
-`../backups/pre-style-rework/`; see its README and manifest for restoration.
+Rook, Vex, Golem, Saikyo, Soldier, Minamoto, and Raguel retain their existing
+atlases and separate four-frame idle strips. Earlier generation prompts remain
+in `generation.json`, `idle-generation.json`, `raguel-generation.json`, and
+`raguel-idle-generation.json`. Their pose manifests use the same runtime API.
+
+Previous image files remain intact. Verified copies of the older sources are
+in `../backups/pre-style-rework/`, `../backups/pre-raguel-rework/`, and
+`../backups/pre-roster-diversity/`, each with SHA-256 hashes. The latest backup
+also records the previous roster data and the four replaced human atlases.

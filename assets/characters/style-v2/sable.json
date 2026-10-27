@@ -1,0 +1,134 @@
+{
+  "image": "sable-chibi.png",
+  "body_height": 227,
+  "pixel_height": 72,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      313,
+      319
+    ],
+    "step_left": [
+      0,
+      319,
+      313,
+      309
+    ],
+    "step_right": [
+      313,
+      319,
+      314,
+      309
+    ],
+    "block": [
+      627,
+      319,
+      313,
+      309
+    ],
+    "jump": [
+      940,
+      319,
+      314,
+      309
+    ],
+    "crouch": [
+      0,
+      628,
+      332,
+      312
+    ],
+    "light_start": [
+      332,
+      628,
+      295,
+      312
+    ],
+    "light": [
+      627,
+      628,
+      364,
+      312
+    ],
+    "heavy_start": [
+      991,
+      628,
+      263,
+      312
+    ],
+    "heavy": [
+      0,
+      940,
+      354,
+      314
+    ],
+    "special": [
+      354,
+      940,
+      322,
+      314
+    ],
+    "hit": [
+      676,
+      940,
+      269,
+      314
+    ],
+    "knockdown": [
+      945,
+      940,
+      309,
+      314
+    ]
+  },
+  "dedicated_knockdown": true,
+  "animations": {
+    "walk": [
+      "step_left",
+      "step_right"
+    ],
+    "run": [
+      "step_left",
+      "step_right"
+    ],
+    "light": [
+      "light_start",
+      "light"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy"
+    ]
+  },
+  "idle_animation": {
+    "image": "sable-chibi.png",
+    "body_height": 227,
+    "frames": [
+      [
+        44,
+        92,
+        261,
+        227
+      ],
+      [
+        354,
+        92,
+        264,
+        227
+      ],
+      [
+        666,
+        89,
+        266,
+        230
+      ],
+      [
+        986,
+        92,
+        259,
+        227
+      ]
+    ]
+  }
+}

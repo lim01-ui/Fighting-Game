@@ -238,7 +238,9 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
             align="left",
         )
         draw_text_fit(
-            screen, item_font, ch["archetype"], (200, 220, 255),
+            screen, item_font,
+            ch["archetype"] + (" / " + ch["species"] if ch.get("species") else ""),
+            (200, 220, 255),
             pygame.Rect(panel.x + 20, panel.y + 274, panel.width - 40, 28),
             align="left",
         )

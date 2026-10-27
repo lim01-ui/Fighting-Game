@@ -1,0 +1,789 @@
+{
+  "fighters": {
+    "sable": {
+      "key": "sable",
+      "sprite_asset": "swordsman",
+      "name": "SABLE",
+      "archetype": "Zoner",
+      "special_behavior": {
+        "type": "long_swipe",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "whip",
+      "weapon_color": [
+        200,
+        120,
+        200
+      ],
+      "weapon_handle": [
+        120,
+        50,
+        120
+      ],
+      "colors": {
+        "body": [
+          110,
+          70,
+          160
+        ],
+        "accent": [
+          220,
+          160,
+          255
+        ],
+        "eye": [
+          255,
+          240,
+          255
+        ]
+      },
+      "body": {
+        "width": 66,
+        "height": 152,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 0.95,
+        "jump": 1.0,
+        "health": 0.95,
+        "damage": 1.0,
+        "defense": 1.05
+      },
+      "attack_mods": {
+        "reach": 1.25,
+        "startup": 1.1,
+        "cooldown": 1.1
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.0,
+        "reach_mult": 1.35,
+        "hitstun_mult": 1.0,
+        "startup_mult": 1.1,
+        "extra_hits": 0,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "nova": {
+      "key": "nova",
+      "sprite_asset": "wizard",
+      "name": "NOVA",
+      "archetype": "Technical",
+      "special_behavior": {
+        "type": "projectile",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 1,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "orb",
+      "weapon_color": [
+        120,
+        240,
+        255
+      ],
+      "weapon_handle": [
+        60,
+        180,
+        200
+      ],
+      "colors": {
+        "body": [
+          80,
+          200,
+          220
+        ],
+        "accent": [
+          255,
+          255,
+          255
+        ],
+        "eye": [
+          255,
+          255,
+          255
+        ]
+      },
+      "body": {
+        "width": 68,
+        "height": 140,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.2,
+        "jump": 1.1,
+        "health": 0.95,
+        "damage": 0.9,
+        "defense": 1.0
+      },
+      "attack_mods": {
+        "reach": 1.0,
+        "startup": 0.85,
+        "cooldown": 0.9
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.0,
+        "reach_mult": 1.0,
+        "hitstun_mult": 1.0,
+        "startup_mult": 0.9,
+        "extra_hits": 0,
+        "projectile": "orb",
+        "shield_reflect": 0.0
+      }
+    },
+    "jinx": {
+      "key": "jinx",
+      "sprite_asset": "musketeer",
+      "name": "JINX",
+      "archetype": "Trickster",
+      "special_behavior": {
+        "type": "fan_throw",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 3,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "knives",
+      "weapon_color": [
+        220,
+        220,
+        240
+      ],
+      "weapon_handle": [
+        140,
+        100,
+        180
+      ],
+      "colors": {
+        "body": [
+          180,
+          80,
+          200
+        ],
+        "accent": [
+          255,
+          240,
+          80
+        ],
+        "eye": [
+          255,
+          255,
+          100
+        ]
+      },
+      "body": {
+        "width": 60,
+        "height": 128,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.45,
+        "jump": 1.25,
+        "health": 0.8,
+        "damage": 0.75,
+        "defense": 1.15
+      },
+      "attack_mods": {
+        "reach": 0.85,
+        "startup": 0.7,
+        "cooldown": 0.8
+      },
+      "weapon_effect": {
+        "knockback_mult": 0.9,
+        "reach_mult": 0.9,
+        "hitstun_mult": 0.9,
+        "startup_mult": 0.75,
+        "extra_hits": 0,
+        "projectile": "knife",
+        "shield_reflect": 0.0
+      }
+    },
+    "kestrel": {
+      "key": "kestrel",
+      "sprite_asset": "archer",
+      "name": "KESTREL",
+      "archetype": "Aerial",
+      "special_behavior": {
+        "type": "pierce_thrust",
+        "dash": 30,
+        "extra_hits": 0,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": true
+      },
+      "weapon": "spear",
+      "weapon_color": [
+        200,
+        180,
+        120
+      ],
+      "weapon_handle": [
+        90,
+        70,
+        40
+      ],
+      "colors": {
+        "body": [
+          200,
+          160,
+          90
+        ],
+        "accent": [
+          100,
+          200,
+          180
+        ],
+        "eye": [
+          255,
+          255,
+          255
+        ]
+      },
+      "body": {
+        "width": 64,
+        "height": 148,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.15,
+        "jump": 1.45,
+        "health": 0.9,
+        "damage": 1.0,
+        "defense": 1.0
+      },
+      "attack_mods": {
+        "reach": 1.1,
+        "startup": 1.0,
+        "cooldown": 0.95
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.0,
+        "reach_mult": 1.4,
+        "hitstun_mult": 1.0,
+        "startup_mult": 1.0,
+        "extra_hits": 0,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "bramble": {
+      "key": "bramble",
+      "sprite_asset": "enchantress",
+      "name": "BRAMBLE",
+      "archetype": "Defensive",
+      "special_behavior": {
+        "type": "multi_hit",
+        "dash": 0,
+        "extra_hits": 2,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "club",
+      "weapon_color": [
+        110,
+        80,
+        50
+      ],
+      "weapon_handle": [
+        60,
+        40,
+        20
+      ],
+      "colors": {
+        "body": [
+          60,
+          90,
+          50
+        ],
+        "accent": [
+          200,
+          180,
+          120
+        ],
+        "eye": [
+          255,
+          230,
+          180
+        ]
+      },
+      "body": {
+        "width": 80,
+        "height": 144,
+        "crouch_ratio": 0.62
+      },
+      "stats": {
+        "speed": 0.85,
+        "jump": 0.9,
+        "health": 1.25,
+        "damage": 1.05,
+        "defense": 0.75
+      },
+      "attack_mods": {
+        "reach": 0.95,
+        "startup": 1.1,
+        "cooldown": 1.05
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.5,
+        "reach_mult": 1.0,
+        "hitstun_mult": 1.3,
+        "startup_mult": 1.15,
+        "extra_hits": 0,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "iron": {
+      "key": "iron",
+      "sprite_asset": "knight",
+      "name": "IRON",
+      "archetype": "Tank",
+      "special_behavior": {
+        "type": "armored_bash",
+        "dash": 60,
+        "extra_hits": 0,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 48,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "shield",
+      "weapon_color": [
+        110,
+        110,
+        130
+      ],
+      "weapon_handle": [
+        60,
+        60,
+        80
+      ],
+      "colors": {
+        "body": [
+          40,
+          100,
+          60
+        ],
+        "accent": [
+          180,
+          220,
+          140
+        ],
+        "eye": [
+          220,
+          255,
+          200
+        ]
+      },
+      "body": {
+        "width": 86,
+        "height": 148,
+        "crouch_ratio": 0.62
+      },
+      "stats": {
+        "speed": 0.8,
+        "jump": 0.8,
+        "health": 1.35,
+        "damage": 1.2,
+        "defense": 0.75
+      },
+      "attack_mods": {
+        "reach": 1.0,
+        "startup": 1.2,
+        "cooldown": 1.15
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.1,
+        "reach_mult": 0.9,
+        "hitstun_mult": 1.1,
+        "startup_mult": 1.1,
+        "extra_hits": 0,
+        "projectile": null,
+        "shield_reflect": 0.05
+      }
+    },
+    "sanya": {
+      "key": "sanya",
+      "sprite_asset": "sanya",
+      "name": "SANYA",
+      "archetype": "Kicks",
+      "special_behavior": {
+        "type": "spin_kick",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": true,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "gauntlets",
+      "weapon_color": [
+        230,
+        60,
+        90
+      ],
+      "weapon_handle": [
+        120,
+        20,
+        40
+      ],
+      "colors": {
+        "body": [
+          220,
+          50,
+          80
+        ],
+        "accent": [
+          255,
+          255,
+          255
+        ],
+        "eye": [
+          255,
+          255,
+          255
+        ]
+      },
+      "body": {
+        "width": 66,
+        "height": 150,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.1,
+        "jump": 1.1,
+        "health": 0.95,
+        "damage": 1.05,
+        "defense": 1.0
+      },
+      "attack_mods": {
+        "reach": 1.25,
+        "startup": 1.0,
+        "cooldown": 1.0
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.0,
+        "reach_mult": 1.2,
+        "hitstun_mult": 1.4,
+        "startup_mult": 1.0,
+        "extra_hits": 0,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "choom": {
+      "key": "choom",
+      "sprite_asset": "choom",
+      "name": "CHOOM",
+      "archetype": "Specialist",
+      "special_behavior": {
+        "type": "stun_bolt",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 1,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 60,
+        "pierce": false
+      },
+      "weapon": "baton",
+      "weapon_color": [
+        240,
+        220,
+        60
+      ],
+      "weapon_handle": [
+        140,
+        120,
+        20
+      ],
+      "colors": {
+        "body": [
+          240,
+          210,
+          50
+        ],
+        "accent": [
+          60,
+          120,
+          230
+        ],
+        "eye": [
+          255,
+          255,
+          255
+        ]
+      },
+      "body": {
+        "width": 64,
+        "height": 138,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.25,
+        "jump": 1.05,
+        "health": 0.9,
+        "damage": 1.1,
+        "defense": 1.05
+      },
+      "attack_mods": {
+        "reach": 0.95,
+        "startup": 0.85,
+        "cooldown": 0.9
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.0,
+        "reach_mult": 1.0,
+        "hitstun_mult": 1.6,
+        "startup_mult": 0.9,
+        "extra_hits": 0,
+        "projectile": "spark",
+        "shield_reflect": 0.0
+      }
+    },
+    "renegade": {
+      "key": "renegade",
+      "name": "RENEGADE",
+      "archetype": "Brawler",
+      "sprite_asset": "renegade",
+      "special_behavior": {
+        "type": "slash",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "fists",
+      "weapon_color": [
+        235,
+        70,
+        70
+      ],
+      "weapon_handle": [
+        80,
+        60,
+        45
+      ],
+      "colors": {
+        "body": [
+          230,
+          230,
+          235
+        ],
+        "accent": [
+          235,
+          70,
+          70
+        ],
+        "eye": [
+          255,
+          255,
+          255
+        ]
+      },
+      "body": {
+        "width": 68,
+        "height": 140,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.05,
+        "jump": 1.0,
+        "health": 1.0,
+        "damage": 1.0,
+        "defense": 1.0
+      },
+      "attack_mods": {
+        "reach": 1.0,
+        "startup": 1.0,
+        "cooldown": 1.0
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.0,
+        "reach_mult": 1.0,
+        "hitstun_mult": 1.0,
+        "startup_mult": 1.0,
+        "extra_hits": 0,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "chib": {
+      "key": "chib",
+      "name": "CHIB",
+      "archetype": "Sword Master",
+      "sprite_asset": "chib",
+      "special_behavior": {
+        "type": "slash",
+        "dash": 45,
+        "extra_hits": 1,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "sword",
+      "weapon_color": [
+        244,
+        137,
+        246
+      ],
+      "weapon_handle": [
+        120,
+        11,
+        247
+      ],
+      "colors": {
+        "body": [
+          244,
+          137,
+          246
+        ],
+        "accent": [
+          120,
+          11,
+          247
+        ],
+        "eye": [
+          255,
+          255,
+          255
+        ]
+      },
+      "body": {
+        "width": 64,
+        "height": 136,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.25,
+        "jump": 1.1,
+        "health": 0.85,
+        "damage": 1.05,
+        "defense": 1.05
+      },
+      "attack_mods": {
+        "reach": 1.05,
+        "startup": 0.78,
+        "cooldown": 0.85
+      },
+      "weapon_effect": {
+        "knockback_mult": 0.95,
+        "reach_mult": 1.05,
+        "hitstun_mult": 1.0,
+        "startup_mult": 0.8,
+        "extra_hits": 1,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    }
+  },
+  "sha256": {
+    "Swordsman/Attack_1.png": "24f6ce111fc8fd3214ebde04594e1c69b19bc9767d091e35ff18615d361537ca",
+    "Swordsman/Attack_2.png": "327ac89f44eeb2917430c94cd051997bb1dab712c92432699606b4064a78fef0",
+    "Swordsman/Attack_3.png": "7a209491aba7c21000dc13f83826a2d12095ea7392aae6fcdcb7e58bc2e27156",
+    "Swordsman/Dead.png": "268aac11f576eecfe9e75b780cc8c8c71af4931508946409af76f4db817cf7b9",
+    "Swordsman/Hurt.png": "9daf9853ecce9f044ed48e3807bfb0cb20716ee3ee8d8a15ac7aff0cd8e53b82",
+    "Swordsman/Idle.png": "35e2dbcc2d8e119c7a99d893145ec5a86e3a0e59f321ac7f6885f3d3d7c67c13",
+    "Swordsman/Idle_2.png": "1dc8fb791cd0c50399abefb8825ec55bb819d4ce71bece83db67ae3f68b3dc2e",
+    "Swordsman/Jump.png": "4d0621d0630ccae1d7a8fb23245188655d545915d98169b0e5dbeafc458e1d9c",
+    "Swordsman/Run.png": "2fe193df5bc0355216e9a12fbb00ea3e332d41cbb2c0c317beab0d5c4172b710",
+    "Swordsman/Walk.png": "a778370dea19c2155dd45c7fae32e0db7fda3e7bc082d57071d36a8705ae00b2",
+    "Wizard/Attack_1.png": "e7a3b80ee9fee698c8cb735f23023536a21e5d461fccfd74bfe468feae97c351",
+    "Wizard/Attack_2.png": "fedf29b03fa839d01872fe996971f5a465cbb7194b251ec3fe5c5603792048b7",
+    "Wizard/Attack_3.png": "aed0121ab9fc36f832afb5f1a2ea2e646dcefded8bae59de0f47b98dc4500e0a",
+    "Wizard/Dead.png": "3d4ac874157a76950cdbf51f5a5372cfac8990e639d8af9b8d9f764c4dfdd225",
+    "Wizard/Hurt.png": "20a447e34a63688ae8a3c074b23f80adf9a04268d66960ce3b9a261a0167d7f8",
+    "Wizard/Idle.png": "34558bb71bcaefc9c1b8c5da6d4ce36c6b113f72e08cefc3b9d0bb6ffe9acfb0",
+    "Wizard/Idle_2.png": "7b2c668d949b480301e071af78c30f49c6dd7d59cee5ff867ca2f6a9d051e3cf",
+    "Wizard/Jump.png": "e7e8b31a2f96ab45e8d21409fec417bea8c14c803153a3ec78746d6a9917b0dd",
+    "Wizard/Run.png": "43dbcad1bcddedf236bca26ad31f62a3058aaec62ecc6a21a4f5fe334268d44d",
+    "Wizard/Walk.png": "4b855f5dc5c34d28dc7845672fde7ce3e2fb492b26f3ee3642785e2264c2d431",
+    "Musketeer/Attack_1.png": "d3b20d3b30907eaf553da9596faedf19cad8b1c460a9b8d3291e94f861fef0ae",
+    "Musketeer/Attack_2.png": "2a576a750cdf11969a2b1111b506e13188ef6935534bc56c5538681543844d9f",
+    "Musketeer/Attack_3.png": "512d9634d2321db8a37addb49552e23bf1ec7fb1bf70faeb18638c7f1f189aa0",
+    "Musketeer/Attack_4.png": "d7d29f348d3cf57dbec0f91d309eae17ca46e34ba24190552f7aaf92c36fd4f8",
+    "Musketeer/Dead.png": "78b61047124dbd7db9f9b2892fb5e3ced408f21cb38dea1feaefd225dca3c239",
+    "Musketeer/Hurt.png": "26bb2fe3263af91fb27deadc09b518e0554c3a2892de1a2ed7e00909a5443098",
+    "Musketeer/Idle.png": "ca7895ed0b29b0de45b68b9dbe68fc7ebd108f59705bf3d6922abcd51939f28d",
+    "Musketeer/Jump.png": "6c0b99ac11bcee6da2a20e248ac50d7c9004cc65d603b594cf1acb79c776b5cb",
+    "Musketeer/Run.png": "a402ef70d6ff54ee2ee344fc142daae30931844acda8cba40d11c7a4e873fdaa",
+    "Musketeer/Walk.png": "0a5591b68f9b04edc1a624fbc234cc271feb06dd76d026598c602010da39ba0b",
+    "Archer/Arrow.png": "ae01e4acc16511f30d35c60fa8d45aa8ad8e9b75d1e566d6287961b1a7e5f844",
+    "Archer/Attack_1.png": "09fafe71e28bf2ceacd012f5d1ed1c8f367bf3f0efc2b8e7aadc7cbc61a8d63b",
+    "Archer/Dead.png": "69e3a2c64aa47fd68affa2dc8659c12ade3311ae8a7d7bd601c12f18b4881928",
+    "Archer/Hurt.png": "7e89079e35e8050c9b9fb5afbab9996f4bf0068a7f9e3cb4c4716b8a60552174",
+    "Archer/Idle.png": "0542d2e8f6e4cca75f5611d68fc52e6438b3f695528e0820540f5187a1169bf5",
+    "Archer/Idle_2.png": "a6e428a195b82b6e89b0a1b2b8cb61838db90ff353e607658ff39a726d9bda89",
+    "Archer/Jump.png": "24477e5185430e715ab4d5727e954cd38181f382dac49d67b873d3983c3b3271",
+    "Archer/Run.png": "a749853f9d4b08aba358517335dc4bd8359f894082bc31cdb6627d02666c2113",
+    "Archer/Shot_1.png": "da936d1ff0aaafc187106a2096a61c821f6fae410d5433713da15d698b5cfe1d",
+    "Archer/Shot_2.png": "ec05af475075bcefa2917111d9f5bbdbbd26621e20147d228ed0168a0ecf6851",
+    "Archer/Walk.png": "426a96aefed6754cc3a627c813dac49b9f31ab0ecba0e459b074d12256d1d06e",
+    "Enchantress/Attack_1.png": "ac10d06cf317ba53a0fbe05475dccb355536841803c137fc91304db7a233487e",
+    "Enchantress/Attack_2.png": "93a0768f1a86ba9f65a3d58f29b2c3b35c514aefa562f517e2e3a788a36aa7ba",
+    "Enchantress/Attack_3.png": "112a24e7ce7ae51896a7838aad8b2fe631b0bf909b4be8f2b65722bb29982157",
+    "Enchantress/Attack_4.png": "ca7f0cf294c28358999f19ff1711459807e52881e9475458cbaee15f741efe14",
+    "Enchantress/Dead.png": "ca626fe480d07071ab874e743b5777723654b1b152a9c7b3d3bf958353d43a32",
+    "Enchantress/Hurt.png": "e4c27008a662e2874d311925607b4c147498ba6caaf97ce38771c31f6994e002",
+    "Enchantress/Idle.png": "e676a51e462edac239b28ee29d7c02178638d1853ffb55d6bf41cf21e343e474",
+    "Enchantress/Jump.png": "9bd2748097964730ff4fd56a63e243c62df8fef307a50a685c0f7206acf3afd6",
+    "Enchantress/Run.png": "9b09a4b7ed2cc324664c9bdd52ee3b6681f13b215057696ca98fb4a9a524a30b",
+    "Enchantress/Walk.png": "53da04cc6d5951a5f2059d54963bad2b78140b4fa67a753b7626e00fead74dc6",
+    "Knight/Attack_1.png": "11f844e747221e52c4e704bb9680f3484505e8938744ac45be0303dd9630deee",
+    "Knight/Attack_2.png": "7ac30a802990e2dda3dec8899d55bc458d50c7f94ccb84e314f627b7a1645fda",
+    "Knight/Attack_3.png": "10f6a28bc1acb5a2ae7da67b5227edf0d300fb92140149384e0b14b1c85a9d75",
+    "Knight/Attack_4.png": "38e630abd25ad93e5faf0699f518284084878ff2fd343f884cde449a75ffdc1d",
+    "Knight/Dead.png": "9c78821fd35d5838cbfecd52856b0b0856df4ec062487ac22c37ef8249568b7c",
+    "Knight/Hurt.png": "63f5fbe3214c664a2c39bcae50a43916547bb60606b0f945c0a382a99afd7f97",
+    "Knight/Idle.png": "1ffefa7247bba56dd614a78ce44ddb01d4c8d992db8ef79ab4018c469dff4d98",
+    "Knight/Jump.png": "57af7d1c8ebd5ae64747431f40de77986fe975f50ccbeb2fc7563eb0cd5ec339",
+    "Knight/Run.png": "dc7b9cd685f6da55c4891c8b52ce1fe822b0b4ed1d3834e42007b41089f565c2",
+    "Knight/Walk.png": "655eaf9d8f962aee301fede54e79b6ee2a8fc67a000ea8b7233c2abeaa6a2a60",
+    "style-v2/sanya-idle.png": "b929434ee504ed8040f3bc2fe3c46a903bf08cd7967a86195e74d4ebcae6e52d",
+    "style-v2/sanya.json": "be9fb5ef5ac052050887c59a2f13dd2309dc769509557c8581913cc88169b89e",
+    "style-v2/sanya.png": "3677574def0b8bbcd627c0d43741b55fe6b01d295224bc5ae22f7324fc8a9129",
+    "style-v2/choom-idle.png": "48f824fcd5cd3d183fb72623972a065716a6395dbb9120da54920f0cac891aa6",
+    "style-v2/choom.json": "9464afecbe69fc023de5318bbc45ef01a870b40c9feda0897a301886d75c2e1a",
+    "style-v2/choom.png": "94bd3e56ad2638edde14b7925a9c55b96c9773a6dfadf7d54e76eaece08acd74",
+    "style-v2/renegade-idle.png": "f4705ec99e64afe8a20b1a2ff5870cc5d0f00f631de08895856eb8d185b4cf84",
+    "style-v2/renegade.json": "d3a01862317f70b6ebae2178f80b43378d9815d87c4651fff5445325947c8c55",
+    "style-v2/renegade.png": "f9b0af086353b792e45c069a53a250d32272a5e6acd0945901c7460be4db5112",
+    "style-v2/chib-idle.png": "17fb448440878974f508b8f73dea11091b870b3cc1bd441b95fb9cab24228b47",
+    "style-v2/chib.json": "f47afc150416f25ce9104c432e6987e1da2489cd90035102e230c0f3994d9052",
+    "style-v2/chib.png": "098b2880c4ac337285beaaf7a20906b61c299fb2ea033d91cb79d5354c19f261"
+  }
+}

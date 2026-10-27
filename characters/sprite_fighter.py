@@ -165,6 +165,7 @@ _manifests = {}
 GENERATED_ASSETS = (
     "rook", "vex", "golem", "sanya", "choom", "saikyo", "renegade",
     "soldier", "chib", "minamoto", "raguel",
+    "sable", "nova", "jinx", "kestrel", "bramble", "iron",
 )
 
 
@@ -246,7 +247,7 @@ def _generated_frame(asset, animation, frame_index, facing):
             max(1, round(frame.get_width() * scale)),
             max(1, round(frame.get_height() * scale)),
         ))
-        if animation == "knockdown":
+        if animation == "knockdown" and not manifest.get("dedicated_knockdown", False):
             frame = pygame.transform.rotate(frame, 80)
         if facing < 0:
             frame = pygame.transform.flip(frame, True, False)

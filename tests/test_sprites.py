@@ -23,19 +23,17 @@ class SpriteTests(unittest.TestCase):
     def tearDownClass(cls):
         pygame.quit()
 
-    def test_reference_fighters_keep_their_original_sprite_packs(self):
-        expected = {'iron': 'knight', 'sable': 'swordsman', 'nova': 'wizard',
-                    'jinx': 'musketeer', 'kestrel': 'archer',
-                    'bramble': 'enchantress'}
-        for fighter, asset in expected.items():
-            self.assertEqual(character_data.get(fighter)['sprite_asset'], asset)
-            self.assertFalse(sprite_fighter.is_generated_asset(asset))
-        self.assertEqual(set(character_data.ROSTER_ORDER) - set(expected),
-                         set(sprite_fighter.GENERATED_ASSETS))
+    def test_roster_uses_the_shared_chibi_sprite_pipeline(self):
+        self.assertEqual(set(character_data.ROSTER_ORDER), set(sprite_fighter.GENERATED_ASSETS))
+        for fighter in character_data.ROSTER_ORDER:
+            with self.subTest(fighter=fighter):
+                self.assertEqual(character_data.get(fighter)['sprite_asset'], fighter)
+                self.assertTrue(sprite_fighter.is_generated_asset(fighter))
+                self.assertEqual(sprite_fighter.body_height(fighter), 72)
 
     def test_original_sprite_backups_match_the_recorded_hashes(self):
         fighters = set()
-        for directory in ('pre-style-rework', 'pre-raguel-rework'):
+        for directory in ('pre-style-rework', 'pre-raguel-rework', 'pre-roster-diversity'):
             backup = sprite_fighter.ASSET_ROOT / 'backups' / directory
             manifest = json.loads((backup / 'manifest.json').read_text(encoding='utf-8'))
             fighters.update(manifest['fighters'])
@@ -45,6 +43,16 @@ class SpriteTests(unittest.TestCase):
                         self.assertEqual(hashlib.sha256((backup / relative).read_bytes()).hexdigest(),
                                          digest)
         self.assertEqual(fighters, set(sprite_fighter.GENERATED_ASSETS))
+
+    def test_redesigned_fighters_keep_names_stats_and_moves(self):
+        path = sprite_fighter.ASSET_ROOT / 'backups' / 'pre-roster-diversity' / 'manifest.json'
+        previous = json.loads(path.read_text(encoding='utf-8'))['fighters']
+        for key, original in previous.items():
+            with self.subTest(fighter=key):
+                current = character_data.get(key)
+                for field in ('name', 'stats', 'body', 'attack_mods', 'special_behavior', 'weapon_effect'):
+                    # JSON stores tuples as lists; normalize before comparing metadata.
+                    self.assertEqual(json.loads(json.dumps(current[field])), original[field])
 
     def test_reworked_atlas_cells_are_in_bounds_and_do_not_overlap(self):
         for asset in sprite_fighter.GENERATED_ASSETS:

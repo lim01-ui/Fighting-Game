@@ -1,0 +1,134 @@
+{
+  "image": "jinx-chibi.png",
+  "body_height": 243,
+  "pixel_height": 72,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      318,
+      309
+    ],
+    "step_left": [
+      0,
+      309,
+      318,
+      309
+    ],
+    "step_right": [
+      318,
+      309,
+      318,
+      309
+    ],
+    "block": [
+      636,
+      309,
+      319,
+      309
+    ],
+    "jump": [
+      955,
+      309,
+      318,
+      309
+    ],
+    "crouch": [
+      0,
+      618,
+      318,
+      309
+    ],
+    "light_start": [
+      318,
+      618,
+      318,
+      309
+    ],
+    "light": [
+      636,
+      618,
+      408,
+      309
+    ],
+    "heavy_start": [
+      1044,
+      618,
+      229,
+      309
+    ],
+    "heavy": [
+      0,
+      927,
+      358,
+      309
+    ],
+    "special": [
+      358,
+      927,
+      334,
+      309
+    ],
+    "hit": [
+      692,
+      927,
+      266,
+      309
+    ],
+    "knockdown": [
+      958,
+      927,
+      315,
+      309
+    ]
+  },
+  "dedicated_knockdown": true,
+  "animations": {
+    "walk": [
+      "step_left",
+      "step_right"
+    ],
+    "run": [
+      "step_left",
+      "step_right"
+    ],
+    "light": [
+      "light_start",
+      "light"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy"
+    ]
+  },
+  "idle_animation": {
+    "image": "jinx-chibi.png",
+    "body_height": 243,
+    "frames": [
+      [
+        41,
+        55,
+        252,
+        243
+      ],
+      [
+        360,
+        54,
+        251,
+        245
+      ],
+      [
+        674,
+        54,
+        256,
+        245
+      ],
+      [
+        997,
+        57,
+        249,
+        242
+      ]
+    ]
+  }
+}

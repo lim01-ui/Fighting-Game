@@ -118,7 +118,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "sable": {
         "key": "sable",
-        "sprite_asset": "swordsman",
+        "sprite_asset": "sable",
         "name": "SABLE",
         "archetype": "Zoner",
         "special_behavior": {'type': 'long_swipe', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
@@ -144,7 +144,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "nova": {
         "key": "nova",
-        "sprite_asset": "wizard",
+        "sprite_asset": "nova",
         "name": "NOVA",
         "archetype": "Technical",
         "special_behavior": {'type': 'projectile', 'dash': 0, 'extra_hits': 0, 'projectiles': 1, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
@@ -170,7 +170,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "iron": {
         "key": "iron",
-        "sprite_asset": "knight",
+        "sprite_asset": "iron",
         "name": "IRON",
         "archetype": "Tank",
         "special_behavior": {'type': 'armored_bash', 'dash': 60, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 48, 'stun_frames': 0, 'pierce': False},
@@ -196,7 +196,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "jinx": {
         "key": "jinx",
-        "sprite_asset": "musketeer",
+        "sprite_asset": "jinx",
         "name": "JINX",
         "archetype": "Trickster",
         "special_behavior": {'type': 'fan_throw', 'dash': 0, 'extra_hits': 0, 'projectiles': 3, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
@@ -222,7 +222,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "kestrel": {
         "key": "kestrel",
-        "sprite_asset": "archer",
+        "sprite_asset": "kestrel",
         "name": "KESTREL",
         "archetype": "Aerial",
         "special_behavior": {'type': 'pierce_thrust', 'dash': 30, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': True},
@@ -248,7 +248,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "bramble": {
         "key": "bramble",
-        "sprite_asset": "enchantress",
+        "sprite_asset": "bramble",
         "name": "BRAMBLE",
         "archetype": "Defensive",
         "special_behavior": {'type': 'multi_hit', 'dash': 0, 'extra_hits': 2, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
@@ -301,6 +301,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "sanya": {
         "key": "sanya",
+        "species": "Slime",
         "sprite_asset": "sanya",
         "name": "SANYA",
         "archetype": "Kicks",
@@ -327,6 +328,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "choom": {
         "key": "choom",
+        "species": "Robot",
         "sprite_asset": "choom",
         "name": "CHOOM",
         "archetype": "Specialist",
@@ -379,6 +381,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "renegade": {
         "key": "renegade",
+        "species": "Treeman",
         "name": "RENEGADE",
         "archetype": "Brawler",
         "sprite_asset": "renegade",
@@ -431,6 +434,7 @@ ROSTER = {
     # ---------------------------------------------------------
     "chib": {
         "key": "chib",
+        "species": "Panda",
         "name": "CHIB",
         "archetype": "Sword Master",
         "sprite_asset": "chib",
