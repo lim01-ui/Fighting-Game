@@ -1,0 +1,1305 @@
+{
+  "source_commit": "ee2aa4c7431ec826fcd6badc2796596aed7f36db",
+  "fighters": {
+    "rook": {
+      "folder": "rook",
+      "roster_entry": {
+        "key": "rook",
+        "sprite_asset": "rook",
+        "name": "ROOK",
+        "archetype": "Balanced",
+        "special_behavior": {
+          "type": "slash",
+          "dash": 0,
+          "extra_hits": 0,
+          "projectiles": 0,
+          "teleport": false,
+          "spin": false,
+          "armor_frames": 0,
+          "stun_frames": 0,
+          "pierce": false
+        },
+        "weapon": "sword",
+        "weapon_color": [
+          220,
+          220,
+          240
+        ],
+        "weapon_handle": [
+          140,
+          150,
+          180
+        ],
+        "colors": {
+          "body": [
+            60,
+            120,
+            220
+          ],
+          "accent": [
+            255,
+            230,
+            120
+          ],
+          "eye": [
+            255,
+            255,
+            255
+          ]
+        },
+        "body": {
+          "width": 70,
+          "height": 140,
+          "crouch_ratio": 0.55
+        },
+        "stats": {
+          "speed": 1.0,
+          "jump": 1.0,
+          "health": 1.0,
+          "damage": 1.0,
+          "defense": 1.0
+        },
+        "attack_mods": {
+          "reach": 1.0,
+          "startup": 1.0,
+          "cooldown": 1.0
+        },
+        "weapon_effect": {
+          "knockback_mult": 1.0,
+          "reach_mult": 1.0,
+          "hitstun_mult": 1.0,
+          "startup_mult": 1.0,
+          "extra_hits": 0,
+          "projectile": null,
+          "shield_reflect": 0.0
+        }
+      },
+      "sprite_spec": null
+    },
+    "vex": {
+      "folder": "vex",
+      "roster_entry": {
+        "key": "vex",
+        "sprite_asset": "vex",
+        "name": "VEX",
+        "archetype": "Speed",
+        "special_behavior": {
+          "type": "dash_slash",
+          "dash": 90,
+          "extra_hits": 1,
+          "projectiles": 0,
+          "teleport": false,
+          "spin": false,
+          "armor_frames": 0,
+          "stun_frames": 0,
+          "pierce": false
+        },
+        "weapon": "daggers",
+        "weapon_color": [
+          230,
+          230,
+          240
+        ],
+        "weapon_handle": [
+          140,
+          140,
+          160
+        ],
+        "colors": {
+          "body": [
+            230,
+            80,
+            60
+          ],
+          "accent": [
+            255,
+            200,
+            90
+          ],
+          "eye": [
+            255,
+            255,
+            255
+          ]
+        },
+        "body": {
+          "width": 62,
+          "height": 132,
+          "crouch_ratio": 0.55
+        },
+        "stats": {
+          "speed": 1.4,
+          "jump": 1.15,
+          "health": 0.85,
+          "damage": 0.8,
+          "defense": 1.1
+        },
+        "attack_mods": {
+          "reach": 0.9,
+          "startup": 0.75,
+          "cooldown": 0.85
+        },
+        "weapon_effect": {
+          "knockback_mult": 0.8,
+          "reach_mult": 0.85,
+          "hitstun_mult": 0.9,
+          "startup_mult": 0.7,
+          "extra_hits": 1,
+          "projectile": null,
+          "shield_reflect": 0.0
+        }
+      },
+      "sprite_spec": null
+    },
+    "golem": {
+      "folder": "golem",
+      "roster_entry": {
+        "key": "golem",
+        "sprite_asset": "golem",
+        "name": "GOLEM",
+        "archetype": "Heavy",
+        "special_behavior": {
+          "type": "heavy_slam",
+          "dash": 0,
+          "extra_hits": 0,
+          "projectiles": 0,
+          "teleport": false,
+          "spin": false,
+          "armor_frames": 0,
+          "stun_frames": 0,
+          "pierce": false
+        },
+        "weapon": "hammer",
+        "weapon_color": [
+          140,
+          100,
+          60
+        ],
+        "weapon_handle": [
+          60,
+          40,
+          25
+        ],
+        "colors": {
+          "body": [
+            140,
+            100,
+            70
+          ],
+          "accent": [
+            220,
+            160,
+            80
+          ],
+          "eye": [
+            255,
+            200,
+            100
+          ]
+        },
+        "body": {
+          "width": 84,
+          "height": 152,
+          "crouch_ratio": 0.6
+        },
+        "stats": {
+          "speed": 0.75,
+          "jump": 0.85,
+          "health": 1.25,
+          "damage": 1.35,
+          "defense": 0.8
+        },
+        "attack_mods": {
+          "reach": 1.1,
+          "startup": 1.3,
+          "cooldown": 1.25
+        },
+        "weapon_effect": {
+          "knockback_mult": 2.0,
+          "reach_mult": 1.05,
+          "hitstun_mult": 1.2,
+          "startup_mult": 1.3,
+          "extra_hits": 0,
+          "projectile": null,
+          "shield_reflect": 0.0
+        }
+      },
+      "sprite_spec": null
+    },
+    "sanya": {
+      "folder": "Sanya",
+      "roster_entry": {
+        "key": "sanya",
+        "sprite_asset": "sanya",
+        "name": "SANYA",
+        "archetype": "Kicks",
+        "special_behavior": {
+          "type": "spin_kick",
+          "dash": 0,
+          "extra_hits": 0,
+          "projectiles": 0,
+          "teleport": false,
+          "spin": true,
+          "armor_frames": 0,
+          "stun_frames": 0,
+          "pierce": false
+        },
+        "weapon": "gauntlets",
+        "weapon_color": [
+          230,
+          60,
+          90
+        ],
+        "weapon_handle": [
+          120,
+          20,
+          40
+        ],
+        "colors": {
+          "body": [
+            220,
+            50,
+            80
+          ],
+          "accent": [
+            255,
+            255,
+            255
+          ],
+          "eye": [
+            255,
+            255,
+            255
+          ]
+        },
+        "body": {
+          "width": 66,
+          "height": 150,
+          "crouch_ratio": 0.55
+        },
+        "stats": {
+          "speed": 1.1,
+          "jump": 1.1,
+          "health": 0.95,
+          "damage": 1.05,
+          "defense": 1.0
+        },
+        "attack_mods": {
+          "reach": 1.25,
+          "startup": 1.0,
+          "cooldown": 1.0
+        },
+        "weapon_effect": {
+          "knockback_mult": 1.0,
+          "reach_mult": 1.2,
+          "hitstun_mult": 1.4,
+          "startup_mult": 1.0,
+          "extra_hits": 0,
+          "projectile": null,
+          "shield_reflect": 0.0
+        }
+      },
+      "sprite_spec": {
+        "folder": "Sanya",
+        "height": 42,
+        "directional": false,
+        "animations": {
+          "idle": [
+            [
+              "Idle.png",
+              42
+            ]
+          ],
+          "walk": [
+            [
+              "Walk.png",
+              42
+            ]
+          ],
+          "run": [
+            [
+              "Run.png",
+              42
+            ]
+          ],
+          "block": [
+            [
+              "Idle.png",
+              42
+            ]
+          ],
+          "light": [
+            [
+              "Attack1.png",
+              42
+            ]
+          ],
+          "heavy": [
+            [
+              "Attack2.png",
+              42
+            ]
+          ],
+          "special": [
+            [
+              "RunAttack2.png",
+              42
+            ]
+          ],
+          "crouch_light": [
+            [
+              "SquatAttack.png",
+              42
+            ]
+          ],
+          "crouch_heavy": [
+            [
+              "SquatAttack.png",
+              42
+            ]
+          ],
+          "air_light": [
+            [
+              "JumpAttack.png",
+              42
+            ]
+          ],
+          "air_heavy": [
+            [
+              "FallAttack.png",
+              42
+            ]
+          ],
+          "hit": [
+            [
+              "Hurt.png",
+              42
+            ]
+          ],
+          "knockdown": [
+            [
+              "Death.png",
+              42
+            ]
+          ],
+          "jump": [
+            [
+              "Jump.png",
+              42
+            ]
+          ]
+        }
+      }
+    },
+    "choom": {
+      "folder": "Choom",
+      "roster_entry": {
+        "key": "choom",
+        "sprite_asset": "choom",
+        "name": "CHOOM",
+        "archetype": "Specialist",
+        "special_behavior": {
+          "type": "stun_bolt",
+          "dash": 0,
+          "extra_hits": 0,
+          "projectiles": 1,
+          "teleport": false,
+          "spin": false,
+          "armor_frames": 0,
+          "stun_frames": 60,
+          "pierce": false
+        },
+        "weapon": "baton",
+        "weapon_color": [
+          240,
+          220,
+          60
+        ],
+        "weapon_handle": [
+          140,
+          120,
+          20
+        ],
+        "colors": {
+          "body": [
+            240,
+            210,
+            50
+          ],
+          "accent": [
+            60,
+            120,
+            230
+          ],
+          "eye": [
+            255,
+            255,
+            255
+          ]
+        },
+        "body": {
+          "width": 64,
+          "height": 138,
+          "crouch_ratio": 0.55
+        },
+        "stats": {
+          "speed": 1.25,
+          "jump": 1.05,
+          "health": 0.9,
+          "damage": 1.1,
+          "defense": 1.05
+        },
+        "attack_mods": {
+          "reach": 0.95,
+          "startup": 0.85,
+          "cooldown": 0.9
+        },
+        "weapon_effect": {
+          "knockback_mult": 1.0,
+          "reach_mult": 1.0,
+          "hitstun_mult": 1.6,
+          "startup_mult": 0.9,
+          "extra_hits": 0,
+          "projectile": "spark",
+          "shield_reflect": 0.0
+        }
+      },
+      "sprite_spec": {
+        "folder": "Choom",
+        "height": 42,
+        "directional": false,
+        "animations": {
+          "idle": [
+            [
+              "Idle.png",
+              42
+            ]
+          ],
+          "walk": [
+            [
+              "Walk.png",
+              42
+            ]
+          ],
+          "run": [
+            [
+              "Run.png",
+              42
+            ]
+          ],
+          "block": [
+            [
+              "Idle.png",
+              42
+            ]
+          ],
+          "light": [
+            [
+              "Attack1.png",
+              42
+            ]
+          ],
+          "heavy": [
+            [
+              "Attack2.png",
+              42
+            ]
+          ],
+          "special": [
+            [
+              "RunAttack2.png",
+              42
+            ]
+          ],
+          "crouch_light": [
+            [
+              "SquatAttack.png",
+              42
+            ]
+          ],
+          "crouch_heavy": [
+            [
+              "SquatAttack.png",
+              42
+            ]
+          ],
+          "air_light": [
+            [
+              "JumpAttack.png",
+              42
+            ]
+          ],
+          "air_heavy": [
+            [
+              "FallAttack.png",
+              42
+            ]
+          ],
+          "hit": [
+            [
+              "Hurt.png",
+              42
+            ]
+          ],
+          "knockdown": [
+            [
+              "Death.png",
+              42
+            ]
+          ],
+          "jump": [
+            [
+              "Jump.png",
+              42
+            ]
+          ]
+        }
+      }
+    },
+    "saikyo": {
+      "folder": "saikyo",
+      "roster_entry": {
+        "key": "saikyo",
+        "name": "SAIKYO",
+        "archetype": "Pixel Brawler",
+        "sprite_sheet": true,
+        "special_behavior": {
+          "type": "slash",
+          "dash": 0,
+          "extra_hits": 0,
+          "projectiles": 0,
+          "teleport": false,
+          "spin": false,
+          "armor_frames": 0,
+          "stun_frames": 0,
+          "pierce": false
+        },
+        "weapon": "fists",
+        "weapon_color": [
+          245,
+          220,
+          170
+        ],
+        "weapon_handle": [
+          80,
+          60,
+          45
+        ],
+        "colors": {
+          "body": [
+            230,
+            230,
+            235
+          ],
+          "accent": [
+            235,
+            70,
+            70
+          ],
+          "eye": [
+            255,
+            255,
+            255
+          ]
+        },
+        "body": {
+          "width": 68,
+          "height": 140,
+          "crouch_ratio": 0.55
+        },
+        "stats": {
+          "speed": 1.0,
+          "jump": 1.0,
+          "health": 1.0,
+          "damage": 1.0,
+          "defense": 1.0
+        },
+        "attack_mods": {
+          "reach": 1.0,
+          "startup": 1.0,
+          "cooldown": 1.0
+        },
+        "weapon_effect": {
+          "knockback_mult": 1.0,
+          "reach_mult": 1.0,
+          "hitstun_mult": 1.0,
+          "startup_mult": 1.0,
+          "extra_hits": 0,
+          "projectile": null,
+          "shield_reflect": 0.0
+        }
+      },
+      "sprite_spec": null
+    },
+    "renegade": {
+      "folder": "renegade",
+      "roster_entry": {
+        "key": "renegade",
+        "name": "RENEGADE",
+        "archetype": "Brawler",
+        "sprite_asset": "renegade",
+        "special_behavior": {
+          "type": "slash",
+          "dash": 0,
+          "extra_hits": 0,
+          "projectiles": 0,
+          "teleport": false,
+          "spin": false,
+          "armor_frames": 0,
+          "stun_frames": 0,
+          "pierce": false
+        },
+        "weapon": "fists",
+        "weapon_color": [
+          235,
+          70,
+          70
+        ],
+        "weapon_handle": [
+          80,
+          60,
+          45
+        ],
+        "colors": {
+          "body": [
+            230,
+            230,
+            235
+          ],
+          "accent": [
+            235,
+            70,
+            70
+          ],
+          "eye": [
+            255,
+            255,
+            255
+          ]
+        },
+        "body": {
+          "width": 68,
+          "height": 140,
+          "crouch_ratio": 0.55
+        },
+        "stats": {
+          "speed": 1.05,
+          "jump": 1.0,
+          "health": 1.0,
+          "damage": 1.0,
+          "defense": 1.0
+        },
+        "attack_mods": {
+          "reach": 1.0,
+          "startup": 1.0,
+          "cooldown": 1.0
+        },
+        "weapon_effect": {
+          "knockback_mult": 1.0,
+          "reach_mult": 1.0,
+          "hitstun_mult": 1.0,
+          "startup_mult": 1.0,
+          "extra_hits": 0,
+          "projectile": null,
+          "shield_reflect": 0.0
+        }
+      },
+      "sprite_spec": {
+        "folder": "renegade",
+        "height": 32,
+        "directional": false,
+        "animations": {
+          "idle": [
+            [
+              "Renegade_Idle_1_strip4.png",
+              16
+            ]
+          ],
+          "walk": [
+            [
+              "Renegade_Walk_1_strip4.png",
+              16
+            ]
+          ],
+          "run": [
+            [
+              "Renegade_Run_1_strip4.png",
+              16
+            ]
+          ],
+          "block": [
+            [
+              "Renegade_Daze_strip4.png",
+              16
+            ]
+          ],
+          "light": [
+            [
+              "Renegade_Punch_1.png",
+              24
+            ],
+            [
+              "Renegade_Punch_2.png",
+              24
+            ]
+          ],
+          "heavy": [
+            [
+              "Renegade_Kick_1.png",
+              24
+            ],
+            [
+              "Renegade_Kick_2.png",
+              24
+            ]
+          ],
+          "special": [
+            [
+              "Renegade_Head_Butt_strip2.png",
+              24
+            ]
+          ],
+          "hit": [
+            [
+              "Renegade_Hurt.png",
+              16
+            ]
+          ],
+          "knockdown": [
+            [
+              "Renegade_Knock_Out.png",
+              24
+            ]
+          ],
+          "jump": [
+            [
+              "Renegade_Kick_2.png",
+              24
+            ]
+          ]
+        }
+      }
+    },
+    "soldier": {
+      "folder": "soldier",
+      "roster_entry": {
+        "key": "soldier",
+        "name": "SOLDIER",
+        "archetype": "Tactical",
+        "sprite_asset": "soldier",
+        "special_behavior": {
+          "type": "slash",
+          "dash": 0,
+          "extra_hits": 0,
+          "projectiles": 0,
+          "teleport": false,
+          "spin": false,
+          "armor_frames": 0,
+          "stun_frames": 0,
+          "pierce": false
+        },
+        "weapon": "fists",
+        "weapon_color": [
+          100,
+          190,
+          95
+        ],
+        "weapon_handle": [
+          65,
+          95,
+          55
+        ],
+        "colors": {
+          "body": [
+            90,
+            130,
+            65
+          ],
+          "accent": [
+            170,
+            205,
+            95
+          ],
+          "eye": [
+            245,
+            245,
+            210
+          ]
+        },
+        "body": {
+          "width": 64,
+          "height": 140,
+          "crouch_ratio": 0.55
+        },
+        "stats": {
+          "speed": 0.95,
+          "jump": 0.95,
+          "health": 1.05,
+          "damage": 1.05,
+          "defense": 0.95
+        },
+        "attack_mods": {
+          "reach": 1.0,
+          "startup": 1.0,
+          "cooldown": 1.0
+        },
+        "weapon_effect": {
+          "knockback_mult": 1.0,
+          "reach_mult": 1.0,
+          "hitstun_mult": 1.0,
+          "startup_mult": 1.0,
+          "extra_hits": 0,
+          "projectile": null,
+          "shield_reflect": 0.0
+        }
+      },
+      "sprite_spec": {
+        "folder": "soldier",
+        "height": 24,
+        "directional": true,
+        "animations": {
+          "idle": [
+            [
+              "SMS_Soldier_IDLE_{direction}_strip4.png",
+              16
+            ]
+          ],
+          "walk": [
+            [
+              "SMS_Soldier_WALK_{direction}_strip4.png",
+              16
+            ]
+          ],
+          "run": [
+            [
+              "SMS_Soldier_RUN_{direction}_strip4.png",
+              16
+            ]
+          ],
+          "block": [
+            [
+              "SMS_Soldier_PUSHPULL_{direction}_strip4.png",
+              16
+            ]
+          ],
+          "light": [
+            [
+              "SMS_Soldier_ATTACKPUNCH_{direction}.png",
+              16
+            ]
+          ],
+          "heavy": [
+            [
+              "SMS_Soldier_ATTACKKICK_{direction}.png",
+              16
+            ]
+          ],
+          "special": [
+            [
+              "SMS_Soldier_ATTACKKICK_{direction}.png",
+              16
+            ]
+          ],
+          "hit": [
+            [
+              "SMS_Soldier_HITHURT_{direction}.png",
+              16
+            ]
+          ],
+          "knockdown": [
+            [
+              "SMS_Soldier_HITHURT_{direction}.png",
+              16
+            ]
+          ],
+          "jump": [
+            [
+              "SMS_Soldier_JUMP_{direction}.png",
+              16
+            ]
+          ]
+        }
+      }
+    },
+    "chib": {
+      "folder": "Chib",
+      "roster_entry": {
+        "key": "chib",
+        "name": "CHIB",
+        "archetype": "Sword Master",
+        "sprite_asset": "chib",
+        "special_behavior": {
+          "type": "slash",
+          "dash": 45,
+          "extra_hits": 1,
+          "projectiles": 0,
+          "teleport": false,
+          "spin": false,
+          "armor_frames": 0,
+          "stun_frames": 0,
+          "pierce": false
+        },
+        "weapon": "sword",
+        "weapon_color": [
+          244,
+          137,
+          246
+        ],
+        "weapon_handle": [
+          120,
+          11,
+          247
+        ],
+        "colors": {
+          "body": [
+            244,
+            137,
+            246
+          ],
+          "accent": [
+            120,
+            11,
+            247
+          ],
+          "eye": [
+            255,
+            255,
+            255
+          ]
+        },
+        "body": {
+          "width": 64,
+          "height": 136,
+          "crouch_ratio": 0.55
+        },
+        "stats": {
+          "speed": 1.25,
+          "jump": 1.1,
+          "health": 0.85,
+          "damage": 1.05,
+          "defense": 1.05
+        },
+        "attack_mods": {
+          "reach": 1.05,
+          "startup": 0.78,
+          "cooldown": 0.85
+        },
+        "weapon_effect": {
+          "knockback_mult": 0.95,
+          "reach_mult": 1.05,
+          "hitstun_mult": 1.0,
+          "startup_mult": 0.8,
+          "extra_hits": 1,
+          "projectile": null,
+          "shield_reflect": 0.0
+        }
+      },
+      "sprite_spec": {
+        "folder": "Chib",
+        "height": 42,
+        "directional": false,
+        "animations": {
+          "idle": [
+            [
+              "Chib_Idle.png",
+              42
+            ]
+          ],
+          "walk": [
+            [
+              "Chib_Walk.png",
+              42
+            ]
+          ],
+          "run": [
+            [
+              "Chib_Run.png",
+              42
+            ]
+          ],
+          "block": [
+            [
+              "Chib_WalkAttack_block.png",
+              42
+            ]
+          ],
+          "light": [
+            [
+              "Chib_Attack_light.png",
+              42
+            ]
+          ],
+          "heavy": [
+            [
+              "Chib_Attack_heavy.png",
+              42
+            ]
+          ],
+          "special": [
+            [
+              "Chib_SquatAttack.png",
+              42
+            ]
+          ],
+          "hit": [
+            [
+              "Chib_Hurt.png",
+              42
+            ]
+          ],
+          "knockdown": [
+            [
+              "Chib_Death.png",
+              42
+            ]
+          ],
+          "jump": [
+            [
+              "Chib_Jump.png",
+              42
+            ]
+          ]
+        }
+      }
+    },
+    "minamoto": {
+      "folder": "Minamoto",
+      "roster_entry": {
+        "key": "minamoto",
+        "name": "MINAMOTO",
+        "archetype": "Archer",
+        "sprite_asset": "minamoto",
+        "sprite_scale": 1.28,
+        "special_behavior": {
+          "type": "projectile",
+          "dash": 0,
+          "extra_hits": 0,
+          "projectiles": 1,
+          "teleport": false,
+          "spin": false,
+          "armor_frames": 0,
+          "stun_frames": 16,
+          "pierce": false
+        },
+        "weapon": "sword",
+        "weapon_color": [
+          173,
+          47,
+          69
+        ],
+        "weapon_handle": [
+          20,
+          24,
+          46
+        ],
+        "colors": {
+          "body": [
+            20,
+            24,
+            46
+          ],
+          "accent": [
+            173,
+            47,
+            69
+          ],
+          "eye": [
+            245,
+            255,
+            232
+          ]
+        },
+        "body": {
+          "width": 64,
+          "height": 140,
+          "crouch_ratio": 0.55
+        },
+        "stats": {
+          "speed": 1.15,
+          "jump": 1.05,
+          "health": 1.0,
+          "damage": 1.05,
+          "defense": 1.0
+        },
+        "attack_mods": {
+          "reach": 1.1,
+          "startup": 0.82,
+          "cooldown": 0.88
+        },
+        "weapon_effect": {
+          "knockback_mult": 1.0,
+          "reach_mult": 1.1,
+          "hitstun_mult": 1.0,
+          "startup_mult": 0.82,
+          "extra_hits": 0,
+          "projectile": "arrow",
+          "shield_reflect": 0.0
+        }
+      },
+      "sprite_spec": {
+        "folder": "Minamoto",
+        "height": 128,
+        "directional": false,
+        "animations": {
+          "idle": [
+            [
+              "minamoto_Idle.png",
+              128
+            ]
+          ],
+          "walk": [
+            [
+              "minamoto_Walk.png",
+              128
+            ]
+          ],
+          "run": [
+            [
+              "minamoto_Run.png",
+              128
+            ]
+          ],
+          "block": [
+            [
+              "minamoto_Idle.png",
+              128
+            ]
+          ],
+          "light": [
+            [
+              "minamoto_light_attack.png",
+              128
+            ]
+          ],
+          "heavy": [
+            [
+              "minamoto_heavy_attack.png",
+              128
+            ]
+          ],
+          "special": [
+            [
+              "minamoto_Special_shooting.png",
+              128
+            ]
+          ],
+          "hit": [
+            [
+              "minamoto_Hurt.png",
+              128
+            ]
+          ],
+          "knockdown": [
+            [
+              "minamoto_Dead.png",
+              128
+            ]
+          ],
+          "jump": [
+            [
+              "minamoto_Jump.png",
+              128
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "sha256": {
+    "Chib/Chib_Attack_heavy.png": "ba648255381727697b9666d2dc521de04a45016f5376d3c5bd3440db3ca9c756",
+    "Chib/Chib_Attack_light.png": "ba170a7ceb78d6ab9cd166394920b28548dbe5cd05d1f9f0490c65eeb47877c3",
+    "Chib/Chib_Death.png": "7d54becf371af00250004deb0cc5853f28c703b01d51251058e74b3db88ad4f7",
+    "Chib/Chib_Hurt.png": "811eff655cff6601c787d0172570e072134fc2071a74e3cfa912efc85585c7b8",
+    "Chib/Chib_Idle.png": "a06b5950a072be6c8482b5cbc3976c98cc360c68893eac5dc6cdc972d3069186",
+    "Chib/Chib_Jump.png": "7566125c30e0f2cb4bec4b363dbb195bcc0dafd8cbbd7d113ce7fe95dd8ce83b",
+    "Chib/Chib_Run.png": "838de33cf5cabba5b1e259e19b09feb554fdfa15a2db862cde423d0c37e3ba13",
+    "Chib/Chib_SquatAttack.png": "8ce49f91be6fc4ab8935b2b6ca29ab193f2b9beb953ee61ebf3452bea04fe0ae",
+    "Chib/Chib_Walk.png": "eb07fcd53543fa7d01d895c3dcd67e1f534275a04aa759e1386bb5035994debd",
+    "Chib/Chib_WalkAttack_block.png": "be095b6ada018c2119bd527cddba9210850fd6ee31ba4c3320c7f1706b8fd53d",
+    "Choom/Attack1.png": "5014cbe60fc6e0930d6cd550b57d760c56a21d7fbaefd0e675654690086ccfad",
+    "Choom/Attack2.png": "4683d00832cb30e09181b4ee9c71ad9bdae750b489c76278ab6adbe12f4eae28",
+    "Choom/Death.png": "fd8a376ffc47cf3a6bd2809385fede9feb73364cb8d0b79b586cdeec625d2fed",
+    "Choom/FallAttack.png": "b1ba375baae1dd5fcf0560eef2b27127c0ac0f7d670bc463ceab4360fb50ad8b",
+    "Choom/Hurt.png": "da8a7ed9c75f4ef87c3b50c6ef818111b1cc3dcf7db63d47f6fa55377ba6184d",
+    "Choom/Idle.png": "f0c5897c71b80c7ea23e281fe8bfa8c5fe6fbc536797f41953e0d9ae9b3dc9fe",
+    "Choom/Jump.png": "cc7987e48c831b784ee44ac375931432a7bcc2625abca3ffaeb78e7eb597ffcb",
+    "Choom/JumpAttack.png": "656c7026fcb9482426ba45adf3d37880d3049d7acebfe832710a4fa791e9c224",
+    "Choom/Run.png": "9e1b856f6e1056267cbc2cc5d0a7205b76a42f3db6ea35f040e613ee23acc06b",
+    "Choom/RunAttack1.png": "1e2cd95a110259d57cd63fc792b2af623ef630fe96f1d00536d94dea02c09a15",
+    "Choom/RunAttack2.png": "2ee07fafd28916cc83508e42870b8d41c2b11007423866beaab265ccc511b29a",
+    "Choom/Squat.png": "895fb0dd82df9406c2854687c51ec0aa2fd29ed5ad045be768f21bb455fa2ff8",
+    "Choom/SquatAttack.png": "cf9fe72b03aacd8864fc263ada5061098b147cd5f19087cb8f776a80667d5934",
+    "Choom/Walk.png": "c1a66bbf1f5e5451033f6ada4fdf6101d87a7a939361b4d8486ad247da70e330",
+    "Choom/WalkAttack1.png": "ae3aaa10d418c7118737cf442e012986bb45b56736b96d10f916b702160167e0",
+    "Choom/WalkAttack2.png": "416b097122e96bf5c0986bf81c2419dea5ad1fd40058a3b94e6ec22bfda93d33",
+    "golem/fighter-v1.json": "ee002ed378389f7f2f08f587b0b195aa3bfb73e048444077570b9d0761f6bbad",
+    "golem/fighter-v1.png": "cc552543aa9eaa38468e865f6ce1ed8bd7c0ed03fdd97917c08c71e33f70d5cd",
+    "golem/fighter-v1.prompt.json": "4a997b3e5e602d25cc3cd0f026a2d0cec97e319a1d2c78250c50e631ba886f16",
+    "loaders/characters/character_data.py": "2417238180f5a357edac981c8b40995cc818b4213459f57e65c3ba8edd1dfe65",
+    "loaders/characters/pixel_fighter.py": "81d7cb6cdfc68ff13ea874c92435ff45226b471a84cd8b4ae1f625a6ba4d21d2",
+    "loaders/characters/player.py": "5e94b20b44bcd00a262b6b5b4eb1828bdc9048fc57c37f7fcfc5ca1df3a030f4",
+    "loaders/characters/sprite_fighter.py": "0f086fc520960358d3226520c5ca4e2ad3c417a2253b69f278cd2073955c78d6",
+    "Minamoto/minamoto_Arrow.png": "10c6e975eaee94bf214e0c66ea719dbf6bb3c6bd37df7e21e32dc94d722e8d6c",
+    "Minamoto/minamoto_Dead.png": "06c9a77832fdd42b13b4296727fbea27edcd293a1a6d2fb28b868f106e005409",
+    "Minamoto/minamoto_heavy_attack.png": "74f21a880545828fee702d6a92b4a580ef4b71381cb2ded96c893ab067d02f62",
+    "Minamoto/minamoto_Hurt.png": "10397e55931fd17c165c0936c2dc678ff4724c046331fb719b7979c6923b524a",
+    "Minamoto/minamoto_Idle.png": "f9084aacf3a8751de6593487ceaba09bf4bc6d9598121cb2f2f07a6e7be1f6c9",
+    "Minamoto/minamoto_Jump.png": "7a52550c3fd2effd166ba297ee380ef0aca803573549eb74cf0b046d3c5ba61c",
+    "Minamoto/minamoto_light_attack.png": "654a571bc7b9e9c6f3e03e95cf85450fd0902fbeb74415fa88014332dbb3098d",
+    "Minamoto/minamoto_Run.png": "0623194db40fb7e334e84704c1910effefea801b77fb6209014a328894de8442",
+    "Minamoto/minamoto_Special_shooting.png": "52af562bbb95edbceec18310e8e48c37b5782d50e323ce6983e3b339945a9905",
+    "Minamoto/minamoto_Walk.png": "1de1382f55b5254206cf1f7b155abeffc7371a1f622ecdcdeed16a80c16f5727",
+    "renegade/Renegade_Daze_strip4.png": "35a855400aa912835315702b911a080d96564b3aa1b0dd0c590adb1a68b37530",
+    "renegade/Renegade_Head_Butt_strip2.png": "6398ae9ad57485b5d0ae1523385e29c76b871af8b16350e8442cdc59da8cd44a",
+    "renegade/Renegade_Hurt.png": "f1e66b54c7cd17dcb0dc57bfad90f70c1ae9640f5fc3ba50d4d70f51dcbb5495",
+    "renegade/Renegade_Idle_1_strip4.png": "bbdf5aabf50446762d29d1c2caf60d7ccb58837d6865729e60fa2d3e6ee53814",
+    "renegade/Renegade_Kick_1.png": "e31e63a66942e44bfd986e4cbed42fa16f720f8767eccbe5cb49482d2494cae0",
+    "renegade/Renegade_Kick_2.png": "76fcacd61aa8eda1bf0f5f0b20b683e3e6b94b902aac4634d7ff27997cc3c897",
+    "renegade/Renegade_Knock_Out.png": "25f0613da15562587b17fe723f0b86d96b8a3f0fd09b9e63c0f99a9b0da542cf",
+    "renegade/Renegade_Punch_1.png": "87ecc2cac17183a9a26a084373d3f796f8e18e5bcbe379e2363c0f9cdffec471",
+    "renegade/Renegade_Punch_2.png": "daa199cb5ab3436717310fffcb1fcc62eeec9aabf3a4e2ef59949b6bd2699dcc",
+    "renegade/Renegade_Run_1_strip4.png": "4ac977f9d76747eba5a35e68b11b0fce214691e62714bb0db3208b24169cfe32",
+    "renegade/Renegade_Walk_1_strip4.png": "6d0e5db38aa810a12bbc3ca003789fe56e0fc152da2b763b6378e1185a422db4",
+    "rook/fighter-v1.json": "6d7f950af8ffdc55a5688069c4f6f4760c134ac31f41882f72e1c5c66d996ca6",
+    "rook/fighter-v1.png": "538436bdd347c8050d11d3a8a4047cd0194b31372a5fb5a0747e67a6b6f65688",
+    "rook/fighter-v1.prompt.json": "1c0c73441d0544b7084e474be2192ae6739fd2d00ae6ad78970a9809d5de0bf8",
+    "rook/portrait.png": "98e021cad9adcdcac2de42ce841b9b71dbc44e629063e95e428063995f6a7f88",
+    "saikyo/character2_v4_0.gif": "703eeb0c99b26f372d5e93fada439257ee0581300f5bea2ca971f7dbb16ae503",
+    "saikyo/README.txt": "9e3a0424057ca95c5490ce187e418dae4b84b6734ce742e575005ed44e825098",
+    "Sanya/Attack1.png": "cf47c512dfafe8356286164c9c38ef30d5163bbcfb98abb0f73efaadf4306324",
+    "Sanya/Attack2.png": "f4a34f2789463aa3755b62f9ea1468992c0dcaf12e8adc42a4579fbaae2dcadd",
+    "Sanya/Death.png": "d184a68b8d57f740105c9580916579d69c7e9a279a0ebf399e8849dc9b59de9d",
+    "Sanya/FallAttack.png": "9b76042b352498caa4fe68ef29f5d938999208a99097c8d843bf7e040326b164",
+    "Sanya/Hurt.png": "179f4432f28241edaa7398085d3cffb0ed95f44d24d9206964aa28fd5ee07818",
+    "Sanya/Idle.png": "ccb0f91dcca6fd3679895e5cf2d2f07e60d84356971980d19c2ed79ed97655ad",
+    "Sanya/Jump.png": "d567034c8bd31c4a64be1fd5dc4d0b710fc6f78d22fd6974aeed1f54e1814967",
+    "Sanya/JumpAttack.png": "69aa64afdefc8d78c990d5acc9dc7ba58f4a4944f3e740c88b80600c1fc85d21",
+    "Sanya/Run.png": "17eb25b6664e37a2e37beb6398bb8053b25afa1aa09a8215b80b9587bfdd9465",
+    "Sanya/RunAttack1.png": "3e54ce9bbcd042a4c0a57bc968bcaacd6502fe1c8e0c43525cb493bcb9500525",
+    "Sanya/RunAttack2.png": "e6e8a4d56cf22f183fc25a38c6da00aca12151c73a68ccd367ec046d20175a16",
+    "Sanya/Squat.png": "6998737cabf1340e085e9a7b3d84494faefe6110215b63bf57b860e4d7f24a2b",
+    "Sanya/SquatAttack.png": "a426f665b87d4bb9f6da055fd64ca7e32e0422249b51b8a09de022675663e22a",
+    "Sanya/Walk.png": "0972d7c70d724feb0d88a78ae43378e77dd94c1ead4bc7698dc578bb8a3e14b5",
+    "Sanya/WalkAttack1.png": "519fdd770d7bd100d5a07a26984fa085c6d1efb2e48a5223236361e15c4192e1",
+    "Sanya/WalkAttack2.png": "9c9f0a6503f09b74e8fbde25ceddf508270764f38062623fca78a2ad6a53595a",
+    "soldier/SMS_Soldier_ATTACKKICK_EAST.png": "dd26fbac59a4c09c5a749e3f5fe5d6b33e88c800c095b7848839348b5ca1ddae",
+    "soldier/SMS_Soldier_ATTACKKICK_WEST.png": "2663872f9b57fe243e2b962ecdf5d8477785b91200f08176db471355659db43e",
+    "soldier/SMS_Soldier_ATTACKPUNCH_EAST.png": "04ad2da6eed173a703bca37d26c00afdf216f2b4b216691288b5b7ed691b6102",
+    "soldier/SMS_Soldier_ATTACKPUNCH_WEST.png": "5e343f9b440649ae69edf15237b16a9e1418785ac1535d6aae2939a1d71a95b3",
+    "soldier/SMS_Soldier_HITHURT_EAST.png": "95ac21791d3c9a5ac0d4451ecf6f8754b3a3405ec5ff22c86d8585ae63daf253",
+    "soldier/SMS_Soldier_HITHURT_WEST.png": "c586bce70d3dfc37721ad17f88f26ba60438c81ff6b0539b30927389179c2601",
+    "soldier/SMS_Soldier_IDLE_EAST_strip4.png": "56905459de623f1054e16e19e52834e267444a35f2cf2afedfe1d4a4242c9b59",
+    "soldier/SMS_Soldier_IDLE_WEST_strip4.png": "da0c58f084de1f62c4693ccb096d9ee3d9604eeedc2ab67d05c9d61b1da95d0f",
+    "soldier/SMS_Soldier_JUMP_EAST.png": "50c8d1a7d30f008d7eb134627d32ac3853f587b724412ed2d4b49d0bb169b14c",
+    "soldier/SMS_Soldier_JUMP_WEST.png": "3581f66b787b9ba47a4e584864fde19d4a47b979596071d5d37b869114771587",
+    "soldier/SMS_Soldier_PUSHPULL_EAST_strip4.png": "f171fef389f839c3ae39a3d3640e4bb50379fd2c90d1a70dc8f0c6bbcc28293a",
+    "soldier/SMS_Soldier_PUSHPULL_WEST_strip4.png": "dfe6ae0003cf3a35fcaa336d53ad36408a0887363bb1f6559da32c80c6f83421",
+    "soldier/SMS_Soldier_RUN_EAST_strip4.png": "28495abd7907813be74488ac116209131eab1e8ae391dc48690b31db5e3dd2b2",
+    "soldier/SMS_Soldier_RUN_WEST_strip4.png": "f88264ab3762c52310964c165f286b419c58da2af4718d14f3906eb87c359721",
+    "soldier/SMS_Soldier_WALK_EAST_strip4.png": "9e03bf88e77f8258d72f8f6e096be163442176a2b9b4f291beddb814e277f331",
+    "soldier/SMS_Soldier_WALK_WEST_strip4.png": "544c577dfe9925c36f94c985f0d8d82277ca45397a8b2fe1fd19552987fd787c",
+    "vex/fighter-v1.json": "2e2470460a7719ab15d28266f630fb3c01175fb6bc8cafbe875cdb75233a73de",
+    "vex/fighter-v1.png": "51d6432a81083a6f932a6ca72f8153615dea1b40d76cdeeaf758453f66341f78",
+    "vex/fighter-v1.prompt.json": "6809b72f5c93317c26b7e5c5e37bf867c92568534c66b3e393e7217a2b2d02d7"
+  }
+}
