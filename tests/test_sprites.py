@@ -9,6 +9,7 @@ from unittest.mock import patch
 import pygame
 import settings
 from characters import character_data, sprite_fighter
+from ui import character_select
 from characters.player import Player, S_IDLE, S_WALK, S_CROUCH, S_GUARD, S_HITSTUN, S_BLOCKSTUN, S_KNOCKDOWN
 
 
@@ -53,8 +54,53 @@ class SpriteTests(unittest.TestCase):
                 with self.subTest(fighter=asset, cell=index):
                     self.assertTrue(image.get_rect().contains(rect))
                     self.assertFalse(any(rect.colliderect(other) for other in cells[index + 1:]))
-            self.assertEqual(sprite_fighter._load_frame(asset, 'idle', 0, 1).get_height(),
-                             manifest['pixel_height'])
+            idle = sprite_fighter._load_frame(asset, 'idle', 0, 1)
+            self.assertAlmostEqual(idle.get_bounding_rect(min_alpha=16).height,
+                                   manifest['pixel_height'], delta=1)
+
+    def test_idle_loops_have_distinct_frames_and_stable_canvas_and_feet(self):
+        for asset in sprite_fighter.GENERATED_ASSETS:
+            spec = sprite_fighter._manifest(asset)['idle_animation']
+            sheet = pygame.image.load(str(sprite_fighter.ASSET_ROOT / 'style-v2' / spec['image']))
+            self.assertEqual(len(spec['frames']), 4)
+            for rect in spec['frames']:
+                self.assertTrue(sheet.get_rect().contains(pygame.Rect(rect)))
+            for facing in (-1, 1):
+                with self.subTest(fighter=asset, facing=facing):
+                    frames = []
+                    for tick in (0, 180, 360, 540, 720):
+                        with patch('pygame.time.get_ticks', return_value=tick):
+                            frames.append(sprite_fighter.preview_frame(asset, facing))
+                    self.assertEqual(len({frame.get_size() for frame in frames}), 1)
+                    self.assertEqual(len({pygame.image.tobytes(frame, 'RGBA')
+                                          for frame in frames[:4]}), 4)
+                    self.assertIs(frames[0], frames[4])
+                    bottoms = [frame.get_bounding_rect(min_alpha=16).bottom for frame in frames]
+                    self.assertLessEqual(max(bottoms) - min(bottoms), 1)
+                    for i, frame in enumerate(frames[:4]):
+                        opposite = sprite_fighter._load_frame(asset, 'idle', i, -facing)
+                        self.assertEqual(pygame.image.tobytes(frame, 'RGBA'),
+                                         pygame.image.tobytes(pygame.transform.flip(opposite, True, False), 'RGBA'))
+
+    def test_character_select_animates_reworked_cards_and_large_preview(self):
+        screen = pygame.display.get_surface()
+        clock = type('Clock', (), {'tick': lambda self, fps: 16})()
+        screenshots = []
+        for tick in (0, 360):
+            with patch('pygame.time.get_ticks', return_value=tick), \
+                 patch('pygame.event.get', side_effect=[[], [pygame.event.Event(pygame.QUIT)]]), \
+                 patch('pygame.display.flip', side_effect=lambda: screenshots.append(screen.copy())):
+                character_select.run_character_select(screen, clock)
+        for asset in sprite_fighter.GENERATED_ASSETS:
+            with self.subTest(fighter=asset):
+                rect = character_select._cell_rect(character_data.ROSTER_ORDER.index(asset))
+                self.assertNotEqual(pygame.image.tobytes(screenshots[0].subsurface(rect), 'RGB'),
+                                    pygame.image.tobytes(screenshots[1].subsurface(rect), 'RGB'))
+        preview = pygame.Rect(character_select.PANEL_LEFT + 20,
+                              character_select.PANEL_TOP + 20,
+                              character_select.PANEL_W - 40, 200)
+        self.assertNotEqual(pygame.image.tobytes(screenshots[0].subsurface(preview), 'RGB'),
+                            pygame.image.tobytes(screenshots[1].subsurface(preview), 'RGB'))
 
     def test_generated_poses_are_nonempty_and_flip_correctly(self):
         for asset in sprite_fighter.GENERATED_ASSETS:

@@ -22,6 +22,10 @@ use the [style-v2 atlases](style-v2/README.md). Each has twelve poses, a two-ste
 walk cycle, light/heavy windup and strike poses, guard, jump, crouch, special and
 hurt artwork. Knockdown rotates the hurt pose; ultimate uses the special pose.
 These are compact pose atlases rather than full high-frame-count animations.
+All ten also have separate four-frame idle breathing strips. The character
+select cards and large preview, VS screen and combat idle state cycle those
+frames on a shared canvas with a stable foot baseline. Their exact generation
+prompts are in [idle-generation.json](style-v2/idle-generation.json).
 
 The built-in image_gen tool generated every replacement sheet separately,
 using the original Knight/Swordsman sprites and the simplified new Rook sheet

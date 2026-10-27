@@ -190,8 +190,39 @@ def foot_padding_ratio(asset):
     return _SPECS.get(asset, {}).get("foot_padding_ratio", 0.0)
 
 
+def _idle_frame(asset, frame_index, facing):
+    manifest = _manifest(asset)
+    spec = manifest["idle_animation"]
+    index = frame_index % len(spec["frames"])
+    key = (asset, "idle_cycle", index, facing)
+    if key not in _frames:
+        sheet_key = (asset, "idle_sheet")
+        if sheet_key not in _sheets:
+            _sheets[sheet_key] = pygame.image.load(
+                str(ASSET_ROOT / "style-v2" / spec["image"])
+            ).convert_alpha()
+        scale = manifest["pixel_height"] / spec["body_height"]
+        dimensions = [
+            (max(1, round(rect[2] * scale)), max(1, round(rect[3] * scale)))
+            for rect in spec["frames"]
+        ]
+        # One canvas/foot baseline for the whole loop. Per-frame tight fitting
+        # would resize away the breathing and make previews jump between poses.
+        canvas = pygame.Surface((max(w for w, h in dimensions),
+                                 max(h for w, h in dimensions)), pygame.SRCALPHA)
+        source = _sheets[sheet_key].subsurface(pygame.Rect(spec["frames"][index]))
+        image = pygame.transform.scale(source, dimensions[index])
+        canvas.blit(image, image.get_rect(midbottom=canvas.get_rect().midbottom))
+        if facing < 0:
+            canvas = pygame.transform.flip(canvas, True, False)
+        _frames[key] = canvas
+    return _frames[key]
+
+
 def _generated_frame(asset, animation, frame_index, facing):
     manifest = _manifest(asset)
+    if animation == "idle" and "idle_animation" in manifest:
+        return _idle_frame(asset, frame_index, facing)
     sequence = manifest.get("animations", {}).get(animation, [animation])
     pose_name = sequence[frame_index % len(sequence)]
     pose = manifest["poses"].get(pose_name, manifest["poses"]["idle"])
