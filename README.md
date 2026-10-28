@@ -1,4 +1,4 @@
-# Python Fighters hello
+# Python Fighters
 
 Python Fighters is a keyboard-controlled 2D fighting game built with
 Pygame-CE. Choose a fighter and stage, battle a CPU opponent, practice in
