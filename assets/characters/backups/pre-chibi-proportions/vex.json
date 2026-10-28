@@ -1,0 +1,319 @@
+{
+  "image": "angelix.png",
+  "body_height": 157,
+  "pixel_height": 72,
+  "phase_animation": true,
+  "dedicated_knockdown": true,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      333,
+      227
+    ],
+    "idle_b": [
+      333,
+      0,
+      333,
+      227
+    ],
+    "idle_c": [
+      666,
+      0,
+      334,
+      227
+    ],
+    "idle_d": [
+      1000,
+      0,
+      333,
+      227
+    ],
+    "step_a": [
+      0,
+      227,
+      333,
+      179
+    ],
+    "step_b": [
+      333,
+      227,
+      333,
+      179
+    ],
+    "step_c": [
+      666,
+      227,
+      334,
+      179
+    ],
+    "step_d": [
+      1000,
+      227,
+      333,
+      179
+    ],
+    "block": [
+      0,
+      406,
+      333,
+      215
+    ],
+    "jump": [
+      333,
+      406,
+      333,
+      215
+    ],
+    "crouch": [
+      666,
+      406,
+      334,
+      215
+    ],
+    "hit": [
+      1000,
+      406,
+      333,
+      215
+    ],
+    "light_start": [
+      0,
+      621,
+      330,
+      170
+    ],
+    "light_contact": [
+      330,
+      621,
+      345,
+      170
+    ],
+    "light_follow": [
+      675,
+      621,
+      348,
+      170
+    ],
+    "light_recover": [
+      1023,
+      621,
+      310,
+      170
+    ],
+    "heavy_start": [
+      0,
+      791,
+      333,
+      202
+    ],
+    "heavy_contact": [
+      333,
+      791,
+      333,
+      202
+    ],
+    "heavy_follow": [
+      666,
+      791,
+      335,
+      202
+    ],
+    "heavy_recover": [
+      1001,
+      791,
+      332,
+      202
+    ],
+    "special_start": [
+      0,
+      993,
+      333,
+      187
+    ],
+    "special_contact": [
+      333,
+      993,
+      333,
+      187
+    ],
+    "special_follow": [
+      666,
+      993,
+      334,
+      187
+    ],
+    "knockdown": [
+      1000,
+      993,
+      333,
+      187
+    ]
+  },
+  "anchors": {
+    "idle": [
+      200,
+      227
+    ],
+    "idle_b": [
+      533,
+      227
+    ],
+    "idle_c": [
+      866,
+      227
+    ],
+    "idle_d": [
+      1200,
+      226
+    ],
+    "step_a": [
+      200,
+      406
+    ],
+    "step_b": [
+      533,
+      403
+    ],
+    "step_c": [
+      866,
+      405
+    ],
+    "step_d": [
+      1200,
+      406
+    ],
+    "block": [
+      200,
+      621
+    ],
+    "jump": [
+      533,
+      621
+    ],
+    "crouch": [
+      866,
+      621
+    ],
+    "hit": [
+      1200,
+      621
+    ],
+    "light_start": [
+      198,
+      791
+    ],
+    "light_contact": [
+      537,
+      791
+    ],
+    "light_follow": [
+      884,
+      791
+    ],
+    "light_recover": [
+      1209,
+      791
+    ],
+    "heavy_start": [
+      200,
+      986
+    ],
+    "heavy_contact": [
+      533,
+      993
+    ],
+    "heavy_follow": [
+      867,
+      993
+    ],
+    "heavy_recover": [
+      1200,
+      993
+    ],
+    "special_start": [
+      200,
+      1169
+    ],
+    "special_contact": [
+      533,
+      1161
+    ],
+    "special_follow": [
+      866,
+      1165
+    ],
+    "knockdown": [
+      1200,
+      1153
+    ]
+  },
+  "animations": {
+    "walk": [
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
+    ],
+    "run": [
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
+    ],
+    "light": [
+      "light_start",
+      "light_contact",
+      "light_follow",
+      "light_recover"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy_contact",
+      "heavy_follow",
+      "heavy_recover"
+    ],
+    "special": [
+      "special_start",
+      "special_contact",
+      "special_follow",
+      "idle"
+    ]
+  },
+  "idle_animation": {
+    "image": "angelix.png",
+    "body_height": 157,
+    "frames": [
+      [
+        39,
+        9,
+        264,
+        218
+      ],
+      [
+        366,
+        9,
+        288,
+        218
+      ],
+      [
+        690,
+        9,
+        290,
+        218
+      ],
+      [
+        1027,
+        9,
+        279,
+        217
+      ]
+    ],
+    "sequence": [
+      "idle",
+      "idle_b",
+      "idle_c",
+      "idle_d"
+    ]
+  }
+}

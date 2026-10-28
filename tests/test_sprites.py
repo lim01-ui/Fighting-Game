@@ -44,13 +44,18 @@ class SpriteTests(unittest.TestCase):
                                          digest)
         self.assertEqual(fighters, set(sprite_fighter.GENERATED_ASSETS))
 
-    def test_redesigned_fighters_keep_names_stats_and_moves(self):
+    def test_redesigned_fighters_preserve_slot_ids_and_original_equipment(self):
         path = sprite_fighter.ASSET_ROOT / 'backups' / 'pre-roster-diversity' / 'manifest.json'
         previous = json.loads(path.read_text(encoding='utf-8'))['fighters']
         for key, original in previous.items():
             with self.subTest(fighter=key):
                 current = character_data.get(key)
-                for field in ('name', 'stats', 'body', 'attack_mods', 'special_behavior', 'weapon_effect'):
+                # Live balance stats intentionally differ from these archives.
+                self.assertEqual(current['key'], key)
+                fields = []
+                if not sprite_fighter._manifest(key).get('phase_animation'):
+                    fields += ['name', 'weapon']
+                for field in fields:
                     # JSON stores tuples as lists; normalize before comparing metadata.
                     self.assertEqual(json.loads(json.dumps(current[field])), original[field])
 
@@ -60,14 +65,15 @@ class SpriteTests(unittest.TestCase):
             image = pygame.image.load(str(sprite_fighter.ASSET_ROOT / 'style-v2' / manifest['image']))
             cells = [pygame.Rect(rect) for pose, rect in manifest['poses'].items()
                      if pose != 'knockdown']
-            self.assertEqual(len(cells), 12)
+            self.assertEqual(len(cells), 23 if manifest.get('phase_animation') else 12)
             for index, rect in enumerate(cells):
                 with self.subTest(fighter=asset, cell=index):
                     self.assertTrue(image.get_rect().contains(rect))
                     self.assertFalse(any(rect.colliderect(other) for other in cells[index + 1:]))
             idle = sprite_fighter._load_frame(asset, 'idle', 0, 1)
+            native_bounds = image.subsurface(pygame.Rect(manifest['poses']['idle'])).get_bounding_rect(min_alpha=16)
             self.assertAlmostEqual(idle.get_bounding_rect(min_alpha=16).height,
-                                   manifest['pixel_height'], delta=1)
+                                   native_bounds.height * manifest['pixel_height'] / manifest['body_height'], delta=2)
 
     def test_idle_loops_have_distinct_frames_and_stable_canvas_and_feet(self):
         for asset in sprite_fighter.GENERATED_ASSETS:
@@ -79,7 +85,8 @@ class SpriteTests(unittest.TestCase):
             for facing in (-1, 1):
                 with self.subTest(fighter=asset, facing=facing):
                     frames = []
-                    for tick in (0, 180, 360, 540, 720):
+                    duration = spec.get('frame_ms', 180)
+                    for tick in (0, duration, duration * 2, duration * 3, duration * 4):
                         with patch('pygame.time.get_ticks', return_value=tick):
                             frames.append(sprite_fighter.preview_frame(asset, facing))
                     self.assertEqual(len({frame.get_size() for frame in frames}), 1)
@@ -141,10 +148,39 @@ class SpriteTests(unittest.TestCase):
                         self.assertGreater(surface.get_bounding_rect().height, 0)
                 for attack in player.attacks:
                     with self.subTest(fighter=key, facing=facing, attack=attack):
-                        player._start_attack(attack)
+                        # Each pose check starts ready; otherwise a special
+                        # would correctly prevent the following ultimate.
+                        player.reset()
+                        self.assertTrue(player._start_attack(attack))
+                        self.assertEqual(player.current_attack.data.name, attack)
                         surface.fill((0, 0, 0, 0))
                         player.draw(surface)
                         self.assertGreater(surface.get_bounding_rect().height, 0)
+
+    def test_roster_uses_baseline_visual_height_plus_heavy_size_and_stable_feet(self):
+        surface = pygame.Surface((1280, 720), pygame.SRCALPHA)
+        with patch('pygame.time.get_ticks', return_value=0):
+            for key in character_data.ROSTER_ORDER:
+                for facing in (-1, 1):
+                    with self.subTest(fighter=key, facing=facing):
+                        player = Player(500, 350, key, settings.P1_KEYS, facing=facing)
+                        player.rect.bottom = settings.GROUND_Y
+                        surface.fill((0, 0, 0, 0))
+                        player._draw_sprite_asset(surface)
+                        bounds = surface.get_bounding_rect(min_alpha=16)
+                        manifest = sprite_fighter._manifest(key)
+                        if manifest.get('phase_animation'):
+                            sheet = pygame.image.load(str(sprite_fighter.ASSET_ROOT / 'style-v2' / manifest['image']))
+                            source = sheet.subsurface(pygame.Rect(manifest['poses']['idle']))
+                            reference = source.get_bounding_rect(min_alpha=16).height
+                            # Wings, flames, and antennae extend beyond the shared
+                            # head-to-foot body height instead of shrinking it.
+                            self.assertAlmostEqual(bounds.height * manifest['body_height'] / reference,
+                                                   player.render_height, delta=3)
+                        else:
+                            self.assertAlmostEqual(bounds.height, player.render_height, delta=2)
+                        self.assertAlmostEqual(bounds.bottom,
+                                               settings.GROUND_Y - player.character.get('hover_height', 0), delta=3)
 
     def test_crouching_shortens_sprites_without_widening_them(self):
         surface = pygame.Surface((1280, 720), pygame.SRCALPHA)
@@ -172,12 +208,18 @@ class SpriteTests(unittest.TestCase):
                         self.assertGreaterEqual(crouching.width, standing.width * 0.65)
                     else:
                         self.assertAlmostEqual(crouching.width, standing.width, delta=4)
-                    self.assertAlmostEqual(crouching.height,
-                                           standing.height * player.crouch_ratio, delta=4)
-                    self.assertAlmostEqual(
-                        settings.GROUND_Y - crouching.bottom,
-                        (settings.GROUND_Y - standing.bottom) * player.crouch_ratio,
-                        delta=4)
+                    if sprite_fighter._manifest(key).get('phase_animation'):
+                        self.assertAlmostEqual(crouching.height,
+                                               player.render_height * player.crouch_ratio, delta=4)
+                        self.assertAlmostEqual(crouching.bottom,
+                                               settings.GROUND_Y - player.character.get('hover_height', 0), delta=4)
+                    else:
+                        self.assertAlmostEqual(crouching.height,
+                                               standing.height * player.crouch_ratio, delta=4)
+                        self.assertAlmostEqual(
+                            settings.GROUND_Y - crouching.bottom,
+                            (settings.GROUND_Y - standing.bottom) * player.crouch_ratio,
+                            delta=4)
 
     def test_guard_and_ultimate_use_matching_poses(self):
         for asset in sprite_fighter.GENERATED_ASSETS:
@@ -199,8 +241,10 @@ class SpriteTests(unittest.TestCase):
                 player = Player(100, 200, asset, settings.P1_KEYS)
                 self.assertEqual(player.character['sprite_asset'], asset)
                 self.assertFalse(player.character.get('sprite_sheet'))
-                walk = [sprite_fighter._load_frame(asset, 'walk', i, 1) for i in range(3)]
-                self.assertIs(walk[0], walk[2])
+                manifest = sprite_fighter._manifest(asset)
+                length = len(manifest['animations']['walk'])
+                walk = [sprite_fighter._load_frame(asset, 'walk', i, 1) for i in range(length + 1)]
+                self.assertIs(walk[0], walk[length])
                 self.assertNotEqual(pygame.image.tobytes(walk[0], 'RGBA'),
                                     pygame.image.tobytes(walk[1], 'RGBA'))
                 for attack in ('light', 'heavy'):
@@ -210,6 +254,14 @@ class SpriteTests(unittest.TestCase):
                     active = sprite_fighter.frame_for_player(asset, player)
                     self.assertIs(active, sprite_fighter._load_frame(asset, attack, 1, 1))
                     self.assertIsNot(windup, active)
+                    if manifest.get('phase_animation'):
+                        player.current_attack.frame += player.current_attack.data.active - 1
+                        follow = sprite_fighter.frame_for_player(asset, player)
+                        self.assertIs(follow, sprite_fighter._load_frame(asset, attack, 2, 1))
+                        player.current_attack.frame += 1
+                        recovery = sprite_fighter.frame_for_player(asset, player)
+                        self.assertIs(recovery, sprite_fighter._load_frame(asset, attack, 3, 1))
+                        self.assertEqual(len({windup, active, follow, recovery}), 4)
 
 
 if __name__ == '__main__':

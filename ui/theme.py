@@ -1,4 +1,4 @@
-"""Night-city arcade presentation shared by the intro, menus, and match HUD."""
+"""Bold night-city arcade presentation shared by menus and the match HUD."""
 
 import math
 from functools import lru_cache
@@ -7,7 +7,6 @@ import pygame
 
 from stages import stages
 from ui import retro
-from ui.text_layout import draw_text_fit
 
 
 NAVY = (20, 39, 65)
@@ -18,26 +17,56 @@ GOLD = (255, 213, 113)
 MUTED = (163, 192, 218)
 
 
+@lru_cache(maxsize=256)
+def _text_image(font, text, color, weight):
+    letters = font.render(str(text), False, color)
+    image = pygame.Surface((letters.get_width() + 10, letters.get_height() + 10), pygame.SRCALPHA)
+    shadow = letters.copy()
+    shadow.fill((5, 12, 24), special_flags=pygame.BLEND_RGBA_MULT)
+    for dx, dy in ((1, 3), (5, 3), (3, 1), (3, 5), (5, 7)):
+        image.blit(shadow, (dx, dy))
+    for offset in range(weight + 1):
+        image.blit(letters, (3 + offset, 3))
+    return image
+
+
+def bold_text(surface, font, text, color, rect, align='center', weight=1, alpha=255):
+    """Thick pixel faces and dark outlines stay readable over bright scenery."""
+    rect = pygame.Rect(rect)
+    image = _text_image(font, str(text), tuple(color), weight)
+    factor = min(1, rect.width / image.get_width(), rect.height / image.get_height())
+    if factor < 1:
+        image = pygame.transform.scale(image, (max(1, round(image.get_width() * factor)), max(1, round(image.get_height() * factor))))
+    if alpha != 255:
+        image = image.copy()
+        image.set_alpha(alpha)
+    target = image.get_rect(center=rect.center)
+    if align == 'left':
+        target.left = rect.left
+    elif align == 'right':
+        target.right = rect.right
+    surface.blit(image, target)
+    return target
+
+
 def background(surface, elapsed=None, shade=85):
     elapsed = pygame.time.get_ticks() / 1000 if elapsed is None else elapsed
     width, height = surface.get_size()
-    skyline = stages._background("City", "city 1", width, height)
-    surface.blit(skyline, (-32 + round(math.sin(elapsed * 0.09) * 18), 0))
-    # Tiny deterministic stars twinkle rather than flickering randomly per frame.
+    skyline = stages._background('City', 'city 1', width, height)
+    surface.blit(skyline, (-32 + round(math.sin(elapsed * .09) * 18), 0))
     for index in range(30):
         x = (index * 193 + 42) % width
         y = (index * 67 + 24) % max(1, height // 2)
         pulse = (math.sin(elapsed * 1.4 + index * 2.1) + 1) / 2
-        color = tuple(round(c * (0.45 + pulse * 0.55)) for c in PALE)
+        color = tuple(round(c * (.45 + pulse * .55)) for c in PALE)
         pygame.draw.rect(surface, color, (x, y, 2, 2))
-        if pulse > 0.94 and index % 3 == 0:
+        if pulse > .94 and index % 3 == 0:
             pygame.draw.line(surface, color, (x - 3, y + 1), (x + 4, y + 1))
             pygame.draw.line(surface, color, (x + 1, y - 3), (x + 1, y + 4))
-    # Slow-moving fireflies bring the foreground to life without obscuring text.
     for index in range(14):
-        x = int((index * 151 + elapsed * (5 + index % 4)) % width)
-        y = int(height * 0.48 + (index * 41) % max(1, int(height * 0.42))
-                + math.sin(elapsed * 0.7 + index) * 12)
+        x = round((index * 151 + elapsed * (5 + index % 4)) % width)
+        y = round(height * .48 + (index * 41) % max(1, round(height * .42))
+                  + math.sin(elapsed * .7 + index) * 12)
         pygame.draw.rect(surface, GOLD if index % 3 == 0 else BLUE, (x, y, 2, 2))
     if shade:
         veil = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
@@ -100,4 +129,4 @@ def footer(surface, text="ARROWS / W S: SELECT     ENTER / CLICK: CONFIRM     ES
     pygame.draw.rect(surface, (42, 72, 99), rect)
     pygame.draw.line(surface, PALE, rect.topleft, rect.topright, 3)
     pygame.draw.line(surface, (15, 36, 59), (0, rect.bottom - 4), (rect.right, rect.bottom - 4), 3)
-    draw_text_fit(surface, retro.font(size=18), text, PALE, rect.inflate(-50, -20))
+    bold_text(surface, retro.font(size=18), text, PALE, rect.inflate(-50, -14), weight=0)

@@ -3,8 +3,7 @@ import math
 import pygame
 from ui import retro, theme
 import settings
-from characters import sprite_fighter
-from ui.text_layout import draw_text_fit
+from characters import character_data, sprite_fighter
 
 
 MODES = (
@@ -21,32 +20,31 @@ MODES = (
 class LobbyView:
     def __init__(self):
         # Shared drawing/hit rectangles preserve keyboard and mouse navigation.
-        self.rows = [pygame.Rect(87, 245 + i * 49, 506, 42) for i in range(len(MODES))]
+        self.rows = [pygame.Rect(72, 242 + i * 55, 540, 48) for i in range(len(MODES))]
         self.fonts = {name: retro.font(size=size) for name, size in (
-            ('heading', 29), ('item', 25), ('body', 18), ('small', 15))}
+            ('heading', 32), ('item', 33), ('body', 20), ('small', 17))}
 
     def text(self, surface, font, text, color, rect, align='left'):
-        draw_text_fit(surface, self.fonts[font], text, color, pygame.Rect(rect), align=align)
+        theme.bold_text(surface, self.fonts[font], text, color, rect, align=align,
+                        weight=1 if font in ('heading', 'item') else 0)
 
     def draw(self, screen, selected, elapsed, dt):
-        theme.background(screen, elapsed, shade=35)
+        theme.background(screen, elapsed, shade=65)
         theme.logo(screen, elapsed, y=12)
-        self.text(screen, 'small', 'NIGHT CITY / ARCADE', theme.PALE, (440, 207, 400, 24), 'center')
+        self.text(screen, 'small', 'CITY / OCEAN / ARCADE', theme.PALE, (380, 207, 520, 24), 'center')
         for index, row in enumerate(self.rows):
             active = index == selected
+            pygame.draw.rect(screen, (4, 13, 27), row.move(4, 4))
+            pygame.draw.rect(screen, (35, 65, 91) if active else (13, 29, 49), row)
+            pygame.draw.rect(screen, theme.GOLD if active else (71, 109, 140), row, 3 if active else 1)
             if active:
-                backing = pygame.Surface(row.size, pygame.SRCALPHA)
-                backing.fill((*theme.NAVY, 160))
-                screen.blit(backing, row)
                 pulse = 4 + round(math.sin(elapsed * 5) * 3)
-                self.text(screen, 'item', '>', theme.GOLD, (row.x + 14 + pulse, row.y, 30, 40))
+                self.text(screen, 'item', '>', theme.GOLD, (row.x + 14 + pulse, row.y, 30, 46))
                 pygame.draw.line(screen, theme.GOLD, (row.x + 52, row.bottom - 2),
                                  (row.right - 24, row.bottom - 2), 2)
             color = theme.GOLD if active else theme.PALE
-            self.text(screen, 'item', MODES[index][0], (12, 29, 49),
-                      (row.x + 63, row.y + 5, row.width - 80, 36), 'center')
             self.text(screen, 'item', MODES[index][0], color,
-                      (row.x + 61, row.y + 3, row.width - 80, 36), 'center')
+                      (row.x + 52, row.y + 1, row.width - 70, 46), 'center')
 
         _, heading, line1, line2, tag = MODES[selected]
         theme.panel(screen, (692, 270, 510, 172))
@@ -65,5 +63,7 @@ class LobbyView:
             bounds = frame.get_bounding_rect()
             frame = frame.subsurface(bounds)
             image = pygame.transform.scale(frame, (round(frame.get_width() * height / frame.get_height()), height))
-            screen.blit(image, image.get_rect(midbottom=(x, 615 + round(math.sin(elapsed * 2 + x) * 2))))
+            character = character_data.get(asset)
+            lift = sprite_fighter.hover_offset(character, elapsed * settings.FPS)
+            screen.blit(image, image.get_rect(midbottom=(x, 615 - round(lift) + round(math.sin(elapsed * 2 + x) * 2))))
         theme.footer(screen, 'W S / ARROWS: SELECT     ENTER / CLICK: START     ESC: QUIT')

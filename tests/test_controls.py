@@ -87,8 +87,10 @@ class ControlsTests(unittest.TestCase):
         self.assertEqual(settings.P1_KEYS['light'], '')
 
     def test_start_options_and_settings_are_clickable(self):
+        from ui.lobby_view import LobbyView
+        options_center = LobbyView().rows[5].center
         with patch('pygame.event.get', side_effect=[[], [pygame.event.Event(
-                pygame.MOUSEBUTTONDOWN, button=1, pos=(200, 510))]]):
+                pygame.MOUSEBUTTONDOWN, button=1, pos=options_center)]]):
             self.assertEqual(menu.run_main_menu(self.screen, self.clock), 'SETTINGS')
         with patch.object(settings_menu, 'run_controls_menu', return_value=self.screen) as controls:
             with patch('pygame.event.get', side_effect=[[], [pygame.event.Event(

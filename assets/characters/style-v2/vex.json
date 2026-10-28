@@ -1,133 +1,321 @@
 {
-  "image": "vex.png",
-  "body_height": 234,
+  "image": "angelix-chibi.png",
+  "body_height": 191,
   "pixel_height": 72,
+  "phase_animation": true,
+  "dedicated_knockdown": true,
+  "source_facing": 1,
+  "proportion_reference": "raguel",
   "poses": {
     "idle": [
       0,
       0,
-      362,
-      400
+      333,
+      214
     ],
-    "step_left": [
-      362,
+    "idle_b": [
+      333,
       0,
-      362,
-      400
+      333,
+      214
     ],
-    "step_right": [
-      724,
+    "idle_c": [
+      666,
       0,
-      362,
-      400
+      334,
+      214
+    ],
+    "idle_d": [
+      1000,
+      0,
+      333,
+      214
+    ],
+    "step_a": [
+      0,
+      214,
+      333,
+      207
+    ],
+    "step_b": [
+      333,
+      214,
+      333,
+      207
+    ],
+    "step_c": [
+      666,
+      214,
+      334,
+      207
+    ],
+    "step_d": [
+      1000,
+      214,
+      333,
+      207
     ],
     "block": [
-      1086,
       0,
-      363,
-      400
+      421,
+      333,
+      192
     ],
     "jump": [
-      0,
-      400,
-      362,
-      320
+      333,
+      421,
+      333,
+      192
     ],
     "crouch": [
-      362,
-      400,
-      362,
-      320
+      666,
+      421,
+      334,
+      192
+    ],
+    "hit": [
+      1000,
+      421,
+      333,
+      192
     ],
     "light_start": [
-      724,
-      400,
-      362,
-      320
+      0,
+      613,
+      333,
+      190
     ],
-    "light": [
-      1086,
-      400,
-      363,
-      320
+    "light_contact": [
+      333,
+      613,
+      333,
+      190
+    ],
+    "light_follow": [
+      666,
+      613,
+      334,
+      190
+    ],
+    "light_recover": [
+      1000,
+      613,
+      333,
+      190
     ],
     "heavy_start": [
       0,
-      720,
-      362,
-      366
+      803,
+      333,
+      193
     ],
-    "heavy": [
-      362,
-      720,
-      362,
-      366
+    "heavy_contact": [
+      333,
+      803,
+      333,
+      193
     ],
-    "special": [
-      724,
-      720,
-      362,
-      366
+    "heavy_follow": [
+      666,
+      803,
+      365,
+      193
     ],
-    "hit": [
-      1086,
-      720,
-      363,
-      366
+    "heavy_recover": [
+      1031,
+      803,
+      302,
+      193
+    ],
+    "special_start": [
+      0,
+      996,
+      333,
+      184
+    ],
+    "special_contact": [
+      333,
+      996,
+      333,
+      184
+    ],
+    "special_follow": [
+      666,
+      996,
+      334,
+      184
     ],
     "knockdown": [
-      1086,
-      720,
-      363,
-      366
+      1000,
+      996,
+      333,
+      184
+    ]
+  },
+  "anchors": {
+    "idle": [
+      166,
+      213
+    ],
+    "idle_b": [
+      500,
+      214
+    ],
+    "idle_c": [
+      833,
+      213
+    ],
+    "idle_d": [
+      1166,
+      212
+    ],
+    "step_a": [
+      166,
+      414
+    ],
+    "step_b": [
+      500,
+      415
+    ],
+    "step_c": [
+      833,
+      418
+    ],
+    "step_d": [
+      1166,
+      421
+    ],
+    "block": [
+      166,
+      611
+    ],
+    "jump": [
+      500,
+      600
+    ],
+    "crouch": [
+      833,
+      613
+    ],
+    "hit": [
+      1166,
+      613
+    ],
+    "light_start": [
+      166,
+      802
+    ],
+    "light_contact": [
+      500,
+      802
+    ],
+    "light_follow": [
+      833,
+      802
+    ],
+    "light_recover": [
+      1166,
+      803
+    ],
+    "heavy_start": [
+      166,
+      994
+    ],
+    "heavy_contact": [
+      500,
+      992
+    ],
+    "heavy_follow": [
+      848,
+      995
+    ],
+    "heavy_recover": [
+      1182,
+      996
+    ],
+    "special_start": [
+      166,
+      1170
+    ],
+    "special_contact": [
+      500,
+      1169
+    ],
+    "special_follow": [
+      833,
+      1170
+    ],
+    "knockdown": [
+      1166,
+      1166
     ]
   },
   "animations": {
     "walk": [
-      "step_left",
-      "step_right"
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
     ],
     "run": [
-      "step_left",
-      "step_right"
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
     ],
     "light": [
       "light_start",
-      "light"
+      "light_contact",
+      "light_follow",
+      "light_recover"
     ],
     "heavy": [
       "heavy_start",
-      "heavy"
+      "heavy_contact",
+      "heavy_follow",
+      "heavy_recover"
+    ],
+    "special": [
+      "special_start",
+      "special_contact",
+      "special_follow",
+      "idle"
     ]
   },
   "idle_animation": {
-    "image": "vex-idle.png",
-    "body_height": 478,
+    "image": "angelix-chibi.png",
+    "body_height": 191,
     "frames": [
       [
-        112,
-        146,
-        371,
-        478
+        66,
+        22,
+        210,
+        191
       ],
       [
-        655,
-        139,
-        390,
-        485
+        398,
+        23,
+        210,
+        191
       ],
       [
-        1199,
-        131,
-        394,
-        493
+        729,
+        23,
+        213,
+        190
       ],
       [
-        1752,
-        151,
-        378,
-        473
+        1050,
+        23,
+        224,
+        189
       ]
+    ],
+    "sequence": [
+      "idle",
+      "idle_b",
+      "idle_c",
+      "idle_d"
     ]
   }
 }

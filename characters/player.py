@@ -48,6 +48,7 @@ def _build_attack_blueprints(character):
     eff = character.get("weapon_effect", {})
     ultimate = character_data.ultimate_for(character["key"])
     ultimate_hit_count = ultimate.get("extra_hits", 0) + 1
+    special_hit_count = character.get("special_behavior", {}).get("extra_hits", 0) + 1
 
     startup_mult  = eff.get("startup_mult", 1.0)
     reach_mult    = eff.get("reach_mult", 1.0)
@@ -60,7 +61,9 @@ def _build_attack_blueprints(character):
             startup=max(2, int(base["startup"] * mods["startup"] * startup_mult)),
             active=base["active"],
             recovery=max(4, int(base["recovery"] * mods["cooldown"])),
-            damage=max(1, int(base["damage"] * stats["damage"])),
+            # Multi-hit specials split one damage budget across their hits.
+            damage=max(1, int(base["damage"] * stats["damage"]
+                              / (special_hit_count if kind == "special" else 1))),
             hitstun=int(base["hitstun"] * hitstun_mult),
             blockstun=base["blockstun"],
             knockback=int(base["knockback"] * kb_mult),
@@ -174,6 +177,8 @@ class Player:
         self.width  = int(body["width"]  * settings.FIGHTER_SCALE)
         self.height = int(body["height"] * settings.FIGHTER_SCALE)
         self.crouch_ratio = body["crouch_ratio"]
+        self.render_height = round(settings.FIGHTER_RENDER_HEIGHT
+                                   * self.character.get("render_scale", 1.0))
 
         self.rect = pygame.Rect(x, y, self.width, self.height)
         self.spawn_x = x
@@ -183,8 +188,10 @@ class Player:
         self.on_ground = True
 
         self.move_speed = settings.MOVE_SPEED * stats["speed"]
+        self._move_remainder = 0.0
+        self._move_direction = 0
         self.jump_power = settings.JUMP_POWER * stats["jump"]
-        self.max_health = int(settings.MAX_HEALTH * stats["health"])
+        self.max_health = round(settings.MAX_HEALTH * stats["health"])
         self.health = self.max_health
         self.defense = stats["defense"]
 
@@ -226,6 +233,7 @@ class Player:
         self._projectile_fired: bool = False
         self._was_attacking: bool = False
         self.ultimate_meter = 0.0
+        self.special_cooldown_frames = 0
 
     def _key(self, name):
         return preferences.key_code_from_name(name)
@@ -277,10 +285,9 @@ class Player:
                     self.is_crouching = True
                 self._start_attack(attack_type)
                 return
-            if special:
-                self._start_attack(
+            if special and self._start_attack(
                     "ultimate" if self.ultimate_meter >= 100 else "special"
-                )
+                ):
                 return
 
         if self.state == S_ATTACK:
@@ -289,11 +296,23 @@ class Player:
         self.is_crouching = crouch and self.on_ground
 
         moving = False
+        direction = 0
         if not self.is_crouching:
             if left and not right and not (self._holding_back and block):
-                self.rect.x -= self.move_speed; moving = True
+                direction = -1
             elif right and not left and not (self._holding_back and block):
-                self.rect.x += self.move_speed; moving = True
+                direction = 1
+        if direction != self._move_direction:
+            self._move_remainder = 0.0
+        self._move_direction = direction
+        if direction:
+            # Rect coordinates are integers: carry the fraction so stat changes
+            # keep their intended speed equally when walking left and right.
+            self._move_remainder += direction * self.move_speed
+            distance = math.trunc(self._move_remainder)
+            self._move_remainder -= distance
+            self.rect.x += distance
+            moving = True
 
         if jump and self.on_ground:
             self.vel_y = self.jump_power
@@ -306,15 +325,28 @@ class Player:
         else:                   self.state = S_IDLE
 
     def _start_attack(self, kind):
+        ability = kind in ("special", "ultimate")
+        if ability and not self.special_ready:
+            return False
         data = self.attacks[kind]
         self.current_attack = Attack(data, self.facing, self.rect)
         self.state = S_ATTACK
         self._multi_hit_counter = 0
+        self._special_spawned = False
+        self._projectile_fired = False
+        self._stun_on_hit = 0
+        if ability:
+            self.special_cooldown_frames = settings.SPECIAL_COOLDOWN_FRAMES
         if kind == "ultimate":
             self.ultimate_meter = 0.0
             combat_behaviors.on_start(self, ultimate=True)
         elif kind == "special":
             combat_behaviors.on_start(self)
+        return True
+
+    @property
+    def special_ready(self):
+        return self.special_cooldown_frames <= 0
 
     def gain_ultimate_meter(self, damage):
         """Charge the ultimate meter from dealt or received health damage."""
@@ -336,6 +368,10 @@ class Player:
             self.health = max(0, self.health - damage)
             self.hit_pause = settings.HIT_PAUSE_FRAMES
             return True
+        # An interrupted swing cannot leave an active hitbox or a pending
+        # special stun behind while the fighter is recovering from the hit.
+        self.current_attack = None
+        self._stun_on_hit = 0
         if blocked:
             if self.is_perfect_guarding:
                 self._last_hit_was_parried = True
@@ -401,6 +437,10 @@ class Player:
             self._opponent_ref = opponent
         self.face_opponent()
         self._animation_time += 1.0
+        # Use simulation frames so pause and LAN waiting cannot bypass the
+        # cooldown. Hitstop still counts toward the five seconds of fight time.
+        if self.special_cooldown_frames > 0:
+            self.special_cooldown_frames -= 1
         if self._parry_flash_frames > 0:
             self._parry_flash_frames -= 1
         if self.hit_pause > 0:
@@ -459,6 +499,8 @@ class Player:
                 self.rect.left = other.rect.right
 
     def go_knockdown(self):
+        self.current_attack = None
+        self._stun_on_hit = 0
         self.state = S_KNOCKDOWN
         self.state_timer = settings.KNOCKDOWN_FRAMES
 
@@ -468,6 +510,9 @@ class Player:
         self.vel_y = 0
         self.on_ground = True
         self.health = self.max_health
+        self._move_remainder = 0.0
+        self._move_direction = 0
+        self.special_cooldown_frames = 0
         self.state = S_IDLE
         self.state_timer = 0
         self.current_attack = None
@@ -963,7 +1008,12 @@ class Player:
         if self.state == S_KNOCKDOWN and reference_height is None:
             target_scale = 0.42 * sprite_scale
         target_h = int(self.height * target_scale)
-        if reference_height:
+        if sprite_fighter.is_generated_asset(self.character["sprite_asset"]):
+            # Keep a shared baseline with a modest size bonus for heavy bodies;
+            # all poses and effects retain their proportions at that size.
+            target_h = max(1, round(image.get_height() * self.render_height
+                                    / reference_height))
+        elif reference_height:
             target_h = max(1, int(image.get_height() * self.height * target_scale / reference_height))
         elif self.is_crouching and self.state != S_ATTACK:
             # frame_for_player already shortened the frame. Match its target
@@ -973,11 +1023,18 @@ class Player:
             max(1, int(image.get_width() * target_h / image.get_height())),
             target_h,
         )
+        anchor = sprite_fighter.frame_anchor(image)
+        anchor = (round(anchor[0] * size[0] / image.get_width()),
+                  round(anchor[1] * size[1] / image.get_height()))
         image = pygame.transform.scale(image, size)
         bob = (
             int(math.sin(self._animation_time * 0.075) * 2)
             if self.state in (S_IDLE, S_GUARD) else 0
         )
+        if sprite_fighter.has_planted_idle(self.character['sprite_asset']):
+            # These sheets already breathe. An additional whole-body bob
+            # would lift their planted boots off the floor.
+            bob = 0
         lunge = 8 if (
             self.state == S_ATTACK and self.current_attack is not None
             and self.current_attack.in_active
@@ -985,12 +1042,12 @@ class Player:
         foot_padding = round(image.get_height() * sprite_fighter.foot_padding_ratio(
             self.character["sprite_asset"]
         ))
+        if self.character.get("hover_height") and self.state != S_KNOCKDOWN:
+            bob = -round(sprite_fighter.hover_offset(self.character, self._animation_time))
         surface.blit(
             image,
-            image.get_rect(
-                midbottom=(self.rect.centerx + self.facing * lunge,
-                           self.rect.bottom + bob + foot_padding),
-            ),
+            (self.rect.centerx + self.facing * lunge - anchor[0],
+             self.rect.bottom + bob + foot_padding - anchor[1]),
         )
 
     def _draw_pixel_fighter(self, surface):

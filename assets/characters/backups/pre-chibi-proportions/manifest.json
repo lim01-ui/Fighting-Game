@@ -1,0 +1,30 @@
+{
+  "fighters": [
+    "rook",
+    "vex",
+    "sable",
+    "chib",
+    "golem",
+    "sanya",
+    "soldier",
+    "choom"
+  ],
+  "sha256": {
+    "rook.json": "9597324fd4a2eaefa2ce7aa5bf6631b2be9f7fd4afc52281879581f03644ba7a",
+    "oni.png": "45ea3979e553e333322ab084ff52b6720a3591e91f83fa9a21dbfb2c6a14a397",
+    "vex.json": "affe5dd849b18df8a5e4e3956e8714fedb3ef07e6aef1171146d975c5a1cadc4",
+    "angelix.png": "e1e7ec55e639637f044f1e5db3096a713c3494bf8c049b1659c9fb3682c65b8e",
+    "sable.json": "24070cda84bd18ec5d1e0b39102206a840346e033eed1b36ebdc42a62eea5236",
+    "phoenix.png": "3dbf75107c6db44721c18c62d1b858f8d559f6026d44b4acf4c76ffd156755a2",
+    "chib.json": "1e2dc4c9614939648f148b2d513f4d669faaf9697df14b266ef90e7606020dd1",
+    "po.png": "deaca92a48cf67d041e62d6c16dad60115544df0347b2557d88c364e9dbbddaa",
+    "golem.json": "c6c165fb1637efdc3b2d3ea2d1e9eab51ee9d99e3efe3d9ef7df3675f9053f21",
+    "golem-moss.png": "79fd59606adc827eb2070a4a3579a444df872b5a4ba37cb43d100a7e3024e9cb",
+    "sanya.json": "a0245cd17f324a000ba53733b03782b8ed446c13fba23e006c9ec7bb1203c6cd",
+    "sanya-mecha.png": "9d5895702a04a496cdba73f5fa0c2fab4faf9b4f48276cf92923d558d0ac9907",
+    "soldier.json": "b03acea813b09d8cc265a422e891193e4aade74442c403b81f8e2f8f5eec6697",
+    "null.png": "68deffa8bd703ac77b35ae06e4d03a37baa599aca91bbd35c9fe7758efe3b50f",
+    "choom.json": "a31c58d02ddca190590eecce49c466a545ffbbe32a5a3dea0b5d6c43610939dd",
+    "glacier.png": "885913c4f401f191f7d63665c24bca143c46bfb9a4df8c0ea3aaac36bb0b45f3"
+  }
+}

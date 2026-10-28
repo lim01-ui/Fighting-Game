@@ -23,11 +23,20 @@ training mode, or connect to another player over a local network.
 
 - **17 fighters**, each with their own archetype, stats, weapon, and signature
   special/ultimate behavior:
-  Rook, Vex, Golem, Sable, Nova, Iron, Jinx, Kestrel, Bramble, Raguel, Sanya,
-  Choom, Saikyo, Renegade, Soldier, Chib, and Minamoto.
+  Oni, Angelix, Golem, Phoenix, Nova, Iron, Jinx, Kestrel, Bramble, Raguel, Sanya,
+  Glacier, Saikyo, Renegade, NULL, PO, and Minamoto.
 - **Different attack options:** light and heavy attacks, crouching and aerial
   attacks, character-specific special moves, and a unique ultimate for every
   fighter.
+- **Five-second special cooldown:** special and ultimate attacks share a
+  timer, shown on Special in the keybind overlay. Every round begins with a
+  five-second lockout starting at FIGHT. Afterward it starts when the move begins,
+  counts during recovery and hitstop, and pauses when the match pauses or
+  waits for a LAN peer. Normal attacks remain available during the cooldown.
+- **Roster tradeoffs:** Golem, Glacier and Renegade are larger, slower tanks;
+  Sanya is the fastest fighter with the lowest health. Every fighter has
+  strengths and weaknesses in movement, durability, damage, range and recovery.
+  See the [full balance table](design/balance/roster-balance.md).
 - **Defense and counterplay:** block by holding the block key or moving away
   from the opponent. Blocking reduces damage; a well-timed block can parry and
   interrupt an incoming attack.
@@ -36,6 +45,8 @@ training mode, or connect to another player over a local network.
   fighter's ultimate.
 - **Best-of-three matches** with round countdowns, health and meter displays,
   round wins, and match-end screens.
+  Timeouts compare the percentage of health remaining, so larger health pools
+  do not automatically win.
 - **Combat feedback:** hit and block callouts, combo and damage displays,
   hit sparks, projectiles, screen shake, hit pause, knockdowns, KO effects,
   and victory poses.
@@ -48,11 +59,13 @@ training mode, or connect to another player over a local network.
 
 ### Stages, presentation, and settings
 
-- **Three stages:** Sunset, Dojo, and Neon.
-- **Seven palettes per stage:** Classic, Night, Snow, Fire, Ice, Storm, and
-  Golden — 21 stage-and-palette combinations.
-- Animated title video, music, sound effects, stage atmosphere, and parallax
-  backgrounds.
+- **16 restored arenas:** all eight City and all eight Ocean backgrounds,
+  with the original rooftop/dock floors, camera parallax and stage selector.
+- Animated night-city startup and menu backgrounds.
+- Bold startup menus and animated KO/victory banners with impact lettering,
+  sparks, a winner crown and gold confetti. See the
+  [presentation previews](design/stage-concepts/2026-10-27/README.md).
+- Music, sound effects, stage atmosphere, and camera parallax.
 - Settings for master/music/effects volume, fullscreen, and Player 1 key
   rebinding. Preferences are saved between launches.
 - In-match controls/help overlay and fitted, readable HUD/menu text.

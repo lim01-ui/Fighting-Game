@@ -1,0 +1,134 @@
+{
+  "image": "choom-robot.png",
+  "body_height": 227,
+  "pixel_height": 72,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      318,
+      312
+    ],
+    "step_left": [
+      0,
+      312,
+      324,
+      308
+    ],
+    "step_right": [
+      324,
+      312,
+      311,
+      308
+    ],
+    "block": [
+      635,
+      312,
+      316,
+      308
+    ],
+    "jump": [
+      951,
+      312,
+      317,
+      308
+    ],
+    "crouch": [
+      0,
+      620,
+      325,
+      311
+    ],
+    "light_start": [
+      325,
+      620,
+      309,
+      311
+    ],
+    "light": [
+      634,
+      620,
+      358,
+      311
+    ],
+    "heavy_start": [
+      992,
+      620,
+      276,
+      311
+    ],
+    "heavy": [
+      0,
+      931,
+      365,
+      310
+    ],
+    "special": [
+      365,
+      931,
+      306,
+      310
+    ],
+    "hit": [
+      671,
+      931,
+      280,
+      310
+    ],
+    "knockdown": [
+      951,
+      931,
+      317,
+      310
+    ]
+  },
+  "dedicated_knockdown": true,
+  "animations": {
+    "walk": [
+      "step_left",
+      "step_right"
+    ],
+    "run": [
+      "step_left",
+      "step_right"
+    ],
+    "light": [
+      "light_start",
+      "light"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy"
+    ]
+  },
+  "idle_animation": {
+    "image": "choom-robot.png",
+    "body_height": 227,
+    "frames": [
+      [
+        82,
+        85,
+        236,
+        227
+      ],
+      [
+        398,
+        82,
+        231,
+        230
+      ],
+      [
+        691,
+        78,
+        236,
+        234
+      ],
+      [
+        1003,
+        87,
+        233,
+        225
+      ]
+    ]
+  }
+}

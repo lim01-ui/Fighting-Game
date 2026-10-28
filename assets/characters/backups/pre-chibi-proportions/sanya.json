@@ -1,0 +1,319 @@
+{
+  "image": "sanya-mecha.png",
+  "body_height": 126,
+  "pixel_height": 72,
+  "phase_animation": true,
+  "dedicated_knockdown": true,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      384,
+      174
+    ],
+    "idle_b": [
+      384,
+      0,
+      384,
+      174
+    ],
+    "idle_c": [
+      768,
+      0,
+      384,
+      174
+    ],
+    "idle_d": [
+      1152,
+      0,
+      384,
+      174
+    ],
+    "step_a": [
+      0,
+      174,
+      384,
+      165
+    ],
+    "step_b": [
+      384,
+      174,
+      384,
+      165
+    ],
+    "step_c": [
+      768,
+      174,
+      384,
+      165
+    ],
+    "step_d": [
+      1152,
+      174,
+      384,
+      165
+    ],
+    "block": [
+      0,
+      339,
+      384,
+      172
+    ],
+    "jump": [
+      384,
+      339,
+      384,
+      172
+    ],
+    "crouch": [
+      768,
+      339,
+      384,
+      172
+    ],
+    "hit": [
+      1152,
+      339,
+      384,
+      172
+    ],
+    "light_start": [
+      0,
+      511,
+      384,
+      155
+    ],
+    "light_contact": [
+      384,
+      511,
+      399,
+      155
+    ],
+    "light_follow": [
+      783,
+      511,
+      369,
+      155
+    ],
+    "light_recover": [
+      1152,
+      511,
+      384,
+      155
+    ],
+    "heavy_start": [
+      0,
+      666,
+      384,
+      167
+    ],
+    "heavy_contact": [
+      384,
+      666,
+      384,
+      167
+    ],
+    "heavy_follow": [
+      768,
+      666,
+      409,
+      167
+    ],
+    "heavy_recover": [
+      1177,
+      666,
+      359,
+      167
+    ],
+    "special_start": [
+      0,
+      833,
+      384,
+      191
+    ],
+    "special_contact": [
+      384,
+      833,
+      384,
+      191
+    ],
+    "special_follow": [
+      768,
+      833,
+      393,
+      191
+    ],
+    "knockdown": [
+      1161,
+      833,
+      375,
+      191
+    ]
+  },
+  "anchors": {
+    "idle": [
+      215,
+      173
+    ],
+    "idle_b": [
+      599,
+      174
+    ],
+    "idle_c": [
+      983,
+      173
+    ],
+    "idle_d": [
+      1367,
+      174
+    ],
+    "step_a": [
+      215,
+      338
+    ],
+    "step_b": [
+      599,
+      337
+    ],
+    "step_c": [
+      983,
+      338
+    ],
+    "step_d": [
+      1367,
+      339
+    ],
+    "block": [
+      215,
+      504
+    ],
+    "jump": [
+      599,
+      502
+    ],
+    "crouch": [
+      983,
+      504
+    ],
+    "hit": [
+      1367,
+      505
+    ],
+    "light_start": [
+      215,
+      660
+    ],
+    "light_contact": [
+      607,
+      664
+    ],
+    "light_follow": [
+      990,
+      666
+    ],
+    "light_recover": [
+      1367,
+      663
+    ],
+    "heavy_start": [
+      215,
+      830
+    ],
+    "heavy_contact": [
+      599,
+      828
+    ],
+    "heavy_follow": [
+      997,
+      831
+    ],
+    "heavy_recover": [
+      1378,
+      832
+    ],
+    "special_start": [
+      215,
+      1003
+    ],
+    "special_contact": [
+      599,
+      1002
+    ],
+    "special_follow": [
+      988,
+      1000
+    ],
+    "knockdown": [
+      1371,
+      995
+    ]
+  },
+  "animations": {
+    "walk": [
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
+    ],
+    "run": [
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
+    ],
+    "light": [
+      "light_start",
+      "light_contact",
+      "light_follow",
+      "light_recover"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy_contact",
+      "heavy_follow",
+      "heavy_recover"
+    ],
+    "special": [
+      "special_start",
+      "special_contact",
+      "special_follow",
+      "idle"
+    ]
+  },
+  "idle_animation": {
+    "image": "sanya-mecha.png",
+    "body_height": 126,
+    "frames": [
+      [
+        41,
+        7,
+        241,
+        166
+      ],
+      [
+        421,
+        7,
+        241,
+        167
+      ],
+      [
+        808,
+        7,
+        237,
+        166
+      ],
+      [
+        1186,
+        7,
+        236,
+        167
+      ]
+    ],
+    "sequence": [
+      "idle",
+      "idle_b",
+      "idle_c",
+      "idle_d"
+    ]
+  }
+}

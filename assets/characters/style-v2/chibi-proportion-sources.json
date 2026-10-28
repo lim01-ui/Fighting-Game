@@ -1,0 +1,46 @@
+{
+  "tool": "built-in image_gen",
+  "prompts": "../../../design/character-concepts/2026-10-27/chibi-proportion-revision-prompts.json",
+  "files": [
+    {
+      "key": "rook",
+      "image": "oni-chibi.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-7d7dbaf6-2f50-470d-a3fe-2d34864a45d4.png"
+    },
+    {
+      "key": "vex",
+      "image": "angelix-chibi.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-67823554-e011-4c1b-ab21-dabd93223983.png"
+    },
+    {
+      "key": "sable",
+      "image": "phoenix-chibi.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-aeb654c0-eb30-40ed-950d-dfd3372fa5d8.png"
+    },
+    {
+      "key": "chib",
+      "image": "po-chibi.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-4cae1afc-c179-4752-8c87-aa4c70521365.png"
+    },
+    {
+      "key": "golem",
+      "image": "golem-moss-chibi.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-90060ae0-a630-4744-a2f7-61179c2307cc.png"
+    },
+    {
+      "key": "sanya",
+      "image": "sanya-mecha-chibi.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-7a1fbcb3-a21d-4771-a76c-f93234222918.png"
+    },
+    {
+      "key": "soldier",
+      "image": "null-chibi.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-e85e103f-e808-474a-8804-1494556b96bc.png"
+    },
+    {
+      "key": "choom",
+      "image": "glacier-chibi.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-e1613b1a-a59c-4eb0-a780-baa99d745c7c.png"
+    }
+  ]
+}

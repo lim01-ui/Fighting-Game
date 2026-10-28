@@ -54,7 +54,9 @@ HEAVY_KNOCKBACK = 9
 HEAVY_REACH     = 78
 HEAVY_HEIGHT    = 34
 
-# SPECIAL ATTACK (placeholder until Phase 5)
+# SPECIAL ATTACK
+SPECIAL_COOLDOWN_SECONDS = 5
+SPECIAL_COOLDOWN_FRAMES = SPECIAL_COOLDOWN_SECONDS * FPS
 SPECIAL_STARTUP   = 14
 SPECIAL_ACTIVE    = 6
 SPECIAL_RECOVERY  = 22
@@ -113,6 +115,8 @@ P2_KEYS = {
 
 # Fighter visual scale (1.0 = normal). Bigger fighters feel chunkier.
 FIGHTER_SCALE = 1.55
+# Baseline standing sprite height; individual heavy fighters can be a little larger.
+FIGHTER_RENDER_HEIGHT = round(140 * FIGHTER_SCALE * 0.9)
 DEBUG_HITBOXES = False
 
 # Hit sparks

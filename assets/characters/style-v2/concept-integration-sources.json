@@ -1,0 +1,47 @@
+{
+  "tool": "built-in image_gen",
+  "prompts": "../../../design/character-concepts/2026-10-27/roster-integration-generation.json",
+  "cleanup_prompt": "Precise sprite-sheet edit: remove the broad purple ambient haze/background glow from this 4-column 6-row pixel art animation sheet. Preserve all24 character poses and all their positions, scale, outlines, black armor, orange eyes, individual purple/cyan head flames and twin energy swords exactly. Make ALL empty space between sprites completely transparent alpha=0. Keep only the small tightly bounded flames attached to helmet and blades, remove the large soft purple washes behind them. Crisp opaque character artwork, tight localized sword glow. Do not add text or change layout. Real transparent RGBA PNG.",
+  "files": [
+    {
+      "key": "rook",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-3bca5e62-f0b9-4cab-95ef-4c1dbc48394b.png",
+      "image": "oni.png"
+    },
+    {
+      "key": "vex",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-e340f8b0-7512-41cb-83d7-54e4746dbfb0.png",
+      "image": "angelix.png"
+    },
+    {
+      "key": "sable",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-1391aa06-33bf-450a-becd-94b9d3a907a8.png",
+      "image": "phoenix.png"
+    },
+    {
+      "key": "chib",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-1129fb06-2a66-42ab-868f-8a39530d4b67.png",
+      "image": "po.png"
+    },
+    {
+      "key": "golem",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-fad2f269-7be6-4f1f-b8e8-fa6b422b303c.png",
+      "image": "golem-moss.png"
+    },
+    {
+      "key": "sanya",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-0d825c7c-3078-4cd0-96e3-c017fe24b171.png",
+      "image": "sanya-mecha.png"
+    },
+    {
+      "key": "soldier",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-6ac92339-308c-4ab5-9268-e700f1728a9f.png",
+      "image": "null.png"
+    },
+    {
+      "key": "choom",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-41138d7b-b6a6-4ae8-9c9f-52e919a60488.png",
+      "image": "glacier.png"
+    }
+  ]
+}

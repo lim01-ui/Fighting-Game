@@ -1,0 +1,319 @@
+{
+  "image": "po.png",
+  "body_height": 190,
+  "pixel_height": 72,
+  "phase_animation": true,
+  "dedicated_knockdown": true,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      339,
+      199
+    ],
+    "idle_b": [
+      339,
+      0,
+      338,
+      199
+    ],
+    "idle_c": [
+      677,
+      0,
+      339,
+      199
+    ],
+    "idle_d": [
+      1016,
+      0,
+      339,
+      199
+    ],
+    "step_a": [
+      0,
+      199,
+      339,
+      192
+    ],
+    "step_b": [
+      339,
+      199,
+      338,
+      192
+    ],
+    "step_c": [
+      677,
+      199,
+      339,
+      192
+    ],
+    "step_d": [
+      1016,
+      199,
+      339,
+      192
+    ],
+    "block": [
+      0,
+      391,
+      339,
+      189
+    ],
+    "jump": [
+      339,
+      391,
+      338,
+      189
+    ],
+    "crouch": [
+      677,
+      391,
+      343,
+      189
+    ],
+    "hit": [
+      1020,
+      391,
+      335,
+      189
+    ],
+    "light_start": [
+      0,
+      580,
+      339,
+      190
+    ],
+    "light_contact": [
+      339,
+      580,
+      338,
+      190
+    ],
+    "light_follow": [
+      677,
+      580,
+      339,
+      190
+    ],
+    "light_recover": [
+      1016,
+      580,
+      339,
+      190
+    ],
+    "heavy_start": [
+      0,
+      770,
+      339,
+      197
+    ],
+    "heavy_contact": [
+      339,
+      770,
+      367,
+      197
+    ],
+    "heavy_follow": [
+      706,
+      770,
+      324,
+      197
+    ],
+    "heavy_recover": [
+      1030,
+      770,
+      325,
+      197
+    ],
+    "special_start": [
+      0,
+      967,
+      339,
+      194
+    ],
+    "special_contact": [
+      339,
+      967,
+      344,
+      194
+    ],
+    "special_follow": [
+      683,
+      967,
+      372,
+      194
+    ],
+    "knockdown": [
+      1055,
+      967,
+      300,
+      194
+    ]
+  },
+  "anchors": {
+    "idle": [
+      170,
+      199
+    ],
+    "idle_b": [
+      508,
+      199
+    ],
+    "idle_c": [
+      846,
+      199
+    ],
+    "idle_d": [
+      1186,
+      199
+    ],
+    "step_a": [
+      170,
+      380
+    ],
+    "step_b": [
+      508,
+      389
+    ],
+    "step_c": [
+      846,
+      391
+    ],
+    "step_d": [
+      1186,
+      388
+    ],
+    "block": [
+      170,
+      577
+    ],
+    "jump": [
+      508,
+      564
+    ],
+    "crouch": [
+      848,
+      576
+    ],
+    "hit": [
+      1188,
+      577
+    ],
+    "light_start": [
+      170,
+      760
+    ],
+    "light_contact": [
+      508,
+      761
+    ],
+    "light_follow": [
+      846,
+      763
+    ],
+    "light_recover": [
+      1186,
+      763
+    ],
+    "heavy_start": [
+      170,
+      958
+    ],
+    "heavy_contact": [
+      522,
+      957
+    ],
+    "heavy_follow": [
+      868,
+      955
+    ],
+    "heavy_recover": [
+      1192,
+      958
+    ],
+    "special_start": [
+      170,
+      1146
+    ],
+    "special_contact": [
+      511,
+      1144
+    ],
+    "special_follow": [
+      869,
+      1132
+    ],
+    "knockdown": [
+      1205,
+      1146
+    ]
+  },
+  "animations": {
+    "walk": [
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
+    ],
+    "run": [
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
+    ],
+    "light": [
+      "light_start",
+      "light_contact",
+      "light_follow",
+      "light_recover"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy_contact",
+      "heavy_follow",
+      "heavy_recover"
+    ],
+    "special": [
+      "special_start",
+      "special_contact",
+      "special_follow",
+      "idle"
+    ]
+  },
+  "idle_animation": {
+    "image": "po.png",
+    "body_height": 190,
+    "frames": [
+      [
+        29,
+        9,
+        299,
+        190
+      ],
+      [
+        367,
+        9,
+        300,
+        190
+      ],
+      [
+        706,
+        10,
+        299,
+        189
+      ],
+      [
+        1043,
+        9,
+        300,
+        190
+      ]
+    ],
+    "sequence": [
+      "idle",
+      "idle_b",
+      "idle_c",
+      "idle_d"
+    ]
+  }
+}

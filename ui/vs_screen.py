@@ -69,11 +69,7 @@ def _draw_side(surface, side_rect, character, t, facing, side):
             image = pygame.transform.flip(image, True, False)
         pixel_fighter.blit_fit(surface, image, inner)
     elif character.get("sprite_asset"):
-        sprite_fighter.blit_fit(
-            surface,
-            sprite_fighter.preview_frame(character["sprite_asset"], facing),
-            inner,
-        )
+        sprite_fighter.blit_preview(surface, character["sprite_asset"], inner, facing)
     else:
         _draw_preview(surface, inner, character, t, facing=facing)
 

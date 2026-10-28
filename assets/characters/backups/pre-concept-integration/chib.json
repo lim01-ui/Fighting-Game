@@ -1,0 +1,134 @@
+{
+  "image": "chib-panda.png",
+  "body_height": 222,
+  "pixel_height": 72,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      361,
+      289
+    ],
+    "step_left": [
+      0,
+      289,
+      361,
+      286
+    ],
+    "step_right": [
+      361,
+      289,
+      362,
+      286
+    ],
+    "block": [
+      723,
+      289,
+      361,
+      286
+    ],
+    "jump": [
+      1084,
+      289,
+      362,
+      286
+    ],
+    "crouch": [
+      0,
+      575,
+      369,
+      251
+    ],
+    "light_start": [
+      369,
+      575,
+      354,
+      251
+    ],
+    "light": [
+      723,
+      575,
+      417,
+      251
+    ],
+    "heavy_start": [
+      1140,
+      575,
+      306,
+      251
+    ],
+    "heavy": [
+      0,
+      826,
+      380,
+      262
+    ],
+    "special": [
+      380,
+      826,
+      370,
+      262
+    ],
+    "hit": [
+      750,
+      826,
+      334,
+      262
+    ],
+    "knockdown": [
+      1084,
+      826,
+      362,
+      262
+    ]
+  },
+  "dedicated_knockdown": true,
+  "animations": {
+    "walk": [
+      "step_left",
+      "step_right"
+    ],
+    "run": [
+      "step_left",
+      "step_right"
+    ],
+    "light": [
+      "light_start",
+      "light"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy"
+    ]
+  },
+  "idle_animation": {
+    "image": "chib-panda.png",
+    "body_height": 222,
+    "frames": [
+      [
+        69,
+        67,
+        271,
+        222
+      ],
+      [
+        445,
+        67,
+        263,
+        222
+      ],
+      [
+        799,
+        69,
+        268,
+        220
+      ],
+      [
+        1161,
+        69,
+        264,
+        220
+      ]
+    ]
+  }
+}

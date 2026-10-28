@@ -1,134 +1,321 @@
 {
-  "image": "chib-panda.png",
-  "body_height": 222,
+  "image": "po-chibi.png",
+  "body_height": 184,
   "pixel_height": 72,
+  "phase_animation": true,
+  "dedicated_knockdown": true,
+  "source_facing": 1,
+  "proportion_reference": "raguel",
   "poses": {
     "idle": [
       0,
       0,
-      361,
-      289
+      339,
+      196
     ],
-    "step_left": [
+    "idle_b": [
+      339,
       0,
-      289,
-      361,
-      286
+      338,
+      196
     ],
-    "step_right": [
-      361,
-      289,
-      362,
-      286
+    "idle_c": [
+      677,
+      0,
+      339,
+      196
+    ],
+    "idle_d": [
+      1016,
+      0,
+      339,
+      196
+    ],
+    "step_a": [
+      0,
+      196,
+      339,
+      198
+    ],
+    "step_b": [
+      339,
+      196,
+      338,
+      198
+    ],
+    "step_c": [
+      677,
+      196,
+      339,
+      198
+    ],
+    "step_d": [
+      1016,
+      196,
+      339,
+      198
     ],
     "block": [
-      723,
-      289,
-      361,
-      286
+      0,
+      394,
+      339,
+      189
     ],
     "jump": [
-      1084,
-      289,
-      362,
-      286
+      339,
+      394,
+      338,
+      189
     ],
     "crouch": [
-      0,
-      575,
-      369,
-      251
-    ],
-    "light_start": [
-      369,
-      575,
-      354,
-      251
-    ],
-    "light": [
-      723,
-      575,
-      417,
-      251
-    ],
-    "heavy_start": [
-      1140,
-      575,
-      306,
-      251
-    ],
-    "heavy": [
-      0,
-      826,
-      380,
-      262
-    ],
-    "special": [
-      380,
-      826,
-      370,
-      262
+      677,
+      394,
+      339,
+      189
     ],
     "hit": [
-      750,
-      826,
-      334,
-      262
+      1016,
+      394,
+      339,
+      189
+    ],
+    "light_start": [
+      0,
+      583,
+      339,
+      190
+    ],
+    "light_contact": [
+      339,
+      583,
+      338,
+      190
+    ],
+    "light_follow": [
+      677,
+      583,
+      339,
+      190
+    ],
+    "light_recover": [
+      1016,
+      583,
+      339,
+      190
+    ],
+    "heavy_start": [
+      0,
+      773,
+      339,
+      194
+    ],
+    "heavy_contact": [
+      339,
+      773,
+      344,
+      194
+    ],
+    "heavy_follow": [
+      683,
+      773,
+      339,
+      194
+    ],
+    "heavy_recover": [
+      1022,
+      773,
+      333,
+      194
+    ],
+    "special_start": [
+      0,
+      967,
+      339,
+      193
+    ],
+    "special_contact": [
+      339,
+      967,
+      365,
+      193
+    ],
+    "special_follow": [
+      704,
+      967,
+      335,
+      193
     ],
     "knockdown": [
-      1084,
-      826,
-      362,
-      262
+      1039,
+      967,
+      316,
+      193
     ]
   },
-  "dedicated_knockdown": true,
+  "anchors": {
+    "idle": [
+      170,
+      196
+    ],
+    "idle_b": [
+      508,
+      196
+    ],
+    "idle_c": [
+      846,
+      196
+    ],
+    "idle_d": [
+      1186,
+      196
+    ],
+    "step_a": [
+      170,
+      394
+    ],
+    "step_b": [
+      508,
+      391
+    ],
+    "step_c": [
+      846,
+      394
+    ],
+    "step_d": [
+      1186,
+      394
+    ],
+    "block": [
+      170,
+      583
+    ],
+    "jump": [
+      508,
+      572
+    ],
+    "crouch": [
+      846,
+      583
+    ],
+    "hit": [
+      1186,
+      583
+    ],
+    "light_start": [
+      170,
+      771
+    ],
+    "light_contact": [
+      508,
+      771
+    ],
+    "light_follow": [
+      846,
+      771
+    ],
+    "light_recover": [
+      1186,
+      771
+    ],
+    "heavy_start": [
+      170,
+      964
+    ],
+    "heavy_contact": [
+      511,
+      964
+    ],
+    "heavy_follow": [
+      852,
+      965
+    ],
+    "heavy_recover": [
+      1188,
+      965
+    ],
+    "special_start": [
+      170,
+      1148
+    ],
+    "special_contact": [
+      522,
+      1148
+    ],
+    "special_follow": [
+      872,
+      1148
+    ],
+    "knockdown": [
+      1197,
+      1147
+    ]
+  },
   "animations": {
     "walk": [
-      "step_left",
-      "step_right"
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
     ],
     "run": [
-      "step_left",
-      "step_right"
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
     ],
     "light": [
       "light_start",
-      "light"
+      "light_contact",
+      "light_follow",
+      "light_recover"
     ],
     "heavy": [
       "heavy_start",
-      "heavy"
+      "heavy_contact",
+      "heavy_follow",
+      "heavy_recover"
+    ],
+    "special": [
+      "special_start",
+      "special_contact",
+      "special_follow",
+      "idle"
     ]
   },
   "idle_animation": {
-    "image": "chib-panda.png",
-    "body_height": 222,
+    "image": "po-chibi.png",
+    "body_height": 184,
     "frames": [
       [
-        69,
-        67,
-        271,
-        222
+        57,
+        12,
+        231,
+        184
       ],
       [
-        445,
-        67,
-        263,
-        222
+        377,
+        12,
+        250,
+        184
       ],
       [
-        799,
-        69,
-        268,
-        220
+        711,
+        12,
+        251,
+        184
       ],
       [
-        1161,
-        69,
-        264,
-        220
+        1078,
+        12,
+        229,
+        184
       ]
+    ],
+    "sequence": [
+      "idle",
+      "idle_b",
+      "idle_c",
+      "idle_d"
     ]
   }
 }

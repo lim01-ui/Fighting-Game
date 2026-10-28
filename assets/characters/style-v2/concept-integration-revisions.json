@@ -1,0 +1,17 @@
+{
+  "tool": "built-in image_gen",
+  "revisions": [
+    {
+      "key": "choom",
+      "image": "glacier.png",
+      "prompt": "Precise object edit of this 4-column SIX-row (24 pose) transparent pixel sprite atlas. Keep ALL24 cells, poses, character body dimensions, ice crown, blue colors, eyes, alpha and layout. Enlarge BOTH of Glacier's dark navy KNUCKLE FISTS in EVERY pose to about TWICE their current size: each clenched fist should be as large as the golem's entire head/crown and visibly wider than his face, giant rounded block gauntlet fists framed in cyan ice crystals. Increase the fists themselves, not just shoulder spikes. Short thick forearms support the gigantic fists. Preserve active punch/uppercut poses with the oversized fist clearly extended. No weapons. Keep transparent gutters and all sprites fully inside their cells. Real transparent alpha background.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-23b9e034-9ee9-4c22-9c3e-284ab1c0b7c1.png"
+    },
+    {
+      "key": "golem",
+      "image": "golem-moss.png",
+      "prompt": "Precise weapon edit of this 4-column SIX-row, 24-pose pixel-art golem animation atlas. Keep all24 cells, exact poses, body scale, moss, cyan crystals, face, feet baseline, alpha and layout. Replace the rounded bulb-shaped hammer head in EVERY pose with a LARGE RECTANGULAR BOX-SHAPED stone warhammer head: flat planar end faces, straight top and bottom edges, hard 90-degree corners, cracked grey stone block reinforced by a dark metal center band, olive moss only on top, small cyan crystal inset and thin cyan cracks. This is a longshaft warhammer with a straight long dark root-wrapped handle, not a club or rounded mace. Head is at least as wide as golem's head. Keep attached to hands during all swings, overhead attacks and ground-smashes. Keep broad boulder body and all characters identifiable. Genuinely transparent background, no text, no grid lines, no touching neighbors.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-168014e2-4487-41e7-82f9-41f5f656e012.png"
+    }
+  ]
+}

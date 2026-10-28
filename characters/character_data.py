@@ -16,7 +16,8 @@ colors           : dict of RGB tuples
     accent       : accent color (used for highlights, attack flash)
     eye          : eye color
 
-body             : visual proportions (all in pixels)
+render_scale     : standing sprite scale (1.0 = normal, heavy creatures up to 1.12)
+body             : collision proportions (all in pixels)
     width        : standing body width
     height       : standing body height
     crouch_ratio : crouch height as fraction of standing (0.5 - 0.65)
@@ -31,116 +32,129 @@ stats            : gameplay multipliers (1.0 = baseline)
 attack_mods      : per-attack tweaks (multiplied on top of stats)
     reach        : horizontal reach multiplier
     startup      : startup time multiplier (lower = faster)
-    cooldown     : recovery time multiplier
+    cooldown     : recovery time multiplier (separate from the five-second special timer)
+
+Reach and startup are budgeted in attack_mods; weapon_effect keeps both of
+those multipliers at 1.0 so weapon bonuses cannot silently double them.
+Health and defense combine: effective durability is health / defense.
 """
 
 ROSTER = {
     # ---------------------------------------------------------
-    # 1. ROOK — the balanced starter. Good at everything, best at nothing.
+    # 1. ONI — agile armored blades; short reach and a low jump.
     # ---------------------------------------------------------
     "rook": {
         "key": "rook",
+        "species": "Robot",
         "sprite_asset": "rook",
-        "name": "ROOK",
-        "archetype": "Balanced",
+        "name": "ONI",
+        "archetype": "Twin Blades",
         "special_behavior": {'type': 'slash', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
-        "weapon": "sword",
-        "weapon_color": (220, 220, 240),
-        "weapon_handle": (140, 150, 180),
+        "weapon": "daggers",
+        "weapon_color": (150, 125, 255),
+        "weapon_handle": (50, 40, 70),
         "colors": {
-            "body":   (60, 120, 220),
-            "accent": (255, 230, 120),
-            "eye":    (255, 255, 255),
+            "body":   (48, 40, 65),
+            "accent": (155, 100, 255),
+            "eye":    (255, 196, 70),
         },
         "body": {"width": 70, "height": 140, "crouch_ratio": 0.55},
         "stats": {
-            "speed": 1.00, "jump": 1.00, "health": 1.00,
-            "damage": 1.00, "defense": 1.00,
+            "speed": 1.08, "jump": 0.95, "health": 1.02,
+            "damage": 1.00, "defense": 0.98,
         },
-        "attack_mods": {"reach": 1.00, "startup": 1.00, "cooldown": 1.00},
+        "attack_mods": {"reach": 0.94, "startup": 0.90, "cooldown": 0.95},
         "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.0, 'hitstun_mult': 1.0, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 2. VEX — speed rushdown. Fast, weak, short reach.
+    # 2. ANGELIX — mobile aerial caster; fragile, weak melee and slow recovery.
     # ---------------------------------------------------------
     "vex": {
         "key": "vex",
+        "species": "Winged Mage",
+        "hover_height": 24,
+        "hover_amplitude": 6,
         "sprite_asset": "vex",
-        "name": "VEX",
-        "archetype": "Speed",
-        "special_behavior": {'type': 'dash_slash', 'dash': 90, 'extra_hits': 1, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
-        "weapon": "daggers",
-        "weapon_color": (230, 230, 240),
-        "weapon_handle": (140, 140, 160),
+        "name": "ANGELIX",
+        "archetype": "Aerial Mage",
+        "special_behavior": {'type': 'projectile', 'dash': 0, 'extra_hits': 0, 'projectiles': 1, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
+        "weapon": "staff",
+        "weapon_color": (95, 235, 255),
+        "weapon_handle": (65, 75, 100),
         "colors": {
-            "body":   (230, 80, 60),
-            "accent": (255, 200, 90),
-            "eye":    (255, 255, 255),
+            "body":   (45, 55, 85),
+            "accent": (80, 225, 255),
+            "eye":    (70, 210, 255),
         },
         "body": {"width": 62, "height": 132, "crouch_ratio": 0.55},
         "stats": {
-            "speed": 1.40, "jump": 1.15, "health": 0.85,
-            "damage": 0.80, "defense": 1.10,
+            "speed": 1.10, "jump": 1.25, "health": 0.88,
+            "damage": 0.88, "defense": 1.04,
         },
-        "attack_mods": {"reach": 0.90, "startup": 0.75, "cooldown": 0.85},
-        "weapon_effect": {'knockback_mult': 0.8, 'reach_mult': 0.85, 'hitstun_mult': 0.9, 'startup_mult': 0.7, 'extra_hits': 1, 'projectile': None, 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 1.10, "startup": 1.04, "cooldown": 1.08},
+        "weapon_effect": {'knockback_mult': 0.85, 'reach_mult': 1.0, 'hitstun_mult': 0.95, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': 'orb', 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 3. GOLEM — heavy grappler. Slow, tanky, huge damage, big reach.
+    # 3. GOLEM — largest hammer tank; slow movement, low jump, long recovery.
     # ---------------------------------------------------------
     "golem": {
         "key": "golem",
+        "species": "Moss Golem",
+        "render_scale": 1.12,
         "sprite_asset": "golem",
         "name": "GOLEM",
         "archetype": "Heavy",
         "special_behavior": {'type': 'heavy_slam', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
         "weapon": "hammer",
-        "weapon_color": (140, 100, 60),
-        "weapon_handle": (60, 40, 25),
+        "weapon_color": (120, 160, 110),
+        "weapon_handle": (70, 65, 45),
         "colors": {
-            "body":   (140, 100, 70),
-            "accent": (220, 160, 80),
-            "eye":    (255, 200, 100),
+            "body":   (105, 120, 90),
+            "accent": (65, 225, 255),
+            "eye":    (120, 255, 85),
         },
-        "body": {"width": 84, "height": 152, "crouch_ratio": 0.60},
+        "body": {"width": 84, "height": 154, "crouch_ratio": 0.60},
         "stats": {
-            "speed": 0.75, "jump": 0.85, "health": 1.25,
-            "damage": 1.35, "defense": 0.80,
+            "speed": 0.72, "jump": 0.78, "health": 1.24,
+            "damage": 1.20, "defense": 0.92,
         },
-        "attack_mods": {"reach": 1.10, "startup": 1.30, "cooldown": 1.25},
-        "weapon_effect": {'knockback_mult': 2.0, 'reach_mult': 1.05, 'hitstun_mult': 1.2, 'startup_mult': 1.3, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 1.10, "startup": 1.34, "cooldown": 1.28},
+        "weapon_effect": {'knockback_mult': 1.35, 'reach_mult': 1.0, 'hitstun_mult': 1.10, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 4. SABLE — zoner. Tall, long reach, medium everything else.
+    # 4. PHOENIX — long greatsword and strong jump; slow movement and swings.
     # ---------------------------------------------------------
     "sable": {
         "key": "sable",
+        "species": "Valkyrie",
+        "hover_height": 24,
+        "hover_amplitude": 6,
         "sprite_asset": "sable",
-        "name": "SABLE",
-        "archetype": "Zoner",
+        "name": "PHOENIX",
+        "archetype": "Aerial Greatsword",
         "special_behavior": {'type': 'long_swipe', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
-        "weapon": "whip",
-        "weapon_color": (200, 120, 200),
-        "weapon_handle": (120, 50, 120),
+        "weapon": "sword",
+        "weapon_color": (255, 215, 60),
+        "weapon_handle": (95, 65, 40),
         "colors": {
-            "body":   (110, 70, 160),
-            "accent": (220, 160, 255),
-            "eye":    (255, 240, 255),
+            "body":   (70, 50, 100),
+            "accent": (255, 207, 55),
+            "eye":    (230, 75, 65),
         },
         "body": {"width": 66, "height": 152, "crouch_ratio": 0.55},
         "stats": {
-            "speed": 0.95, "jump": 1.00, "health": 0.95,
-            "damage": 1.00, "defense": 1.05,
+            "speed": 0.88, "jump": 1.18, "health": 0.96,
+            "damage": 1.12, "defense": 1.00,
         },
-        "attack_mods": {"reach": 1.25, "startup": 1.10, "cooldown": 1.10},
-        "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.35, 'hitstun_mult': 1.0, 'startup_mult': 1.1, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 1.22, "startup": 1.16, "cooldown": 1.16},
+        "weapon_effect": {'knockback_mult': 1.15, 'reach_mult': 1.0, 'hitstun_mult': 1.0, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 5. NOVA — technical. Fast, balanced, slightly low damage.
+    # 5. NOVA — quick orb caster; low health, low damage and short melee reach.
     # ---------------------------------------------------------
     "nova": {
         "key": "nova",
@@ -158,15 +172,15 @@ ROSTER = {
         },
         "body": {"width": 68, "height": 140, "crouch_ratio": 0.55},
         "stats": {
-            "speed": 1.20, "jump": 1.10, "health": 0.95,
-            "damage": 0.90, "defense": 1.00,
+            "speed": 1.14, "jump": 1.10, "health": 0.92,
+            "damage": 0.90, "defense": 1.02,
         },
-        "attack_mods": {"reach": 1.00, "startup": 0.85, "cooldown": 0.90},
-        "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.0, 'hitstun_mult': 1.0, 'startup_mult': 0.9, 'extra_hits': 0, 'projectile': 'orb', 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 0.96, "startup": 0.94, "cooldown": 0.98},
+        "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.0, 'hitstun_mult': 1.0, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': 'orb', 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 6. IRON — slow tank. Huge health, big damage, slow.
+    # 6. IRON — shield defense and armor; short reach, weak damage, low mobility.
     # ---------------------------------------------------------
     "iron": {
         "key": "iron",
@@ -184,15 +198,15 @@ ROSTER = {
         },
         "body": {"width": 86, "height": 148, "crouch_ratio": 0.62},
         "stats": {
-            "speed": 0.80, "jump": 0.80, "health": 1.35,
-            "damage": 1.20, "defense": 0.75,
+            "speed": 0.84, "jump": 0.84, "health": 1.16,
+            "damage": 0.92, "defense": 0.90,
         },
-        "attack_mods": {"reach": 1.00, "startup": 1.20, "cooldown": 1.15},
-        "weapon_effect": {'knockback_mult': 1.1, 'reach_mult': 0.9, 'hitstun_mult': 1.1, 'startup_mult': 1.1, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.05},
+        "attack_mods": {"reach": 0.92, "startup": 1.10, "cooldown": 1.12},
+        "weapon_effect": {'knockback_mult': 1.05, 'reach_mult': 1.0, 'hitstun_mult': 1.05, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.05},
     },
 
     # ---------------------------------------------------------
-    # 7. JINX — trickster. Very fast, tricky, weak, short.
+    # 7. JINX — agile knife trickster; short reach and fragile, light hits.
     # ---------------------------------------------------------
     "jinx": {
         "key": "jinx",
@@ -210,15 +224,15 @@ ROSTER = {
         },
         "body": {"width": 60, "height": 128, "crouch_ratio": 0.55},
         "stats": {
-            "speed": 1.45, "jump": 1.25, "health": 0.80,
-            "damage": 0.75, "defense": 1.15,
+            "speed": 1.27, "jump": 1.20, "health": 0.85,
+            "damage": 0.84, "defense": 1.04,
         },
-        "attack_mods": {"reach": 0.85, "startup": 0.70, "cooldown": 0.80},
-        "weapon_effect": {'knockback_mult': 0.9, 'reach_mult': 0.9, 'hitstun_mult': 0.9, 'startup_mult': 0.75, 'extra_hits': 0, 'projectile': 'knife', 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 0.90, "startup": 0.84, "cooldown": 0.92},
+        "weapon_effect": {'knockback_mult': 0.90, 'reach_mult': 1.0, 'hitstun_mult': 0.95, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': 'knife', 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 8. KESTREL — aerial. Great jump, medium everything else.
+    # 8. KESTREL — leaping spear specialist; fragile with committed recovery.
     # ---------------------------------------------------------
     "kestrel": {
         "key": "kestrel",
@@ -236,15 +250,15 @@ ROSTER = {
         },
         "body": {"width": 64, "height": 148, "crouch_ratio": 0.55},
         "stats": {
-            "speed": 1.15, "jump": 1.45, "health": 0.90,
-            "damage": 1.00, "defense": 1.00,
+            "speed": 1.08, "jump": 1.28, "health": 0.92,
+            "damage": 0.96, "defense": 1.02,
         },
-        "attack_mods": {"reach": 1.10, "startup": 1.00, "cooldown": 0.95},
-        "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.4, 'hitstun_mult': 1.0, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 1.18, "startup": 1.04, "cooldown": 1.06},
+        "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.0, 'hitstun_mult': 1.0, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 9. BRAMBLE — defensive. Tanky, low speed, low damage, thick.
+    # 9. BRAMBLE — durable woodland defender; modest mobility and damage.
     # ---------------------------------------------------------
     "bramble": {
         "key": "bramble",
@@ -262,15 +276,15 @@ ROSTER = {
         },
         "body": {"width": 80, "height": 144, "crouch_ratio": 0.62},
         "stats": {
-            "speed": 0.85, "jump": 0.90, "health": 1.25,
-            "damage": 1.05, "defense": 0.75,
+            "speed": 0.94, "jump": 0.94, "health": 1.08,
+            "damage": 0.88, "defense": 0.96,
         },
-        "attack_mods": {"reach": 0.95, "startup": 1.10, "cooldown": 1.05},
-        "weapon_effect": {'knockback_mult': 1.5, 'reach_mult': 1.0, 'hitstun_mult': 1.3, 'startup_mult': 1.15, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 0.96, "startup": 1.08, "cooldown": 1.10},
+        "weapon_effect": {'knockback_mult': 1.15, 'reach_mult': 1.0, 'hitstun_mult': 1.10, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 10. RAGUEL — stance. Balanced but with a distinct quiet look.
+    # 10. RAGUEL — versatile katana duelist; modest health, no extreme stats.
     # ---------------------------------------------------------
     "raguel": {
         "key": "raguel",
@@ -289,69 +303,70 @@ ROSTER = {
         },
         "body": {"width": 68, "height": 142, "crouch_ratio": 0.55},
         "stats": {
-            "speed": 1.05, "jump": 1.00, "health": 1.00,
-            "damage": 1.00, "defense": 1.00,
+            "speed": 1.06, "jump": 1.04, "health": 0.97,
+            "damage": 1.04, "defense": 1.00,
         },
-        "attack_mods": {"reach": 1.05, "startup": 0.95, "cooldown": 1.00},
-        "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.2, 'hitstun_mult': 1.0, 'startup_mult': 0.8, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 1.05, "startup": 0.96, "cooldown": 1.00},
+        "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.0, 'hitstun_mult': 1.0, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 11. SANYA — kick specialist. Long legs, longer reach, medium speed.
+    # 11. SANYA — fastest mecha, quickest swings; lowest health and light damage.
     # ---------------------------------------------------------
     "sanya": {
         "key": "sanya",
-        "species": "Slime",
+        "species": "Mecha",
         "sprite_asset": "sanya",
         "name": "SANYA",
-        "archetype": "Kicks",
-        "special_behavior": {'type': 'spin_kick', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': True, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
-        "weapon": "gauntlets",
-        "weapon_color": (230, 60, 90),
-        "weapon_handle": (120, 20, 40),
+        "archetype": "Speed Twinblade",
+        "special_behavior": {'type': 'spin_slash', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': True, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
+        "weapon": "sword",
+        "weapon_color": (135, 255, 205),
+        "weapon_handle": (195, 170, 100),
         "colors": {
-            "body":   (220, 50, 80),
-            "accent": (255, 255, 255),
-            "eye":    (255, 255, 255),
+            "body":   (220, 230, 235),
+            "accent": (120, 255, 205),
+            "eye":    (120, 255, 205),
         },
         "body": {"width": 66, "height": 150, "crouch_ratio": 0.55},
         "stats": {
-            "speed": 1.10, "jump": 1.10, "health": 0.95,
-            "damage": 1.05, "defense": 1.00,
+            "speed": 1.40, "jump": 1.18, "health": 0.78,
+            "damage": 0.85, "defense": 1.06,
         },
-        "attack_mods": {"reach": 1.25, "startup": 1.00, "cooldown": 1.00},
-        "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.2, 'hitstun_mult': 1.4, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 1.02, "startup": 0.80, "cooldown": 0.88},
+        "weapon_effect": {'knockback_mult': 0.85, 'reach_mult': 1.0, 'hitstun_mult': 0.95, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 12. CHOOM — fast special. Fast, medium damage, short reach.
+    # 12. GLACIER — large ice boxer; strong close hits, slow and easy to zone.
     # ---------------------------------------------------------
     "choom": {
         "key": "choom",
-        "species": "Robot",
+        "species": "Ice Golem",
+        "render_scale": 1.10,
         "sprite_asset": "choom",
-        "name": "CHOOM",
-        "archetype": "Specialist",
-        "special_behavior": {'type': 'stun_bolt', 'dash': 0, 'extra_hits': 0, 'projectiles': 1, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 60, 'pierce': False},
-        "weapon": "baton",
-        "weapon_color": (240, 220, 60),
-        "weapon_handle": (140, 120, 20),
+        "name": "GLACIER",
+        "archetype": "Ice Juggernaut",
+        "special_behavior": {'type': 'heavy_slam', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 24, 'pierce': False},
+        "weapon": "fists",
+        "weapon_color": (120, 220, 255),
+        "weapon_handle": (35, 65, 115),
         "colors": {
-            "body":   (240, 210, 50),
-            "accent": (60, 120, 230),
-            "eye":    (255, 255, 255),
+            "body":   (155, 215, 255),
+            "accent": (95, 225, 255),
+            "eye":    (185, 255, 255),
         },
-        "body": {"width": 64, "height": 138, "crouch_ratio": 0.55},
+        "body": {"width": 82, "height": 152, "crouch_ratio": 0.60},
         "stats": {
-            "speed": 1.25, "jump": 1.05, "health": 0.90,
-            "damage": 1.10, "defense": 1.05,
+            "speed": 0.78, "jump": 0.80, "health": 1.20,
+            "damage": 1.15, "defense": 0.94,
         },
-        "attack_mods": {"reach": 0.95, "startup": 0.85, "cooldown": 0.90},
-        "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.0, 'hitstun_mult': 1.6, 'startup_mult': 0.9, 'extra_hits': 0, 'projectile': 'spark', 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 0.88, "startup": 1.16, "cooldown": 1.20},
+        "weapon_effect": {'knockback_mult': 1.20, 'reach_mult': 1.0, 'hitstun_mult': 1.10, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 13. SAIKYO — CC0 pixel-art karate fighter.
+    # 13. SAIKYO — mobile karate all-rounder; fists have short reach.
     # ---------------------------------------------------------
     "saikyo": {
         "key": "saikyo",
@@ -369,21 +384,22 @@ ROSTER = {
         },
         "body": {"width": 68, "height": 140, "crouch_ratio": 0.55},
         "stats": {
-            "speed": 1.00, "jump": 1.00, "health": 1.00,
-            "damage": 1.00, "defense": 1.00,
+            "speed": 1.08, "jump": 1.10, "health": 1.00,
+            "damage": 1.04, "defense": 1.02,
         },
-        "attack_mods": {"reach": 1.00, "startup": 1.00, "cooldown": 1.00},
+        "attack_mods": {"reach": 0.90, "startup": 0.94, "cooldown": 0.94},
         "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.0, 'hitstun_mult': 1.0, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 14. RENEGADE — imported CC0 brawler sprite.
+    # 14. RENEGADE — broad treeman tank; sturdy bark, slow steps and swings.
     # ---------------------------------------------------------
     "renegade": {
         "key": "renegade",
         "species": "Treeman",
+        "render_scale": 1.10,
         "name": "RENEGADE",
-        "archetype": "Brawler",
+        "archetype": "Bark Guardian",
         "sprite_asset": "renegade",
         "special_behavior": {'type': 'slash', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
         "weapon": "fists",
@@ -394,48 +410,50 @@ ROSTER = {
             "accent": (235, 70, 70),
             "eye":    (255, 255, 255),
         },
-        "body": {"width": 68, "height": 140, "crouch_ratio": 0.55},
+        "body": {"width": 82, "height": 152, "crouch_ratio": 0.60},
         "stats": {
-            "speed": 1.05, "jump": 1.00, "health": 1.00,
-            "damage": 1.00, "defense": 1.00,
+            "speed": 0.80, "jump": 0.84, "health": 1.22,
+            "damage": 1.08, "defense": 0.93,
         },
-        "attack_mods": {"reach": 1.00, "startup": 1.00, "cooldown": 1.00},
-        "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.0, 'hitstun_mult': 1.0, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 1.04, "startup": 1.20, "cooldown": 1.22},
+        "weapon_effect": {'knockback_mult': 1.25, 'reach_mult': 1.0, 'hitstun_mult': 1.08, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 15. SOLDIER — imported CC0 retro adventurer sprite.
+    # 15. NULL — heavy cleaver bruiser; highest damage, very committed swings.
     # ---------------------------------------------------------
     "soldier": {
         "key": "soldier",
-        "name": "SOLDIER",
-        "archetype": "Tactical",
+        "species": "Ember Golem",
+        "render_scale": 1.05,
+        "name": "NULL",
+        "archetype": "Cleaver and Chain",
         "sprite_asset": "soldier",
         "special_behavior": {'type': 'slash', 'dash': 0, 'extra_hits': 0, 'projectiles': 0, 'teleport': False, 'spin': False, 'armor_frames': 0, 'stun_frames': 0, 'pierce': False},
-        "weapon": "fists",
-        "weapon_color": (100, 190, 95),
-        "weapon_handle": (65, 95, 55),
+        "weapon": "axe",
+        "weapon_color": (255, 140, 45),
+        "weapon_handle": (75, 45, 35),
         "colors": {
-            "body":   (90, 130, 65),
-            "accent": (170, 205, 95),
-            "eye":    (245, 245, 210),
+            "body":   (70, 60, 65),
+            "accent": (255, 130, 40),
+            "eye":    (255, 190, 55),
         },
-        "body": {"width": 64, "height": 140, "crouch_ratio": 0.55},
+        "body": {"width": 76, "height": 146, "crouch_ratio": 0.58},
         "stats": {
-            "speed": 0.95, "jump": 0.95, "health": 1.05,
-            "damage": 1.05, "defense": 0.95,
+            "speed": 0.83, "jump": 0.86, "health": 1.10,
+            "damage": 1.22, "defense": 0.98,
         },
-        "attack_mods": {"reach": 1.00, "startup": 1.00, "cooldown": 1.00},
-        "weapon_effect": {'knockback_mult': 1.0, 'reach_mult': 1.0, 'hitstun_mult': 1.0, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
+        "attack_mods": {"reach": 1.14, "startup": 1.26, "cooldown": 1.30},
+        "weapon_effect": {'knockback_mult': 1.35, 'reach_mult': 1.0, 'hitstun_mult': 1.10, 'startup_mult': 1.0, 'extra_hits': 0, 'projectile': None, 'shield_reflect': 0.0},
     },
 
     # ---------------------------------------------------------
-    # 16. CHIB — swift sword master sprite fighter.
+    # 16. PO — sturdy round panda duelist; average pace and reach.
     # ---------------------------------------------------------
     "chib": {
         "key": "chib",
         "species": "Panda",
-        "name": "CHIB",
+        "name": "PO",
         "archetype": "Sword Master",
         "sprite_asset": "chib",
         "special_behavior": {
@@ -449,25 +467,25 @@ ROSTER = {
             'stun_frames': 0,
             'pierce': False,
         },
-        "weapon": "sword",
-        "weapon_color": (244, 137, 246),
-        "weapon_handle": (120, 11, 247),
+        "weapon": "katana",
+        "weapon_color": (150, 240, 210),
+        "weapon_handle": (35, 65, 50),
         "colors": {
-            "body":   (244, 137, 246),
-            "accent": (120, 11, 247),
-            "eye":    (255, 255, 255),
+            "body":   (225, 220, 200),
+            "accent": (95, 225, 165),
+            "eye":    (100, 200, 95),
         },
         "body": {"width": 64, "height": 136, "crouch_ratio": 0.55},
         "stats": {
-            "speed": 1.25, "jump": 1.10, "health": 0.85,
-            "damage": 1.05, "defense": 1.05,
+            "speed": 0.98, "jump": 1.04, "health": 1.08,
+            "damage": 1.02, "defense": 0.98,
         },
-        "attack_mods": {"reach": 1.05, "startup": 0.78, "cooldown": 0.85},
+        "attack_mods": {"reach": 1.00, "startup": 0.94, "cooldown": 1.02},
         "weapon_effect": {
             'knockback_mult': 0.95,
-            'reach_mult': 1.05,
+            'reach_mult': 1.0,
             'hitstun_mult': 1.0,
-            'startup_mult': 0.8,
+            'startup_mult': 1.0,
             'extra_hits': 1,
             'projectile': None,
             'shield_reflect': 0.0,
@@ -475,7 +493,7 @@ ROSTER = {
     },
 
     # ---------------------------------------------------------
-    # 17. MINAMOTO — Samurai Archer & Swordsman.
+    # 17. MINAMOTO — bow and sword zoning; fragile and slower attack recovery.
     # ---------------------------------------------------------
     "minamoto": {
         "key": "minamoto",
@@ -503,15 +521,15 @@ ROSTER = {
         },
         "body": {"width": 64, "height": 140, "crouch_ratio": 0.55},
         "stats": {
-            "speed": 1.15, "jump": 1.05, "health": 1.00,
-            "damage": 1.05, "defense": 1.00,
+            "speed": 1.02, "jump": 1.03, "health": 0.90,
+            "damage": 0.96, "defense": 1.02,
         },
-        "attack_mods": {"reach": 1.10, "startup": 0.82, "cooldown": 0.88},
+        "attack_mods": {"reach": 1.06, "startup": 1.08, "cooldown": 1.10},
         "weapon_effect": {
             'knockback_mult': 1.0,
-            'reach_mult': 1.10,
+            'reach_mult': 1.0,
             'hitstun_mult': 1.0,
-            'startup_mult': 0.82,
+            'startup_mult': 1.0,
             'extra_hits': 0,
             'projectile': 'arrow',
             'shield_reflect': 0.0,
@@ -520,6 +538,8 @@ ROSTER = {
 }
 
 
+# Stable slot IDs also identify saved selections and LAN packets. Display names
+# and artwork may change without invalidating those selections.
 # Ordered list of keys, used by the character-select screen for grid order.
 ROSTER_ORDER = [
     # Original fighters are kept together.
@@ -532,25 +552,26 @@ ROSTER_ORDER = [
 
 ULTIMATES = {
     "rook": {
-        "name": "KING'S BREAKER", "effect": "double_slash",
+        "name": "HELLFIRE CROSS", "effect": "double_slash",
         "damage_mult": 1.85, "reach_mult": 1.2, "extra_hits": 2, "dash": 36,
     },
     "vex": {
-        "name": "PHANTOM RUSH", "effect": "afterimage",
-        "damage_mult": 2.3, "reach_mult": 1.25, "extra_hits": 3, "dash": 150,
+        "name": "CELESTIAL ORBIT", "effect": "orb",
+        "damage_mult": 2.0, "reach_mult": 1.25,
+        "projectile": "orb", "projectiles": 3, "projectile_spread": 42,
     },
     "golem": {
         "name": "FAULTLINE", "effect": "shockwave",
-        "damage_mult": 2.15, "reach_mult": 1.8, "active": 10,
+        "damage_mult": 1.8, "reach_mult": 1.8, "active": 10,
         "recovery": 42,
     },
     "sable": {
-        "name": "MOONFALL LASH", "effect": "whip_arc",
+        "name": "SOLAR REBIRTH", "effect": "double_slash",
         "damage_mult": 1.8, "reach_mult": 2.0, "active": 8,
     },
     "nova": {
         "name": "EVENT HORIZON", "effect": "orb",
-        "damage_mult": 1.35, "projectile": "orb", "projectiles": 3,
+        "damage_mult": 1.9, "projectile": "orb", "projectiles": 3,
         "projectile_spread": 42,
     },
     "iron": {
@@ -560,7 +581,7 @@ ULTIMATES = {
     },
     "jinx": {
         "name": "LUCKY SEVEN", "effect": "knife_fan",
-        "damage_mult": 1.15, "projectile": "knife", "projectiles": 7,
+        "damage_mult": 2.15, "projectile": "knife", "projectiles": 7,
         "projectile_spread": 84,
     },
     "kestrel": {
@@ -579,14 +600,13 @@ ULTIMATES = {
         "teleport": True,
     },
     "sanya": {
-        "name": "SPIRAL COMET", "effect": "spin_kick",
+        "name": "MINT CROSSING", "effect": "double_slash",
         "damage_mult": 2.0, "reach_mult": 1.5, "extra_hits": 3,
         "dash": 44,
     },
     "choom": {
-        "name": "STORM CAGE", "effect": "spark",
-        "damage_mult": 1.6, "projectile": "spark", "projectiles": 5,
-        "projectile_spread": 56, "stun_frames": 42,
+        "name": "PERMAFROST", "effect": "shockwave",
+        "damage_mult": 1.6, "reach_mult": 1.5, "stun_frames": 42,
     },
     "saikyo": {
         "name": "METEOR FIST", "effect": "double_slash",
@@ -599,12 +619,11 @@ ULTIMATES = {
         "dash": 58,
     },
     "soldier": {
-        "name": "SUPPRESSION BURST", "effect": "aura",
-        "damage_mult": 1.8, "projectile": "spark", "projectiles": 6,
-        "projectile_spread": 72, "stun_frames": 24,
+        "name": "CINDER CHAINS", "effect": "whip_arc",
+        "damage_mult": 1.8, "reach_mult": 1.7, "stun_frames": 24,
     },
     "chib": {
-        "name": "ABSOLUTE", "effect": "double_slash",
+        "name": "JADE TYPHOON", "effect": "double_slash",
         "damage_mult": 1.85, "reach_mult": 1.4, "extra_hits": 3,
         "dash": 65,
     },

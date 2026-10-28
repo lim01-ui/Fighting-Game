@@ -71,7 +71,7 @@ def on_active(player, defender, spawn_projectile):
         player._stun_on_hit = beh.get("stun_frames", 0)
         return []
 
-    if btype == "spin_kick":
+    if btype in ("spin_kick", "spin_slash"):
         # Extra hitbox behind the player
         import pygame
         r = player.rect

@@ -11,7 +11,7 @@ import time
 
 PORT = 47611
 # Increment when combat rules change: lockstep peers must simulate identical rules.
-PROTOCOL_VERSION = 4
+PROTOCOL_VERSION = 6
 MAX_SETUP_SIZE = 4096
 INPUT_TIMEOUT = 15.0
 ACTIONS = (

@@ -1,4 +1,4 @@
-"""Smoke checks for the animated intro and shared night-city menu theme."""
+"""Smoke checks for the animated night-city intro and shared arcade menu theme."""
 
 import os
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
@@ -22,7 +22,7 @@ class ThemeTests(unittest.TestCase):
     def tearDownClass(cls):
         pygame.quit()
 
-    def test_city_scene_animates_and_is_repeatable_at_the_same_time(self):
+    def test_city_menu_animates_and_is_repeatable_at_the_same_time(self):
         theme.background(self.screen, elapsed=1)
         first = pygame.image.tobytes(self.screen, "RGB")
         theme.background(self.screen, elapsed=1)

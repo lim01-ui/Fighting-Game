@@ -1,0 +1,597 @@
+{
+  "fighters": {
+    "rook": {
+      "key": "rook",
+      "sprite_asset": "rook",
+      "name": "ROOK",
+      "archetype": "Balanced",
+      "special_behavior": {
+        "type": "slash",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "sword",
+      "weapon_color": [
+        220,
+        220,
+        240
+      ],
+      "weapon_handle": [
+        140,
+        150,
+        180
+      ],
+      "colors": {
+        "body": [
+          60,
+          120,
+          220
+        ],
+        "accent": [
+          255,
+          230,
+          120
+        ],
+        "eye": [
+          255,
+          255,
+          255
+        ]
+      },
+      "body": {
+        "width": 70,
+        "height": 140,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.0,
+        "jump": 1.0,
+        "health": 1.0,
+        "damage": 1.0,
+        "defense": 1.0
+      },
+      "attack_mods": {
+        "reach": 1.0,
+        "startup": 1.0,
+        "cooldown": 1.0
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.0,
+        "reach_mult": 1.0,
+        "hitstun_mult": 1.0,
+        "startup_mult": 1.0,
+        "extra_hits": 0,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "vex": {
+      "key": "vex",
+      "sprite_asset": "vex",
+      "name": "VEX",
+      "archetype": "Speed",
+      "special_behavior": {
+        "type": "dash_slash",
+        "dash": 90,
+        "extra_hits": 1,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "daggers",
+      "weapon_color": [
+        230,
+        230,
+        240
+      ],
+      "weapon_handle": [
+        140,
+        140,
+        160
+      ],
+      "colors": {
+        "body": [
+          230,
+          80,
+          60
+        ],
+        "accent": [
+          255,
+          200,
+          90
+        ],
+        "eye": [
+          255,
+          255,
+          255
+        ]
+      },
+      "body": {
+        "width": 62,
+        "height": 132,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.4,
+        "jump": 1.15,
+        "health": 0.85,
+        "damage": 0.8,
+        "defense": 1.1
+      },
+      "attack_mods": {
+        "reach": 0.9,
+        "startup": 0.75,
+        "cooldown": 0.85
+      },
+      "weapon_effect": {
+        "knockback_mult": 0.8,
+        "reach_mult": 0.85,
+        "hitstun_mult": 0.9,
+        "startup_mult": 0.7,
+        "extra_hits": 1,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "sable": {
+      "key": "sable",
+      "sprite_asset": "sable",
+      "name": "SABLE",
+      "archetype": "Zoner",
+      "special_behavior": {
+        "type": "long_swipe",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "whip",
+      "weapon_color": [
+        200,
+        120,
+        200
+      ],
+      "weapon_handle": [
+        120,
+        50,
+        120
+      ],
+      "colors": {
+        "body": [
+          110,
+          70,
+          160
+        ],
+        "accent": [
+          220,
+          160,
+          255
+        ],
+        "eye": [
+          255,
+          240,
+          255
+        ]
+      },
+      "body": {
+        "width": 66,
+        "height": 152,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 0.95,
+        "jump": 1.0,
+        "health": 0.95,
+        "damage": 1.0,
+        "defense": 1.05
+      },
+      "attack_mods": {
+        "reach": 1.25,
+        "startup": 1.1,
+        "cooldown": 1.1
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.0,
+        "reach_mult": 1.35,
+        "hitstun_mult": 1.0,
+        "startup_mult": 1.1,
+        "extra_hits": 0,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "chib": {
+      "key": "chib",
+      "species": "Panda",
+      "name": "CHIB",
+      "archetype": "Sword Master",
+      "sprite_asset": "chib",
+      "special_behavior": {
+        "type": "slash",
+        "dash": 45,
+        "extra_hits": 1,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "sword",
+      "weapon_color": [
+        244,
+        137,
+        246
+      ],
+      "weapon_handle": [
+        120,
+        11,
+        247
+      ],
+      "colors": {
+        "body": [
+          244,
+          137,
+          246
+        ],
+        "accent": [
+          120,
+          11,
+          247
+        ],
+        "eye": [
+          255,
+          255,
+          255
+        ]
+      },
+      "body": {
+        "width": 64,
+        "height": 136,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.25,
+        "jump": 1.1,
+        "health": 0.85,
+        "damage": 1.05,
+        "defense": 1.05
+      },
+      "attack_mods": {
+        "reach": 1.05,
+        "startup": 0.78,
+        "cooldown": 0.85
+      },
+      "weapon_effect": {
+        "knockback_mult": 0.95,
+        "reach_mult": 1.05,
+        "hitstun_mult": 1.0,
+        "startup_mult": 0.8,
+        "extra_hits": 1,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "golem": {
+      "key": "golem",
+      "sprite_asset": "golem",
+      "name": "GOLEM",
+      "archetype": "Heavy",
+      "special_behavior": {
+        "type": "heavy_slam",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "hammer",
+      "weapon_color": [
+        140,
+        100,
+        60
+      ],
+      "weapon_handle": [
+        60,
+        40,
+        25
+      ],
+      "colors": {
+        "body": [
+          140,
+          100,
+          70
+        ],
+        "accent": [
+          220,
+          160,
+          80
+        ],
+        "eye": [
+          255,
+          200,
+          100
+        ]
+      },
+      "body": {
+        "width": 84,
+        "height": 152,
+        "crouch_ratio": 0.6
+      },
+      "stats": {
+        "speed": 0.75,
+        "jump": 0.85,
+        "health": 1.25,
+        "damage": 1.35,
+        "defense": 0.8
+      },
+      "attack_mods": {
+        "reach": 1.1,
+        "startup": 1.3,
+        "cooldown": 1.25
+      },
+      "weapon_effect": {
+        "knockback_mult": 2.0,
+        "reach_mult": 1.05,
+        "hitstun_mult": 1.2,
+        "startup_mult": 1.3,
+        "extra_hits": 0,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "sanya": {
+      "key": "sanya",
+      "species": "Slime",
+      "sprite_asset": "sanya",
+      "name": "SANYA",
+      "archetype": "Kicks",
+      "special_behavior": {
+        "type": "spin_kick",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": true,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "gauntlets",
+      "weapon_color": [
+        230,
+        60,
+        90
+      ],
+      "weapon_handle": [
+        120,
+        20,
+        40
+      ],
+      "colors": {
+        "body": [
+          220,
+          50,
+          80
+        ],
+        "accent": [
+          255,
+          255,
+          255
+        ],
+        "eye": [
+          255,
+          255,
+          255
+        ]
+      },
+      "body": {
+        "width": 66,
+        "height": 150,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.1,
+        "jump": 1.1,
+        "health": 0.95,
+        "damage": 1.05,
+        "defense": 1.0
+      },
+      "attack_mods": {
+        "reach": 1.25,
+        "startup": 1.0,
+        "cooldown": 1.0
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.0,
+        "reach_mult": 1.2,
+        "hitstun_mult": 1.4,
+        "startup_mult": 1.0,
+        "extra_hits": 0,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "soldier": {
+      "key": "soldier",
+      "name": "SOLDIER",
+      "archetype": "Tactical",
+      "sprite_asset": "soldier",
+      "special_behavior": {
+        "type": "slash",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 0,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 0,
+        "pierce": false
+      },
+      "weapon": "fists",
+      "weapon_color": [
+        100,
+        190,
+        95
+      ],
+      "weapon_handle": [
+        65,
+        95,
+        55
+      ],
+      "colors": {
+        "body": [
+          90,
+          130,
+          65
+        ],
+        "accent": [
+          170,
+          205,
+          95
+        ],
+        "eye": [
+          245,
+          245,
+          210
+        ]
+      },
+      "body": {
+        "width": 64,
+        "height": 140,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 0.95,
+        "jump": 0.95,
+        "health": 1.05,
+        "damage": 1.05,
+        "defense": 0.95
+      },
+      "attack_mods": {
+        "reach": 1.0,
+        "startup": 1.0,
+        "cooldown": 1.0
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.0,
+        "reach_mult": 1.0,
+        "hitstun_mult": 1.0,
+        "startup_mult": 1.0,
+        "extra_hits": 0,
+        "projectile": null,
+        "shield_reflect": 0.0
+      }
+    },
+    "choom": {
+      "key": "choom",
+      "species": "Robot",
+      "sprite_asset": "choom",
+      "name": "CHOOM",
+      "archetype": "Specialist",
+      "special_behavior": {
+        "type": "stun_bolt",
+        "dash": 0,
+        "extra_hits": 0,
+        "projectiles": 1,
+        "teleport": false,
+        "spin": false,
+        "armor_frames": 0,
+        "stun_frames": 60,
+        "pierce": false
+      },
+      "weapon": "baton",
+      "weapon_color": [
+        240,
+        220,
+        60
+      ],
+      "weapon_handle": [
+        140,
+        120,
+        20
+      ],
+      "colors": {
+        "body": [
+          240,
+          210,
+          50
+        ],
+        "accent": [
+          60,
+          120,
+          230
+        ],
+        "eye": [
+          255,
+          255,
+          255
+        ]
+      },
+      "body": {
+        "width": 64,
+        "height": 138,
+        "crouch_ratio": 0.55
+      },
+      "stats": {
+        "speed": 1.25,
+        "jump": 1.05,
+        "health": 0.9,
+        "damage": 1.1,
+        "defense": 1.05
+      },
+      "attack_mods": {
+        "reach": 0.95,
+        "startup": 0.85,
+        "cooldown": 0.9
+      },
+      "weapon_effect": {
+        "knockback_mult": 1.0,
+        "reach_mult": 1.0,
+        "hitstun_mult": 1.6,
+        "startup_mult": 0.9,
+        "extra_hits": 0,
+        "projectile": "spark",
+        "shield_reflect": 0.0
+      }
+    }
+  },
+  "sha256": {
+    "chib-panda.png": "db9fed4f193fa26c4dd527ec41e8749822d77b3ee492858adfb5e32fa6f09b6d",
+    "chib.json": "93acb0dc6be60d194e2da94ffcd005450d81893fe2ca3d381cda94d6c706e409",
+    "choom-robot.png": "2cfb9aa460f4d0a918d92c0606f59ccb7c1fccaac2260d4e39b4027b6d48f421",
+    "choom.json": "306770a7143f431bd89d03fff6d55402f5b04c24d505802b44bd0886df5eb0d7",
+    "golem-idle.png": "56a428379cfd1a377da1230266a487ad8cb813b4baf074602e8b37a840c6ae9b",
+    "golem.json": "5e653815a0d05f5eee4b62579f3b78bdeeb2995222a6af984f65bc944f0033de",
+    "golem.png": "a1e88193bb97ff2b443e15f84128240f1de3792f345a105d57f9a392f3fb3148",
+    "rook-idle.png": "0b64a0c8312343662003b2dd7a2157875d377c7129657368068a85cb160aa88c",
+    "rook.json": "db754d61b49d25f099bd49370fce7b686cb451bdbd53aef8b16c462c17d74244",
+    "rook.png": "c9484a88426034749a7247604fd9b1b41e2e2def6834b4cf3ec27dd90f0269b9",
+    "sable-chibi.png": "e49cafce5dde90cd8f02538680fae2fe17246265403672d889d510c82c535796",
+    "sable.json": "2a839c3dc1ee9c9e41aa55c470abc1a523c792047ad786619f2d93a1fb7b273b",
+    "sanya-slime.png": "f92c5b1f7751e0a248230592c44c199a01acd76ac84b0cd0f345dc3667485b40",
+    "sanya.json": "a3cb6c5cbc1d4ddcc187f2b6f13f998a63e4532414d742bc85b0706b4d3ab94e",
+    "soldier-idle.png": "85a6263f9cc669758efb1ae29def79416dc896135a84a618e2c844aa5e327228",
+    "soldier.json": "c14670d72e7bcd9b7d44d27c180486522d9478813ad39752817f49a4db52e42e",
+    "soldier.png": "0fc4976bd317f15769f1c8c9bc1aa7e608143673901209b42daf24f334077a98",
+    "vex-idle.png": "2be38d0f706b967fc80db0c198deb508582d0b498aa80c7d0bb3125470bb5b01",
+    "vex.json": "90fcc6711a8517ce813db361048e9f379d961eaf90d77107eb2b6484d909df62",
+    "vex.png": "06bb115e7d2d302ec686482100448288aa8e4eae967fcd9f093fc7337523bab1"
+  }
+}

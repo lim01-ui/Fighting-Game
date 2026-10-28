@@ -78,9 +78,13 @@ class RoundManager:
             elif p2.health <= 0:
                 self._end("p1"); return "round_ended"
             if self.timer_frames <= 0:
-                if p1.health > p2.health:
+                # Different max-health pools should not decide a timeout before
+                # anyone has fought. Compare remaining percentages exactly.
+                p1_remaining = p1.health * p2.max_health
+                p2_remaining = p2.health * p1.max_health
+                if p1_remaining > p2_remaining:
                     self._end("p1")
-                elif p2.health > p1.health:
+                elif p2_remaining > p1_remaining:
                     self._end("p2")
                 else:
                     self._end("draw")

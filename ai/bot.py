@@ -98,7 +98,7 @@ class Bot:
         elif self.state == B_JUMP:
             self.keys["jump"] = True
         elif self.state == B_ATTACK:
-            if random.random() < self.diff.special_chance:
+            if p.special_ready and random.random() < self.diff.special_chance:
                 self.keys["special"] = True
             elif random.random() < self.diff.heavy_chance:
                 self.keys["heavy"] = True

@@ -1,0 +1,134 @@
+{
+  "image": "sanya-slime.png",
+  "body_height": 192,
+  "pixel_height": 72,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      361,
+      285
+    ],
+    "step_left": [
+      0,
+      285,
+      361,
+      276
+    ],
+    "step_right": [
+      361,
+      285,
+      362,
+      276
+    ],
+    "block": [
+      723,
+      285,
+      361,
+      276
+    ],
+    "jump": [
+      1084,
+      285,
+      362,
+      276
+    ],
+    "crouch": [
+      0,
+      561,
+      361,
+      255
+    ],
+    "light_start": [
+      361,
+      561,
+      362,
+      255
+    ],
+    "light": [
+      723,
+      561,
+      396,
+      255
+    ],
+    "heavy_start": [
+      1119,
+      561,
+      327,
+      255
+    ],
+    "heavy": [
+      0,
+      816,
+      429,
+      272
+    ],
+    "special": [
+      429,
+      816,
+      353,
+      272
+    ],
+    "hit": [
+      782,
+      816,
+      302,
+      272
+    ],
+    "knockdown": [
+      1084,
+      816,
+      362,
+      272
+    ]
+  },
+  "dedicated_knockdown": true,
+  "animations": {
+    "walk": [
+      "step_left",
+      "step_right"
+    ],
+    "run": [
+      "step_left",
+      "step_right"
+    ],
+    "light": [
+      "light_start",
+      "light"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy"
+    ]
+  },
+  "idle_animation": {
+    "image": "sanya-slime.png",
+    "body_height": 192,
+    "frames": [
+      [
+        65,
+        93,
+        232,
+        192
+      ],
+      [
+        441,
+        80,
+        236,
+        205
+      ],
+      [
+        808,
+        78,
+        250,
+        207
+      ],
+      [
+        1155,
+        103,
+        230,
+        182
+      ]
+    ]
+  }
+}

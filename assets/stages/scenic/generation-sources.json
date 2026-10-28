@@ -1,0 +1,36 @@
+{
+  "tool": "built-in image_gen",
+  "prompts": "../../../design/stage-concepts/2026-10-27/generation-prompts.json",
+  "files": [
+    {
+      "key": "sword_grotto",
+      "image": "01-moonblade-grotto.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-265281ef-f3f1-475d-8312-39d97a6f82c2.png"
+    },
+    {
+      "key": "sakura_relic",
+      "image": "02-sakura-relic.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-aafa1c73-29a9-4484-823c-411373def77d.png"
+    },
+    {
+      "key": "moonlit_shrine",
+      "image": "03-moonlit-shrine.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-6416d6eb-1656-4dc6-8017-ad34eece4f5b.png"
+    },
+    {
+      "key": "aurora_lake",
+      "image": "04-aurora-lake.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-9ed4dabd-b7bb-45e8-b630-a9669fdfe6eb.png"
+    },
+    {
+      "key": "ronin_heights",
+      "image": "05-ronin-heights.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-3d543e0d-1ab2-4462-949f-6cbbfe40839f.png"
+    },
+    {
+      "key": "angkor_sanctuary",
+      "image": "06-angkor-sanctuary.png",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a178c3-f37d-7513-bb2b-80887064060c\\exec-c7fdb416-085d-4a3b-80ce-e7fe504eb019.png"
+    }
+  ]
+}

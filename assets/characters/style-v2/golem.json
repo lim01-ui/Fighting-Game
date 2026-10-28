@@ -1,133 +1,321 @@
 {
-  "image": "golem.png",
-  "body_height": 221,
+  "image": "golem-moss-chibi.png",
+  "body_height": 204,
   "pixel_height": 72,
+  "phase_animation": true,
+  "dedicated_knockdown": true,
+  "source_facing": 1,
+  "proportion_reference": "renegade",
   "poses": {
     "idle": [
       0,
       0,
-      362,
-      400
+      328,
+      212
     ],
-    "step_left": [
-      362,
+    "idle_b": [
+      328,
       0,
-      362,
-      400
+      328,
+      212
     ],
-    "step_right": [
-      724,
+    "idle_c": [
+      656,
       0,
-      362,
-      400
+      328,
+      212
+    ],
+    "idle_d": [
+      984,
+      0,
+      328,
+      212
+    ],
+    "step_a": [
+      0,
+      212,
+      328,
+      213
+    ],
+    "step_b": [
+      328,
+      212,
+      328,
+      213
+    ],
+    "step_c": [
+      656,
+      212,
+      328,
+      213
+    ],
+    "step_d": [
+      984,
+      212,
+      328,
+      213
     ],
     "block": [
-      1086,
       0,
-      363,
-      400
+      425,
+      328,
+      204
     ],
     "jump": [
-      0,
-      400,
-      362,
-      320
+      328,
+      425,
+      328,
+      204
     ],
     "crouch": [
-      362,
-      400,
-      362,
-      320
+      656,
+      425,
+      328,
+      204
+    ],
+    "hit": [
+      984,
+      425,
+      328,
+      204
     ],
     "light_start": [
-      724,
-      400,
-      362,
-      320
+      0,
+      629,
+      328,
+      187
     ],
-    "light": [
-      1086,
-      400,
-      363,
-      320
+    "light_contact": [
+      328,
+      629,
+      340,
+      187
+    ],
+    "light_follow": [
+      668,
+      629,
+      323,
+      187
+    ],
+    "light_recover": [
+      991,
+      629,
+      321,
+      187
     ],
     "heavy_start": [
       0,
-      720,
-      362,
-      366
+      816,
+      328,
+      202
     ],
-    "heavy": [
-      362,
-      720,
-      362,
-      366
+    "heavy_contact": [
+      328,
+      816,
+      337,
+      202
     ],
-    "special": [
-      724,
-      720,
-      362,
-      366
+    "heavy_follow": [
+      665,
+      816,
+      356,
+      202
     ],
-    "hit": [
-      1086,
-      720,
-      363,
-      366
+    "heavy_recover": [
+      1021,
+      816,
+      291,
+      202
+    ],
+    "special_start": [
+      0,
+      1018,
+      328,
+      181
+    ],
+    "special_contact": [
+      328,
+      1018,
+      325,
+      181
+    ],
+    "special_follow": [
+      653,
+      1018,
+      331,
+      181
     ],
     "knockdown": [
-      1086,
-      720,
-      363,
-      366
+      984,
+      1018,
+      328,
+      181
+    ]
+  },
+  "anchors": {
+    "idle": [
+      164,
+      212
+    ],
+    "idle_b": [
+      492,
+      212
+    ],
+    "idle_c": [
+      820,
+      212
+    ],
+    "idle_d": [
+      1148,
+      212
+    ],
+    "step_a": [
+      164,
+      425
+    ],
+    "step_b": [
+      492,
+      422
+    ],
+    "step_c": [
+      820,
+      422
+    ],
+    "step_d": [
+      1148,
+      422
+    ],
+    "block": [
+      164,
+      626
+    ],
+    "jump": [
+      492,
+      629
+    ],
+    "crouch": [
+      820,
+      628
+    ],
+    "hit": [
+      1148,
+      628
+    ],
+    "light_start": [
+      164,
+      816
+    ],
+    "light_contact": [
+      498,
+      816
+    ],
+    "light_follow": [
+      830,
+      816
+    ],
+    "light_recover": [
+      1152,
+      816
+    ],
+    "heavy_start": [
+      164,
+      1009
+    ],
+    "heavy_contact": [
+      496,
+      1012
+    ],
+    "heavy_follow": [
+      843,
+      1018
+    ],
+    "heavy_recover": [
+      1166,
+      1011
+    ],
+    "special_start": [
+      164,
+      1188
+    ],
+    "special_contact": [
+      490,
+      1188
+    ],
+    "special_follow": [
+      818,
+      1190
+    ],
+    "knockdown": [
+      1148,
+      1190
     ]
   },
   "animations": {
     "walk": [
-      "step_left",
-      "step_right"
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
     ],
     "run": [
-      "step_left",
-      "step_right"
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
     ],
     "light": [
       "light_start",
-      "light"
+      "light_contact",
+      "light_follow",
+      "light_recover"
     ],
     "heavy": [
       "heavy_start",
-      "heavy"
+      "heavy_contact",
+      "heavy_follow",
+      "heavy_recover"
+    ],
+    "special": [
+      "special_start",
+      "special_contact",
+      "special_follow",
+      "idle"
     ]
   },
   "idle_animation": {
-    "image": "golem-idle.png",
-    "body_height": 361,
+    "image": "golem-moss-chibi.png",
+    "body_height": 204,
     "frames": [
       [
-        101,
-        214,
-        415,
-        361
+        74,
+        8,
+        219,
+        204
       ],
       [
-        643,
-        204,
-        410,
-        371
+        401,
+        6,
+        218,
+        206
       ],
       [
-        1177,
-        201,
-        415,
-        374
+        727,
+        8,
+        211,
+        204
       ],
       [
-        1723,
-        214,
-        413,
-        361
+        1053,
+        8,
+        206,
+        204
       ]
+    ],
+    "sequence": [
+      "idle",
+      "idle_b",
+      "idle_c",
+      "idle_d"
     ]
   }
 }

@@ -98,7 +98,7 @@ def run_tutorial(screen, clock):
             "CHARGE YOUR ULTIMATE",
             "Deal and take damage to charge the ultimate meter.",
             "At 100%, press Special to unleash your fighter's Ultimate.",
-            "Every fighter has a distinct ultimate move and effect.",
+            "Special and Ultimate share a 5-second cooldown; watch the HUD.",
         ),
         (
             "BLOCK AND FIND AN OPENING",

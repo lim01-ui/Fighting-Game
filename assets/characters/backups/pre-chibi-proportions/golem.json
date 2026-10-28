@@ -1,0 +1,319 @@
+{
+  "image": "golem-moss.png",
+  "body_height": 206,
+  "pixel_height": 72,
+  "phase_animation": true,
+  "dedicated_knockdown": true,
+  "poses": {
+    "idle": [
+      0,
+      0,
+      340,
+      214
+    ],
+    "idle_b": [
+      340,
+      0,
+      316,
+      214
+    ],
+    "idle_c": [
+      656,
+      0,
+      328,
+      214
+    ],
+    "idle_d": [
+      984,
+      0,
+      328,
+      214
+    ],
+    "step_a": [
+      0,
+      214,
+      353,
+      195
+    ],
+    "step_b": [
+      353,
+      214,
+      341,
+      195
+    ],
+    "step_c": [
+      694,
+      214,
+      334,
+      195
+    ],
+    "step_d": [
+      1028,
+      214,
+      284,
+      195
+    ],
+    "block": [
+      0,
+      409,
+      328,
+      218
+    ],
+    "jump": [
+      328,
+      409,
+      328,
+      218
+    ],
+    "crouch": [
+      656,
+      409,
+      339,
+      218
+    ],
+    "hit": [
+      995,
+      409,
+      317,
+      218
+    ],
+    "light_start": [
+      0,
+      627,
+      328,
+      182
+    ],
+    "light_contact": [
+      328,
+      627,
+      332,
+      182
+    ],
+    "light_follow": [
+      660,
+      627,
+      346,
+      182
+    ],
+    "light_recover": [
+      1006,
+      627,
+      306,
+      182
+    ],
+    "heavy_start": [
+      0,
+      809,
+      328,
+      213
+    ],
+    "heavy_contact": [
+      328,
+      809,
+      320,
+      213
+    ],
+    "heavy_follow": [
+      648,
+      809,
+      313,
+      213
+    ],
+    "heavy_recover": [
+      961,
+      809,
+      351,
+      213
+    ],
+    "special_start": [
+      0,
+      1022,
+      328,
+      177
+    ],
+    "special_contact": [
+      328,
+      1022,
+      328,
+      177
+    ],
+    "special_follow": [
+      656,
+      1022,
+      334,
+      177
+    ],
+    "knockdown": [
+      990,
+      1022,
+      322,
+      177
+    ]
+  },
+  "anchors": {
+    "idle": [
+      163,
+      214
+    ],
+    "idle_b": [
+      492,
+      214
+    ],
+    "idle_c": [
+      813,
+      214
+    ],
+    "idle_d": [
+      1141,
+      214
+    ],
+    "step_a": [
+      169,
+      408
+    ],
+    "step_b": [
+      517,
+      409
+    ],
+    "step_c": [
+      854,
+      409
+    ],
+    "step_d": [
+      1164,
+      408
+    ],
+    "block": [
+      157,
+      627
+    ],
+    "jump": [
+      485,
+      627
+    ],
+    "crouch": [
+      819,
+      626
+    ],
+    "hit": [
+      1147,
+      625
+    ],
+    "light_start": [
+      157,
+      809
+    ],
+    "light_contact": [
+      487,
+      809
+    ],
+    "light_follow": [
+      826,
+      809
+    ],
+    "light_recover": [
+      1153,
+      808
+    ],
+    "heavy_start": [
+      157,
+      1010
+    ],
+    "heavy_contact": [
+      482,
+      1022
+    ],
+    "heavy_follow": [
+      798,
+      1022
+    ],
+    "heavy_recover": [
+      1129,
+      1020
+    ],
+    "special_start": [
+      157,
+      1185
+    ],
+    "special_contact": [
+      485,
+      1184
+    ],
+    "special_follow": [
+      816,
+      1185
+    ],
+    "knockdown": [
+      1145,
+      1182
+    ]
+  },
+  "animations": {
+    "walk": [
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
+    ],
+    "run": [
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
+    ],
+    "light": [
+      "light_start",
+      "light_contact",
+      "light_follow",
+      "light_recover"
+    ],
+    "heavy": [
+      "heavy_start",
+      "heavy_contact",
+      "heavy_follow",
+      "heavy_recover"
+    ],
+    "special": [
+      "special_start",
+      "special_contact",
+      "special_follow",
+      "idle"
+    ]
+  },
+  "idle_animation": {
+    "image": "golem-moss.png",
+    "body_height": 206,
+    "frames": [
+      [
+        52,
+        8,
+        288,
+        206
+      ],
+      [
+        365,
+        14,
+        284,
+        200
+      ],
+      [
+        686,
+        13,
+        285,
+        201
+      ],
+      [
+        1003,
+        11,
+        303,
+        203
+      ]
+    ],
+    "sequence": [
+      "idle",
+      "idle_b",
+      "idle_c",
+      "idle_d"
+    ]
+  }
+}

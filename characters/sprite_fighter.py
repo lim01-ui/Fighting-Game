@@ -162,6 +162,7 @@ for _asset, _folder, _body_height, _heavy, _special in (
 _sheets = {}
 _frames = {}
 _manifests = {}
+_anchors = {}
 GENERATED_ASSETS = (
     "rook", "vex", "golem", "sanya", "choom", "saikyo", "renegade",
     "soldier", "chib", "minamoto", "raguel",
@@ -193,11 +194,61 @@ def foot_padding_ratio(asset):
     return _SPECS.get(asset, {}).get("foot_padding_ratio", 0.0)
 
 
+def frame_anchor(image):
+    """The body baseline, independent of a weapon's or wing's outer bounds."""
+    return _anchors.get(image, (image.get_width() / 2, image.get_height()))
+
+
+def has_planted_idle(asset):
+    return (is_generated_asset(asset)
+            and _manifest(asset).get('idle_animation', {}).get('anchor_mode') == 'feet')
+
+
+def idle_frame_index(asset, ticks):
+    duration = (_manifest(asset).get('idle_animation', {}).get('frame_ms', 180)
+                if is_generated_asset(asset) else 180)
+    return ticks // duration
+
+
+def hover_offset(character, ticks):
+    """Cosmetic flight; collision boxes and jump physics remain deterministic."""
+    import math
+    height = character.get("hover_height", 0)
+    return height + math.sin(ticks * 0.075) * character.get("hover_amplitude", 0)
+
+
 def _idle_frame(asset, frame_index, facing):
     manifest = _manifest(asset)
     spec = manifest["idle_animation"]
     index = frame_index % len(spec["frames"])
     key = (asset, "idle_cycle", index, facing)
+    if manifest.get("phase_animation"):
+        if facing < 0:
+            if key not in _frames:
+                source = _idle_frame(asset, index, 1)
+                mirrored = pygame.transform.flip(source, True, False)
+                anchor = frame_anchor(source)
+                _anchors[mirrored] = (source.get_width() - anchor[0], anchor[1])
+                _frames[key] = mirrored
+            return _frames[key]
+        if key not in _frames:
+            frames = [_generated_frame(asset, pose, 0, facing, raw=True) for pose in spec["sequence"]]
+            anchors = [frame_anchor(frame) for frame in frames]
+            if spec.get('anchor_mode') == 'feet':
+                # Nearest-neighbor downscaling can drop the last source row.
+                # Align the rasterized soles too, avoiding a one-native-pixel hop.
+                anchors = [(anchor[0], frame.get_bounding_rect(min_alpha=80).bottom)
+                           for frame, anchor in zip(frames, anchors)]
+            left = max(a[0] for a in anchors)
+            top = max(a[1] for a in anchors)
+            right = max(f.get_width() - a[0] for f, a in zip(frames, anchors))
+            bottom = max(f.get_height() - a[1] for f, a in zip(frames, anchors))
+            for i, (frame, anchor) in enumerate(zip(frames, anchors)):
+                canvas = pygame.Surface((round(left + right + 2), round(top + bottom + 2)), pygame.SRCALPHA)
+                canvas.blit(frame, (round(left - anchor[0]), round(top - anchor[1])))
+                _anchors[canvas] = (left, top)
+                _frames[(asset, "idle_cycle", i, facing)] = canvas
+        return _frames[key]
     if key not in _frames:
         sheet_key = (asset, "idle_sheet")
         if sheet_key not in _sheets:
@@ -222,9 +273,9 @@ def _idle_frame(asset, frame_index, facing):
     return _frames[key]
 
 
-def _generated_frame(asset, animation, frame_index, facing):
+def _generated_frame(asset, animation, frame_index, facing, raw=False):
     manifest = _manifest(asset)
-    if animation == "idle" and "idle_animation" in manifest:
+    if animation == "idle" and "idle_animation" in manifest and not raw:
         return _idle_frame(asset, frame_index, facing)
     sequence = manifest.get("animations", {}).get(animation, [animation])
     pose_name = sequence[frame_index % len(sequence)]
@@ -237,7 +288,7 @@ def _generated_frame(asset, animation, frame_index, facing):
             ).convert_alpha()
         frame = _sheets[asset].subsurface(pygame.Rect(pose)).copy()
         # Remove atlas padding without rescaling the character between poses.
-        bounds = frame.get_bounding_rect(min_alpha=16)
+        bounds = frame.get_bounding_rect(min_alpha=80 if manifest.get("phase_animation") else 16)
         if not bounds.width or not bounds.height:
             raise ValueError(f"Empty sprite pose: {asset}/{animation}")
         frame = frame.subsurface(bounds).copy()
@@ -247,10 +298,18 @@ def _generated_frame(asset, animation, frame_index, facing):
             max(1, round(frame.get_width() * scale)),
             max(1, round(frame.get_height() * scale)),
         ))
+        anchor = manifest.get("anchors", {}).get(pose_name)
+        if anchor:
+            anchor = ((anchor[0] - pose[0] - bounds.x) * scale,
+                      (anchor[1] - pose[1] - bounds.y) * scale)
         if animation == "knockdown" and not manifest.get("dedicated_knockdown", False):
             frame = pygame.transform.rotate(frame, 80)
-        if facing < 0:
+        if facing * manifest.get("source_facing", 1) < 0:
             frame = pygame.transform.flip(frame, True, False)
+            if anchor:
+                anchor = (frame.get_width() - anchor[0], anchor[1])
+        if anchor:
+            _anchors[frame] = anchor
         _frames[key] = frame
     return _frames[key]
 
@@ -311,7 +370,19 @@ def frame_for_player(asset, player):
         if not is_generated_asset(asset) and attack_name in _SPECS.get(asset, {}).get("animations", {}):
             animation = attack_name
         if is_generated_asset(asset):
-            frame_index = 0 if player.current_attack.in_startup else 1
+            attack = player.current_attack
+            sequence = _manifest(asset).get("animations", {}).get(animation, [])
+            if _manifest(asset).get("phase_animation") and len(sequence) >= 3:
+                if attack.in_startup:
+                    frame_index = 0
+                elif attack.in_active:
+                    # Both contact and follow-through play inside the hit window.
+                    progress = (attack.frame - attack.data.startup) / max(1, attack.data.active)
+                    frame_index = 1 + min(len(sequence) - 3, int(progress * (len(sequence) - 2)))
+                else:
+                    frame_index = len(sequence) - 1
+            else:
+                frame_index = 0 if attack.in_startup else 1
         else:
             frame_index = player.current_attack.frame // 3
     elif not player.on_ground:
@@ -336,7 +407,7 @@ def frame_for_player(asset, player):
         frame_index = pygame.time.get_ticks() // 110
     else:
         animation = "idle"
-        frame_index = pygame.time.get_ticks() // 180
+        frame_index = idle_frame_index(asset, pygame.time.get_ticks())
 
     if (is_generated_asset(asset) and player.is_crouching and player.on_ground
             and player.state not in (S_ATTACK, S_HITSTUN, S_KNOCKDOWN)):
@@ -349,6 +420,15 @@ def frame_for_player(asset, player):
             frame, (frame.get_width(), max(1, height))
         )
     if player.state == S_ATTACK and player.current_attack is not None:
+        if is_generated_asset(asset) and _manifest(asset).get("phase_animation") and player.is_crouching:
+            # Dedicated swings retain their weapon motion for low attacks.
+            key = (asset, "low_attack", animation, frame_index, player.facing)
+            if key not in _frames:
+                anchor = frame_anchor(frame)
+                low = pygame.transform.scale(frame, (frame.get_width(), max(1, round(frame.get_height() * .65))))
+                _anchors[low] = (anchor[0], anchor[1] * low.get_height() / frame.get_height())
+                _frames[key] = low
+            frame = _frames[key]
         if not is_generated_asset(asset) and asset in ("soldier", "renegade"):
             attack_name = player.current_attack.data.name
             progress = player.current_attack.frame / max(
@@ -373,7 +453,7 @@ def frame_for_player(asset, player):
 def preview_frame(asset, facing=1):
     """Return an animated idle pose for character-selection previews."""
     frame = _load_frame(
-        asset, "idle", pygame.time.get_ticks() // 180, facing
+        asset, "idle", idle_frame_index(asset, pygame.time.get_ticks()), facing
     )
     if not is_generated_asset(asset) and _SPECS.get(asset, {}).get("trim_preview"):
         return frame.subsurface(frame.get_bounding_rect(min_alpha=16)).copy()
@@ -391,3 +471,30 @@ def blit_fit(surface, image, rect):
     )
     scaled = pygame.transform.scale(image, size)
     surface.blit(scaled, scaled.get_rect(center=rect.center))
+
+
+def blit_preview(surface, asset, rect, facing=1):
+    """Give every selection portrait the same body height and foot baseline.
+
+    Equipment may extend beyond the body. Fitting its entire bounding box
+    would make a wide sword or pair of wings shrink the fighter's face.
+    """
+    rect = pygame.Rect(rect)
+    frame = preview_frame(asset, facing)
+    reference = body_height(asset) or frame.get_height()
+    scale = rect.height * .92 / reference
+    size = (max(1, round(frame.get_width() * scale)),
+            max(1, round(frame.get_height() * scale)))
+    anchor = frame_anchor(frame)
+    lift = 0
+    from characters import character_data
+    character = character_data.ROSTER.get(asset, {})
+    if character.get("hover_height"):
+        import math
+        lift = (1.5 + math.sin(pygame.time.get_ticks() * .0045) * 1.2) * rect.height / 62
+    position = (round(rect.centerx - anchor[0] * scale),
+                round(rect.bottom - 2 - lift - anchor[1] * scale))
+    previous_clip = surface.get_clip()
+    surface.set_clip(previous_clip.clip(rect))
+    surface.blit(pygame.transform.scale(frame, size), position)
+    surface.set_clip(previous_clip)

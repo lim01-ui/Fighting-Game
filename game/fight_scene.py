@@ -42,26 +42,26 @@ STAGE_KEYS = stages.STAGE_KEYS
 
 _SPECIAL_KINDS = {
     "rook": "slash",
-    "vex": "double_slash",
+    "vex": "orb",
     "golem": "shockwave",
-    "sable": "whip_arc",
+    "sable": "double_slash",
     "nova": "nova_orbit",
     "iron": "aura",
     "jinx": "knife_fan",
     "kestrel": "prismatic_wave",
     "bramble": "leafburst",
     "raguel": "afterimage",
-    "sanya": "spin_kick",
-    "choom": "meteor_burst",
+    "sanya": "double_slash",
+    "choom": "shockwave",
     "saikyo": "spin_kick",
     "renegade": "double_slash",
-    "soldier": "void_ring",
+    "soldier": "whip_arc",
 }
 
 
 # ---- HUD helpers ----
 def _make_keybind_overlay(width, players, networked=False, training=False,
-                          pressed_keys=frozenset()):
+                          pressed_keys=frozenset(), special_cooldowns=()):
     """A compact arcade keyboard: movement cluster, guard, and attack keys."""
     panel_width = 700
     row_height = 88
@@ -73,7 +73,7 @@ def _make_keybind_overlay(width, players, networked=False, training=False,
     key_font = retro.font(size=18)
     label_font = retro.font(size=14)
 
-    def keycap(binding, rect, color):
+    def keycap(binding, rect, color, locked=False):
         def draw_cap(target, pressed=False):
             depth = 3 if pressed else 8
             top = rect.top + (5 if pressed else 0)
@@ -102,7 +102,7 @@ def _make_keybind_overlay(width, players, networked=False, training=False,
                           (255, 250, 240), face_rect.inflate(-4, -2))
 
         draw_cap(panel)
-        if preferences.key_code_from_name(binding) in pressed_keys:
+        if not locked and preferences.key_code_from_name(binding) in pressed_keys:
             # The opaque active face sinks into the base like a physical key.
             pygame.draw.rect(highlights, (*color, 90), rect.inflate(6, 6))
             draw_cap(highlights, pressed=True)
@@ -110,6 +110,7 @@ def _make_keybind_overlay(width, players, networked=False, training=False,
     # Work in a fixed compact layout, then shrink only for smaller displays.
     for row, (name, keymap, color) in enumerate(players):
         top = row * row_height
+        cooldown = special_cooldowns[row] if row < len(special_cooldowns) else 0
         draw_text_fit(panel, label_font, name, color, pygame.Rect(8, top + 35, 46, 24))
         draw_text_fit(panel, label_font, "MOVE", retro.GREEN, pygame.Rect(62, top + 4, 180, 16))
         positions = {"jump": (126, 24), "left": (66, 54), "crouch": (126, 54), "right": (186, 54)}
@@ -124,11 +125,20 @@ def _make_keybind_overlay(width, players, networked=False, training=False,
                 continue
             x = 274 + index * 104
             lines = label.split() if action in ("light", "heavy") else [label]
+            if action == "special":
+                lines = [label, f"{cooldown / 10:.1f}S" if cooldown else "READY"]
+                if cooldown:
+                    accent = (142, 151, 177)
             for line_index, line in enumerate(lines):
                 label_y = top + 2 + line_index * 16 if len(lines) > 1 else top + 14
                 draw_text_fit(panel, label_font, line, accent,
                               pygame.Rect(x - 12, label_y, 98, 16))
-            keycap(keymap[action], pygame.Rect(x + 4, top + 38, 64, 44), accent)
+            keycap(keymap[action], pygame.Rect(x + 4, top + 38, 64, 44), accent,
+                   locked=action == "special" and cooldown > 0)
+            if action == "special":
+                progress = 1 - cooldown / (settings.SPECIAL_COOLDOWN_SECONDS * 10)
+                pygame.draw.rect(panel, retro.CYAN,
+                                 (x + 4, top + 80, round(64 * max(0, min(1, progress))), 2))
     bound = {preferences.key_code_from_name(binding)
              for binding in settings.P1_KEYS.values() if binding}
     shortcuts = []
@@ -265,6 +275,15 @@ def _spawn_hit_effects(sparks, flashes, attack_name, cx, cy, color, blocked, sha
 
 def _resolve_combat(attacker, defender, attacker_combo, sparks, flashes, shake,
                     camera_punch, damage_numbers_list, combo_display):
+    attack = attacker.current_attack
+    if attack is not None and attack.data.name in ("special", "ultimate"):
+        ability = (character_data.ultimate_for(attacker.character["key"])
+                   if attack.data.name == "ultimate"
+                   else attacker.character.get("weapon_effect", {}))
+        # Ranged abilities spend their damage budget on their projectiles;
+        # an overlapping invisible melee hit must not double that damage.
+        if ability.get("projectile"):
+            return False
     hb = attacker.get_hitbox()
     if hb is None: return False
     if attacker.attack_has_connected: return False
@@ -355,6 +374,7 @@ def _resolve_combat(attacker, defender, attacker_combo, sparks, flashes, shake,
     beh = (
         character_data.ultimate_for(attacker.character["key"])
         if is_ultimate else attacker.character.get("special_behavior", {})
+        if data.name == "special" else {}
     )
     extra_hits = beh.get("extra_hits", 0)
     if extra_hits > 0 and not defender_is_blocking:
@@ -444,6 +464,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
         networked=network_peer is not None, training=training_mode,
     )
     keybind_pressed = frozenset()
+    keybind_cooldowns = ()
     overlay_key_codes = {
         preferences.key_code_from_name(binding)
         for _, keymap, _ in overlay_players
@@ -671,6 +692,11 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                         sound_fx.play("round_fight", volume=0.9)
                 elif _prev == ROUND_COUNTDOWN and round_mgr.state == ROUND_HOLD:
                     sound_fx.play("round_fight", volume=0.9)
+                if round_mgr.is_fighting and _prev != ROUND_FIGHTING:
+                    # Begin charging at FIGHT, so the intro/countdown cannot
+                    # use up the opening five-second lockout.
+                    p1.special_cooldown_frames = settings.SPECIAL_COOLDOWN_FRAMES
+                    p2.special_cooldown_frames = settings.SPECIAL_COOLDOWN_FRAMES
                 round_mgr._prev_state = round_mgr.state
 
                 if round_mgr.accepts_input:
@@ -1063,6 +1089,8 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             transitions.draw_round_over(
                 screen, round_mgr.winner, round_end_reason,
                 round_mgr.over_progress, fonts,
+                winner_name=(p1.character['name'] if round_mgr.winner == 'p1'
+                             else p2.character['name'] if round_mgr.winner == 'p2' else None),
             )
 
         if match.match_over:
@@ -1237,12 +1265,18 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
             )
         if round_mgr.is_fighting and not match.match_over and not paused:
             pressed = frozenset(code for code in overlay_key_codes if keys[code])
-            if pressed != keybind_pressed:
+            overlay_fighters = ([p1 if local_player == 1 else p2]
+                                if network_peer is not None else
+                                [p1, p2] if len(overlay_players) == 2 else [p1])
+            cooldowns = tuple((player.special_cooldown_frames * 10 + settings.FPS - 1)
+                              // settings.FPS for player in overlay_fighters)
+            if pressed != keybind_pressed or cooldowns != keybind_cooldowns:
                 keybind_pressed = pressed
+                keybind_cooldowns = cooldowns
                 keybind_overlay = _make_keybind_overlay(
                     screen.get_width() - 24, overlay_players,
                     networked=network_peer is not None, training=training_mode,
-                    pressed_keys=pressed,
+                    pressed_keys=pressed, special_cooldowns=cooldowns,
                 )
             screen.blit(keybind_overlay, ((screen.get_width() - keybind_overlay.get_width()) // 2,
                                          screen.get_height() - keybind_overlay.get_height() - 6))
@@ -1297,7 +1331,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                 )
             draw_text_fit(
                 screen, retro.font("Arial", 15, bold=True),
-                "Deal and take damage to charge meter; at 100%, SPECIAL uses your ULTIMATE.",
+                "At 100% meter, SPECIAL uses your ULTIMATE. Both share a 5-second cooldown.",
                 (255, 220, 115),
                 pygame.Rect(panel_rect.x + 20, panel_rect.bottom - 62,
                             panel_rect.width - 40, 24),

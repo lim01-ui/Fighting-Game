@@ -1,134 +1,321 @@
 {
-  "image": "choom-robot.png",
-  "body_height": 227,
+  "image": "glacier-chibi.png",
+  "body_height": 216,
   "pixel_height": 72,
+  "phase_animation": true,
+  "dedicated_knockdown": true,
+  "source_facing": 1,
+  "proportion_reference": "renegade",
   "poses": {
     "idle": [
       0,
       0,
-      318,
-      312
+      324,
+      230
     ],
-    "step_left": [
+    "idle_b": [
+      324,
       0,
-      312,
-      324,
-      308
+      323,
+      230
     ],
-    "step_right": [
+    "idle_c": [
+      647,
+      0,
       324,
-      312,
-      311,
-      308
+      230
+    ],
+    "idle_d": [
+      971,
+      0,
+      324,
+      230
+    ],
+    "step_a": [
+      0,
+      230,
+      324,
+      220
+    ],
+    "step_b": [
+      324,
+      230,
+      323,
+      220
+    ],
+    "step_c": [
+      647,
+      230,
+      324,
+      220
+    ],
+    "step_d": [
+      971,
+      230,
+      324,
+      220
     ],
     "block": [
-      635,
-      312,
-      316,
-      308
+      0,
+      450,
+      324,
+      203
     ],
     "jump": [
-      951,
-      312,
-      317,
-      308
+      324,
+      450,
+      323,
+      203
     ],
     "crouch": [
-      0,
-      620,
-      325,
-      311
-    ],
-    "light_start": [
-      325,
-      620,
-      309,
-      311
-    ],
-    "light": [
-      634,
-      620,
-      358,
-      311
-    ],
-    "heavy_start": [
-      992,
-      620,
-      276,
-      311
-    ],
-    "heavy": [
-      0,
-      931,
-      365,
-      310
-    ],
-    "special": [
-      365,
-      931,
-      306,
-      310
+      647,
+      450,
+      324,
+      203
     ],
     "hit": [
-      671,
-      931,
-      280,
-      310
+      971,
+      450,
+      324,
+      203
+    ],
+    "light_start": [
+      0,
+      653,
+      324,
+      202
+    ],
+    "light_contact": [
+      324,
+      653,
+      361,
+      202
+    ],
+    "light_follow": [
+      685,
+      653,
+      322,
+      202
+    ],
+    "light_recover": [
+      1007,
+      653,
+      288,
+      202
+    ],
+    "heavy_start": [
+      0,
+      855,
+      324,
+      194
+    ],
+    "heavy_contact": [
+      324,
+      855,
+      332,
+      194
+    ],
+    "heavy_follow": [
+      656,
+      855,
+      351,
+      194
+    ],
+    "heavy_recover": [
+      1007,
+      855,
+      288,
+      194
+    ],
+    "special_start": [
+      0,
+      1049,
+      324,
+      166
+    ],
+    "special_contact": [
+      324,
+      1049,
+      323,
+      166
+    ],
+    "special_follow": [
+      647,
+      1049,
+      324,
+      166
     ],
     "knockdown": [
-      951,
-      931,
-      317,
-      310
+      971,
+      1049,
+      324,
+      166
     ]
   },
-  "dedicated_knockdown": true,
+  "anchors": {
+    "idle": [
+      162,
+      230
+    ],
+    "idle_b": [
+      486,
+      230
+    ],
+    "idle_c": [
+      809,
+      229
+    ],
+    "idle_d": [
+      1133,
+      230
+    ],
+    "step_a": [
+      162,
+      450
+    ],
+    "step_b": [
+      486,
+      450
+    ],
+    "step_c": [
+      809,
+      450
+    ],
+    "step_d": [
+      1133,
+      450
+    ],
+    "block": [
+      162,
+      653
+    ],
+    "jump": [
+      486,
+      653
+    ],
+    "crouch": [
+      809,
+      653
+    ],
+    "hit": [
+      1133,
+      653
+    ],
+    "light_start": [
+      162,
+      855
+    ],
+    "light_contact": [
+      504,
+      855
+    ],
+    "light_follow": [
+      846,
+      855
+    ],
+    "light_recover": [
+      1151,
+      855
+    ],
+    "heavy_start": [
+      162,
+      1042
+    ],
+    "heavy_contact": [
+      490,
+      1049
+    ],
+    "heavy_follow": [
+      832,
+      1043
+    ],
+    "heavy_recover": [
+      1151,
+      1049
+    ],
+    "special_start": [
+      162,
+      1210
+    ],
+    "special_contact": [
+      486,
+      1210
+    ],
+    "special_follow": [
+      809,
+      1210
+    ],
+    "knockdown": [
+      1133,
+      1207
+    ]
+  },
   "animations": {
     "walk": [
-      "step_left",
-      "step_right"
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
     ],
     "run": [
-      "step_left",
-      "step_right"
+      "step_a",
+      "step_b",
+      "step_c",
+      "step_d"
     ],
     "light": [
       "light_start",
-      "light"
+      "light_contact",
+      "light_follow",
+      "light_recover"
     ],
     "heavy": [
       "heavy_start",
-      "heavy"
+      "heavy_contact",
+      "heavy_follow",
+      "heavy_recover"
+    ],
+    "special": [
+      "special_start",
+      "special_contact",
+      "special_follow",
+      "idle"
     ]
   },
   "idle_animation": {
-    "image": "choom-robot.png",
-    "body_height": 227,
+    "image": "glacier-chibi.png",
+    "body_height": 216,
     "frames": [
       [
-        82,
-        85,
-        236,
-        227
+        73,
+        14,
+        211,
+        216
       ],
       [
-        398,
-        82,
-        231,
-        230
+        394,
+        12,
+        210,
+        218
       ],
       [
-        691,
-        78,
-        236,
-        234
+        707,
+        11,
+        211,
+        218
       ],
       [
-        1003,
-        87,
-        233,
-        225
+        1028,
+        9,
+        209,
+        221
       ]
+    ],
+    "sequence": [
+      "idle",
+      "idle_b",
+      "idle_c",
+      "idle_d"
     ]
   }
 }

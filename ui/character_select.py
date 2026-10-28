@@ -176,11 +176,7 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
                     screen, pixel_fighter.preview_frame(), cell_inner
                 )
             elif ch.get("sprite_asset"):
-                sprite_fighter.blit_fit(
-                    screen,
-                    sprite_fighter.preview_frame(ch["sprite_asset"]),
-                    cell_inner,
-                )
+                sprite_fighter.blit_preview(screen, ch["sprite_asset"], cell_inner)
             else:
                 _draw_fighter_preview(screen, cell, ch, t + i * 0.3)
 
@@ -223,11 +219,7 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
                 screen, pixel_fighter.preview_frame(), portrait_area
             )
         elif ch.get("sprite_asset"):
-            sprite_fighter.blit_fit(
-                screen,
-                sprite_fighter.preview_frame(ch["sprite_asset"]),
-                portrait_area,
-            )
+            sprite_fighter.blit_preview(screen, ch["sprite_asset"], portrait_area)
         else:
             _draw_fighter_preview(screen, portrait_area, ch, t)
 
@@ -260,7 +252,8 @@ def run_character_select(screen, clock, title="SELECT YOUR FIGHTER",
             ("HEALTH",  stats["health"],  1.6),
             ("DAMAGE",  stats["damage"],  1.6),
             ("DEFENSE", 2.0 - stats["defense"], 1.6),
-            ("REACH",   ch["attack_mods"]["reach"], 1.6),
+            ("REACH",   ch["attack_mods"]["reach"]
+             * ch.get("weapon_effect", {}).get("reach_mult", 1.0), 1.6),
         ]
         sy = panel.y + 328
         for i, (label, val, mx) in enumerate(stat_defs):
