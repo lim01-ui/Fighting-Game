@@ -87,7 +87,8 @@ class RosterBalanceTests(unittest.TestCase):
 
                 keys = defaultdict(bool)
                 keys[pygame.K_l] = True
-                clock = type('Clock', (), {'tick': lambda self, fps: 16})()
+                # Cooldowns follow simulation ticks, independent of render count.
+                clock = type('Clock', (), {'tick': lambda self, fps: 1000 / 60})()
                 with patch.object(fight_scene.vs_screen, 'run_vs_screen', return_value=True), \
                         patch.object(fight_scene.music, 'play'), \
                         patch.object(fight_scene.sound_fx, 'play'), \

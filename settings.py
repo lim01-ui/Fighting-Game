@@ -1,6 +1,9 @@
+# Logical game canvas and minimum window size. The display scales to fit
+# larger windows/fullscreen while keeping gameplay coordinates unchanged.
 WINDOW_WIDTH  = 1280
 WINDOW_HEIGHT = 720
 FPS           = 60
+LAN_RENDER_FPS = 120  # Poll inputs more often; combat still advances at 60 Hz.
 WINDOW_TITLE  = "Python Fighters - Phase 1"
 BLACK = (0,0,0)
 WHITE = (255,255,255)

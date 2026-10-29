@@ -92,9 +92,9 @@ def pixelate(surface, step=4):
 
 
 def present(screen):
-    """Present bitmap UI at native resolution so small key labels stay legible.
+    """Present the logical canvas through SDL's aspect-preserving scaler.
 
-    Artwork is pixelated before compositing; filtering the finished HUD would
-    erase one-pixel details when text is fitted to smaller rectangles.
+    Artwork is pixelated before compositing; nearest-neighbor display scaling
+    preserves the finished HUD's small key labels and bitmap details.
     """
     pygame.display.flip()

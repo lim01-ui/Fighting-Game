@@ -8,6 +8,7 @@ class CameraPunch:
         self.frames_left = 0
         self.duration = 1
         self.focus = (640.0, 360.0)
+        self.scale = 1.0
 
     def kick(self, strength, frames, focus):
         if frames <= 0:
@@ -24,14 +25,16 @@ class CameraPunch:
     def update(self):
         if self.frames_left <= 0:
             self.strength = 0.0
-            return 1.0
+            self.scale = 1.0
+            return self.scale
         progress = 1.0 - self.frames_left / self.duration
         envelope = min(1.0, progress * 5, (1.0 - progress) * 2.5)
         self.frames_left -= 1
-        return 1.0 + self.strength * max(0.0, envelope)
+        self.scale = 1.0 + self.strength * max(0.0, envelope)
+        return self.scale
 
     def draw(self, world, screen, offset=(0, 0)):
-        scale = self.update()
+        scale = self.scale
         if scale <= 1.001:
             screen.blit(world, offset)
             return

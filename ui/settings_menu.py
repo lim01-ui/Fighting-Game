@@ -1,7 +1,7 @@
 """Mouse and keyboard options, including click-to-bind controls."""
 
 import pygame
-from ui import retro, theme
+from ui import retro, theme, display
 
 import settings
 from audio import music, preferences, sound_fx
@@ -23,10 +23,7 @@ CONTROL_LABELS = {
 
 
 def _set_fullscreen(screen, enabled):
-    flags = pygame.FULLSCREEN if enabled else 0
-    return pygame.display.set_mode(
-        (settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT), flags
-    )
+    return display.set_fullscreen(screen, enabled)
 
 
 def _refresh_audio():
@@ -266,6 +263,12 @@ def run_settings_menu(screen, clock):
                 status = "ON" if preferences.get("fullscreen") else "OFF"
                 screen.blit(item_font.render(status, True, color), (settings.WINDOW_WIDTH // 2 + 25, y))
 
+        draw_text_fit(
+            screen, hint_font,
+            "MIN WINDOW: 1280 X 720   RESIZE / MAXIMIZE   FULLSCREEN: FIT DISPLAY",
+            theme.PALE,
+            pygame.Rect(24, 625, settings.WINDOW_WIDTH - 48, 24),
+        )
         draw_text_fit(
             screen, hint_font,
             "CLICK: SELECT / SET VOLUME   UP/DOWN: SELECT   LEFT/RIGHT: ADJUST   ESC: BACK",

@@ -18,10 +18,14 @@ class LanRenderingTests(unittest.TestCase):
         for local_player in (1, 2):
             with self.subTest(local_player=local_player):
                 peer = Mock()
-                peer.poll_inputs.return_value = None
-                peer.local_inputs = {action: False for action in lan.ACTIONS}
+                peer.receive_inputs.return_value = {}
+                peer.get_stats.return_value = {
+                    'ping_ms': None, 'sent_rate': 0, 'received_rate': 0,
+                    'dropped_packets': None, 'last_received_age': None,
+                }
                 clock = Mock()
                 clock.tick.return_value = 16
+                clock.get_fps.return_value = 60
                 with patch.object(main.fight_scene.vs_screen, 'run_vs_screen', return_value=True), \
                      patch.object(main.fight_scene.music, 'play'), \
                      patch('pygame.display.flip') as flip, \
@@ -31,7 +35,9 @@ class LanRenderingTests(unittest.TestCase):
                         screen, clock, network_peer=peer, local_player=local_player,
                     )
                 self.assertEqual(result, 'QUIT')
-                self.assertEqual(peer.poll_inputs.call_count, 2)
+                self.assertEqual(peer.receive_inputs.call_count, 4)
+                peer.poll_inputs.assert_not_called()
+                peer.submit_input.assert_called_once()
                 self.assertEqual(flip.call_count, 2)
 
 

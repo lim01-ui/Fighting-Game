@@ -4,6 +4,8 @@ Fight scene with best-of-3 matches and an optional endless training mode.
 Round transitions are animated via ui/transitions.py.
 """
 
+import copy
+
 import pygame
 from ui import retro, theme
 
@@ -36,6 +38,10 @@ from ui.text_layout import draw_text_fit
 from audio import sound_fx
 from audio import music, preferences
 from network.lan import ACTIONS
+from network.rollback import RollbackSession
+from network.interpolation import RenderInterpolator
+from game.simulation_state import clone_state, simulation_tick
+from ui.network_debug import draw_network_debug
 
 
 STAGE_KEYS = stages.STAGE_KEYS
@@ -404,6 +410,16 @@ def _resolve_combat(attacker, defender, attacker_combo, sparks, flashes, shake,
     return True
 
 
+def _draw_fighter_visual(surface, fighter, position=None, trail=None):
+    visual = copy.copy(fighter)
+    visual.rect = fighter.rect.copy()
+    visual.weapon_trail = list(fighter.weapon_trail if trail is None else trail)
+    if position is not None:
+        visual.rect.topleft = (round(position[0]), round(position[1]))
+    visual.draw(surface)
+    return visual.weapon_trail
+
+
 # ---- Main ----
 def run_fight(screen, clock, difficulty_name=None, training_mode=False,
               p1_character="rook", p2_character="rook",
@@ -555,17 +571,517 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
         match = MatchManager()
         reset_round_state()
 
+    def simulate_game_tick(p1_keys, p2_keys):
+        nonlocal p1, p2, match, round_mgr, combo_on_p1
+        nonlocal combo_on_p2, combo_display_p1, combo_display_p2, sparks, flashes
+        nonlocal shake, camera_punch, footwork, damage_numbers_list, projectiles
+        nonlocal special_effects, ultimate_presentations, ko_slowmo, ko_flash_done, round_end_registered
+        nonlocal round_end_reason, training_attack_timer, training_damage, combat_callout, combat_callout_color
+        nonlocal combat_callout_timer, p1_health_trail, p2_health_trail, ox, oy
+        do_update = True
+        if ko_slowmo > 0:
+            ko_slowmo -= 1
+            do_update = (ko_slowmo % 3 == 0)
+
+        if do_update:
+            round_event = None if training_mode else round_mgr.update(p1, p2)
+            if training_mode:
+                round_mgr.state = ROUND_FIGHTING
+            _prev = round_mgr._prev_state
+            if _prev is None:
+                if round_mgr.state == ROUND_COUNTDOWN:
+                    sound_fx.play("round_ready", volume=0.7)
+                elif training_mode and round_mgr.state == ROUND_FIGHTING:
+                    sound_fx.play("round_fight", volume=0.9)
+            elif _prev == ROUND_COUNTDOWN and round_mgr.state == ROUND_HOLD:
+                sound_fx.play("round_fight", volume=0.9)
+            if round_mgr.is_fighting and _prev != ROUND_FIGHTING:
+                # Begin charging at FIGHT, so the intro/countdown cannot
+                # use up the opening five-second lockout.
+                p1.special_cooldown_frames = settings.SPECIAL_COOLDOWN_FRAMES
+                p2.special_cooldown_frames = settings.SPECIAL_COOLDOWN_FRAMES
+            round_mgr._prev_state = round_mgr.state
+
+            if round_mgr.accepts_input:
+                p1.handle_input(p1_keys)
+                if network_peer is not None:
+                    p2.handle_input(p2_keys)
+                elif bot is None and not training_mode:
+                    p2.handle_input(p2_keys)
+                elif bot is not None:
+                    bot.update()
+                elif training_mode:
+                    p2._holding_back = training_dummy_mode == "BLOCK"
+                    if training_dummy_mode == "ATTACK":
+                        if training_attack_timer > 0:
+                            training_attack_timer -= 1
+                        elif p2.state not in (
+                            "ATTACK", "HITSTUN", "BLOCKSTUN", "KNOCKDOWN"
+                        ):
+                            p2._start_attack("light")
+                            training_attack_timer = 60
+
+            p1.update(opponent=p2)
+            p2.update(opponent=p1)
+
+            if round_mgr.is_fighting:
+                # Fire a projectile once per special move, on the first active frame
+                for attacker, defender in ((p1, p2), (p2, p1)):
+                    atk = attacker.current_attack
+                    if atk is None:
+                        attacker._special_spawned = False
+                        if attacker._projectile_fired:
+                            attacker._projectile_fired = False
+                        continue
+                    eff = attacker.character.get("weapon_effect", {})
+                    ultimate = character_data.ultimate_for(
+                        attacker.character["key"]
+                    )
+                    is_ultimate = atk.data.name == "ultimate"
+                    proj_kind = (
+                        ultimate.get("projectile")
+                        if is_ultimate else eff.get("projectile")
+                    )
+                    stun_frames = (
+                        ultimate.get("stun_frames", 0)
+                        if is_ultimate else attacker.character.get(
+                            "special_behavior", {}
+                        ).get("stun_frames", 0)
+                    )
+                    special_active = (
+                        atk.data.name in ("special", "ultimate")
+                        and atk.in_active
+                    )
+                    if (special_active
+                            and not attacker._special_spawned):
+                        char_key = attacker.character["key"]
+                        kind = (
+                            ultimate["effect"]
+                            if is_ultimate
+                            else _SPECIAL_KINDS.get(char_key, "slash")
+                        )
+                        if kind not in ("orb", "spark"):
+                            special_effects.append(SpecialEffect(
+                                kind,
+                                attacker.rect.centerx,
+                                attacker.rect.centery,
+                                attacker.facing,
+                                attacker.attack_color,
+                            ))
+                        attacker._special_spawned = True
+
+                    if (special_active and proj_kind
+                            and not attacker._projectile_fired):
+                        muzzle_x = attacker.rect.centerx + attacker.facing * (attacker.width // 2 + 15)
+                        muzzle_y = attacker.rect.centery - 20
+                        speed = {"orb": 10, "knife": 14, "spark": 11, "arrow": 15}.get(
+                            proj_kind, 12
+                        )
+                        projectile_count = (
+                            ultimate.get("projectiles", 1)
+                            if is_ultimate else
+                            attacker.character.get(
+                                "special_behavior", {}
+                            ).get("projectiles", 1)
+                        )
+                        vertical_spread = (
+                            ultimate.get("projectile_spread", 0)
+                            if is_ultimate else 36
+                        )
+                        for projectile_index in range(projectile_count):
+                            if projectile_count == 1:
+                                vertical_velocity = 0
+                            else:
+                                spread_position = (
+                                    projectile_index / (projectile_count - 1) - 0.5
+                                )
+                                vertical_velocity = spread_position * (
+                                    vertical_spread / 10
+                                )
+                            projectiles.append(Projectile(
+                                muzzle_x, muzzle_y,
+                                vx=speed,
+                                owner_facing=attacker.facing,
+                                color=attacker.attack_color,
+                                kind=proj_kind,
+                                damage=max(
+                                    1, int(atk.data.damage / projectile_count)
+                                ),
+                                hitstun=max(
+                                    atk.data.hitstun,
+                                    stun_frames,
+                                ),
+                                owner=attacker,
+                                vy=vertical_velocity,
+                            ))
+                        attacker._stun_on_hit = 0
+                        sound_fx.play("projectile_launch", volume=0.65)
+                        attacker._projectile_fired = True
+
+                    if atk.is_finished:
+                        attacker._special_spawned = False
+
+                if (round_mgr.timer_display <= 10
+                        and round_mgr.timer_display > 0
+                        and round_mgr.timer_frames % 60 == 0):
+                    sound_fx.play("timer_warn")
+                for _f in (p1, p2):
+                    _was = _f._was_attacking
+                    _now = _f.is_attacking
+                    attack = _f.current_attack
+                    if _now and not _was and attack is not None:
+                        attack_name = attack.data.name
+                        sound_category = (
+                            "special" if attack_name in ("special", "ultimate")
+                            else "light" if attack_name.endswith("light")
+                            else "heavy" if attack_name.endswith("heavy")
+                            else attack_name
+                        )
+                        sound_fx.play(
+                            "ultimate" if attack_name == "ultimate"
+                            else f"attack_{sound_category}",
+                            volume=0.9 if attack_name == "ultimate" else 0.62,
+                        )
+                        if attack_name == "ultimate":
+                            camera_punch.kick(
+                                0.045, 30,
+                                (_f.rect.centerx, _f.rect.centery),
+                            )
+                            ultimate_name = character_data.ultimate_for(
+                                _f.character["key"]
+                            )["name"]
+                            ultimate_presentations.append(UltimatePresentation(
+                                _f.rect.centerx,
+                                _f.rect.centery,
+                                _f.attack_color,
+                                _f.character["name"],
+                                ultimate_name,
+                                effect_kind=character_data.ultimate_for(
+                                    _f.character["key"]
+                                )["effect"],
+                            ))
+                    _f._was_attacking = _now
+                p2_health_before = p2.health
+                player_hit = _resolve_combat(
+                    p1, p2, combo_on_p2, sparks, flashes,
+                    shake, camera_punch, damage_numbers_list,
+                    combo_display_p1,
+                )
+                if player_hit:
+                    training_damage += (
+                        max(0, int(p2_health_before - p2.health))
+                        if training_mode else 0
+                    )
+                    combat_callout = (
+                        "PARRY!" if p2._last_hit_was_parried
+                        else "BLOCK!" if p2.state == "BLOCKSTUN" else "HIT!"
+                    )
+                    combat_callout_color = (
+                        (120, 195, 255)
+                        if p2.state == "BLOCKSTUN"
+                        else (255, 225, 110)
+                    )
+                    combat_callout_timer = 28
+                p1_health_before = p1.health
+                opponent_hit = _resolve_combat(
+                    p2, p1, combo_on_p1, sparks, flashes,
+                    shake, camera_punch, damage_numbers_list,
+                    combo_display_p2,
+                )
+                if opponent_hit:
+                    combat_callout = (
+                        "PARRY!" if p1._last_hit_was_parried
+                        else "BLOCK!" if p1.state == "BLOCKSTUN" else "HIT!"
+                    )
+                    combat_callout_color = (
+                        (120, 195, 255)
+                        if p1.state == "BLOCKSTUN"
+                        else (255, 225, 110)
+                    )
+                    combat_callout_timer = 28
+                if p1.health < p1_health_before:
+                    combat_callout = "BLOCKED!" if p1.state == "BLOCKSTUN" else "HIT!"
+                combo_on_p1.update(); combo_on_p2.update()
+
+            if training_mode:
+                p1.health = p1.max_health
+                if p2.health <= 0:
+                    p2.reset()
+                    combo_on_p1.reset()
+
+            if round_event == "round_ended":
+                round_end_reason = "ko" if min(p1.health, p2.health) <= 0 else "time"
+                if round_end_reason == "ko":
+                    sound_fx.play("ko")
+                ko_slowmo = settings.KO_SLOWMO_FRAMES
+                shake.kick(*settings.SHAKE_KO)
+                if not ko_flash_done:
+                    flashes.append(Flash((255, 255, 255),
+                                         life=settings.KO_FLASH_LIFE,
+                                         max_alpha=230))
+                    ko_flash_done = True
+                match.register_round_winner(round_mgr.winner)
+                round_end_registered = True
+                if match.match_over:
+                    sound_fx.play("match_win")
+
+            if (round_mgr.is_over and round_mgr.over_pause_done
+                    and round_end_registered and not match.match_over):
+                match.next_round()
+                p1.reset(); p2.reset()
+                combo_on_p1.reset(); combo_on_p2.reset()
+                combo_display_p1.reset(); combo_display_p2.reset()
+                sparks.clear()
+                round_mgr = RoundManager(round_number=match.round_number,
+                                         timer_seconds=99)
+                ko_slowmo = 0
+                ko_flash_done = False
+                round_end_registered = False
+
+        # Update projectiles and check collision
+        alive = []
+        for pr in projectiles:
+            if pr.update():
+                continue
+            alive.append(pr)
+            # Check hit
+            for victim in (p1, p2):
+                if victim is pr.owner:
+                    continue
+                if pr.rect.colliderect(victim.get_hurtbox()):
+                    blocked = (
+                        victim.on_ground and victim._holding_back
+                        and victim.state not in (
+                            "ATTACK", "HITSTUN", "BLOCKSTUN", "KNOCKDOWN"
+                        )
+                    )
+                    perfect_guard = blocked and victim.is_perfect_guarding
+                    incoming = pr.damage * victim.defense
+                    dmg = (
+                        0 if perfect_guard else
+                        int(incoming * settings.BLOCK_REDUCTION)
+                        if blocked else int(incoming)
+                    )
+                    if not perfect_guard:
+                        dmg = max(1, dmg)
+                    victim.health = max(0, victim.health - dmg)
+                    attacker_combo = combo_on_p2 if pr.owner is p1 else combo_on_p1
+                    attacker_display = combo_display_p1 if pr.owner is p1 else combo_display_p2
+                    if blocked:
+                        victim._last_hit_was_parried = perfect_guard
+                        victim._parry_flash_frames = 20 if perfect_guard else 0
+                        victim.state = "BLOCKSTUN"
+                        victim.state_timer = 4 if perfect_guard else 8
+                        if pr.owner is not None:
+                            pr.owner.gain_ultimate_meter(dmg)
+                        victim.gain_ultimate_meter(dmg)
+                        attacker_combo.reset()
+                        attacker_display.reset()
+                        sparks.append(BlockSpark(pr.x, pr.y))
+                        shake.kick(3, 5)
+                        if perfect_guard:
+                            sparks.append(HitSpark(
+                                pr.x, pr.y, (175, 235, 255),
+                                count=18, speed=8, life=17,
+                            ))
+                            flashes.append(Flash(
+                                (100, 200, 255), life=7, max_alpha=75,
+                            ))
+                            pr.owner = victim
+                            pr.vx = -pr.vx
+                            pr.color = victim.attack_color
+                            pr.x += (1 if pr.vx > 0 else -1) * 14
+                            pr.rect.centerx = int(pr.x)
+                        combat_callout = "PARRY!" if perfect_guard else "BLOCK!"
+                        combat_callout_color = (120, 195, 255)
+                        combat_callout_timer = 28
+                    else:
+                        victim.state = "HITSTUN"
+                        victim.state_timer = pr.hitstun
+                        victim.rect.x += (1 if pr.vx > 0 else -1) * 6
+                        if pr.owner is not None:
+                            pr.owner.gain_ultimate_meter(dmg)
+                            attacker_combo.register_hit()
+                            attacker_display.register_hit(dmg)
+                            pr.owner.hit_pause = settings.HIT_PAUSE_FRAMES_SPECIAL
+                        victim.gain_ultimate_meter(dmg)
+                        victim.hit_pause = settings.HIT_PAUSE_FRAMES_SPECIAL
+                        sparks.append(HitSpark(
+                            pr.x, pr.y, pr.color,
+                            count=settings.HIT_SPARK_COUNT_SPECIAL,
+                            speed=11, life=settings.HIT_SPARK_LIFE,
+                        ))
+                        shake.kick(*settings.SHAKE_SPECIAL)
+                        camera_punch.kick(
+                            0.05, 9, (pr.x, pr.y),
+                        )
+                        flashes.append(Flash(pr.color, life=5, max_alpha=60))
+                        combat_callout = "HIT!"
+                        combat_callout_color = (255, 225, 110)
+                        combat_callout_timer = 28
+                    if training_mode and pr.owner is p1:
+                        training_damage += dmg
+                    if dmg > 0:
+                        damage_numbers.spawn(damage_numbers_list,
+                                             pr.x, pr.y - 20, dmg, blocked=blocked)
+                    if victim.health <= 0:
+                        victim.go_knockdown()
+                    if not perfect_guard:
+                        pr.life = 0
+                    break
+        projectiles = [pr for pr in alive if pr.life > 0]
+        special_effects = [se for se in special_effects if not se.update()]
+        ultimate_presentations = [
+            presentation for presentation in ultimate_presentations
+            if not presentation.update()
+        ]
+        sparks = [s for s in sparks if not s.update()]
+        flashes = [f for f in flashes if not f.update()]
+        damage_numbers_list = [d for d in damage_numbers_list if not d.update()]
+        combo_display_p1.update()
+        combo_display_p2.update()
+        if combat_callout_timer > 0:
+            combat_callout_timer -= 1
+        p1_health_trail = max(p1.health, p1_health_trail - 0.6)
+        p2_health_trail = max(p2.health, p2_health_trail - 0.6)
+        ox, oy = shake.update()
+        camera_punch.update()
+        footwork.update((p1, p2))
+
+
+    def capture_simulation():
+        return clone_state({
+            'p1': p1,
+            'p2': p2,
+            'match': match,
+            'round_mgr': round_mgr,
+            'combo_on_p1': combo_on_p1,
+            'combo_on_p2': combo_on_p2,
+            'combo_display_p1': combo_display_p1,
+            'combo_display_p2': combo_display_p2,
+            'sparks': sparks,
+            'flashes': flashes,
+            'shake': shake,
+            'camera_punch': camera_punch,
+            'footwork': footwork,
+            'damage_numbers_list': damage_numbers_list,
+            'projectiles': projectiles,
+            'special_effects': special_effects,
+            'ultimate_presentations': ultimate_presentations,
+            'ko_slowmo': ko_slowmo,
+            'ko_flash_done': ko_flash_done,
+            'round_end_registered': round_end_registered,
+            'round_end_reason': round_end_reason,
+            'training_attack_timer': training_attack_timer,
+            'training_damage': training_damage,
+            'combat_callout': combat_callout,
+            'combat_callout_color': combat_callout_color,
+            'combat_callout_timer': combat_callout_timer,
+            'p1_health_trail': p1_health_trail,
+            'p2_health_trail': p2_health_trail,
+            'ox': ox,
+            'oy': oy,
+        })
+
+    def restore_simulation(snapshot):
+        nonlocal p1, p2, match, round_mgr, combo_on_p1
+        nonlocal combo_on_p2, combo_display_p1, combo_display_p2, sparks, flashes
+        nonlocal shake, camera_punch, footwork, damage_numbers_list, projectiles
+        nonlocal special_effects, ultimate_presentations, ko_slowmo, ko_flash_done, round_end_registered
+        nonlocal round_end_reason, training_attack_timer, training_damage, combat_callout, combat_callout_color
+        nonlocal combat_callout_timer, p1_health_trail, p2_health_trail, ox, oy
+        restored = clone_state(snapshot)
+        p1 = restored['p1']
+        p2 = restored['p2']
+        match = restored['match']
+        round_mgr = restored['round_mgr']
+        combo_on_p1 = restored['combo_on_p1']
+        combo_on_p2 = restored['combo_on_p2']
+        combo_display_p1 = restored['combo_display_p1']
+        combo_display_p2 = restored['combo_display_p2']
+        sparks = restored['sparks']
+        flashes = restored['flashes']
+        shake = restored['shake']
+        camera_punch = restored['camera_punch']
+        footwork = restored['footwork']
+        damage_numbers_list = restored['damage_numbers_list']
+        projectiles = restored['projectiles']
+        special_effects = restored['special_effects']
+        ultimate_presentations = restored['ultimate_presentations']
+        ko_slowmo = restored['ko_slowmo']
+        ko_flash_done = restored['ko_flash_done']
+        round_end_registered = restored['round_end_registered']
+        round_end_reason = restored['round_end_reason']
+        training_attack_timer = restored['training_attack_timer']
+        training_damage = restored['training_damage']
+        combat_callout = restored['combat_callout']
+        combat_callout_color = restored['combat_callout_color']
+        combat_callout_timer = restored['combat_callout_timer']
+        p1_health_trail = restored['p1_health_trail']
+        p2_health_trail = restored['p2_health_trail']
+        ox = restored['ox']
+        oy = restored['oy']
+
+    remote_visuals = RenderInterpolator(delay_frames=0, extrapolation_frames=0)
+    smooth_remote = False
+
+    def simulate_network_tick(frame, p1_values, p2_values, replaying):
+        with simulation_tick(frame, replaying):
+            if match.match_over and (p1_values.get("rematch") or p2_values.get("rematch")):
+                start_new_match()
+                remote_visuals.discard_from(0)
+            simulate_game_tick(_VirtualKeys(p1, p1_values), _VirtualKeys(p2, p2_values))
+        remote = p2 if local_player == 1 else p1
+        remote_visuals.append(frame + 1, remote.rect.x, remote.rect.y, replaying=replaying)
+
+    session = (RollbackSession(simulate_network_tick, capture_simulation,
+                               restore_simulation, local_player=local_player)
+               if network_peer is not None else None)
+    fixed_dt = 1.0 / 60
+    accumulator = 0.0
+    offline_frame = 0
+    submitted_frame = None
+    submitted_values = None
+    pending_actions = set()
+    visual_trails = [[], []]
+    show_network_debug = True
+    world = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
+
+    def receive_network_inputs():
+        nonlocal visual_trails
+        received = network_peer.receive_inputs()
+        if any(values.get("leave") for values in received.values()):
+            return True
+        corrections_before = session.corrections
+        session.receive_inputs(received)
+        if session.corrections != corrections_before:
+            visual_trails = [[], []]
+        return False
+
     while True:
-        dt = clock.tick(settings.FPS)
-        frame_started = pygame.time.get_ticks()
+        dt = clock.tick(settings.LAN_RENDER_FPS if session else settings.FPS)
         t += dt / 1000.0
 
         # INPUT
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "QUIT"
+            if network_peer is not None and event.type == pygame.KEYDOWN:
+                # Preserve taps that begin and end between simulation ticks.
+                for action in ("jump", "light", "heavy", "special"):
+                    binding = settings.P1_KEYS[action]
+                    if binding and event.key == preferences.key_code_from_name(binding):
+                        pending_actions.add(action)
             is_shortcut = event.type == pygame.KEYDOWN and event.key not in bound_keys
             if network_peer is not None and event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F3:
+                    show_network_debug = not show_network_debug
+                    continue
+                if event.key == pygame.K_F4:
+                    smooth_remote = not smooth_remote
+                    remote_visuals.delay_frames = 2 if smooth_remote else 0
+                    remote_visuals.extrapolation_frames = 1 if smooth_remote else 0
+                    continue
                 if event.key == pygame.K_ESCAPE:
                     # Leaving must remain possible even when the peer stops sending.
                     return "MENU"
@@ -626,431 +1142,60 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                         return "MENU"
 
         keys = pygame.key.get_pressed()
-        p1_keys = p2_keys = keys
-        network_ready = True
-        if network_peer is not None:
-            local_values = {
-                action: p1.action_pressed(keys, action)
-                for action in ACTIONS
-                if action not in ("rematch", "leave")
-            }
-            local_values["rematch"] = network_local_rematch
-            local_values["leave"] = network_local_leave
-            # Receive inputs arriving during this frame instead of losing a
-            # whole simulation tick to the transport thread's scheduling.
-            input_budget = max(
-                0.0, 1.0 / settings.FPS
-                - (pygame.time.get_ticks() - frame_started) / 1000.0,
-            )
-            remote_values = network_peer.poll_inputs(
-                local_values, wait_timeout=input_budget,
-            )
-            # Use exactly the snapshot sent for this frame, even after waiting.
-            local_values = network_peer.local_inputs
-            if remote_values is None:
-                network_ready = False
-                network_waiting = True
-                if network_wait_started is None:
-                    network_wait_started = t
+        accumulator += min(dt / 1000.0, 0.25)
+        if (session.frame if session else offline_frame) == 0:
+            accumulator = max(accumulator, fixed_dt)
+        if session is not None:
+            if receive_network_inputs():
+                return "MENU"
+        network_waiting = False
+        ticks_this_render = 0
+        while accumulator + 1e-9 >= fixed_dt and ticks_this_render < 8:
+            if paused:
+                accumulator = 0.0
+                break
+            if session is None:
+                simulate_game_tick(keys, keys)
+                offline_frame += 1
             else:
-                if local_values["rematch"]:
-                    network_local_rematch = False
-                if local_values["leave"]:
-                    network_local_leave = False
-                network_waiting = False
-                network_wait_started = None
-                if remote_values["leave"] or local_values["leave"]:
-                    return "MENU"
-                if match.match_over and (
-                    remote_values["rematch"] or local_values["rematch"]
-                ):
-                    start_new_match()
-            p1_values, p2_values = (
-                (local_values, remote_values or {})
-                if local_player == 1
-                else (remote_values or {}, local_values)
-            )
-            p1_keys = _VirtualKeys(p1, p1_values)
-            p2_keys = _VirtualKeys(p2, p2_values)
-
-        # UPDATE
-        if not paused and network_ready:
-            do_update = True
-            if ko_slowmo > 0:
-                ko_slowmo -= 1
-                do_update = (ko_slowmo % 3 == 0)
-
-            if do_update:
-                round_event = None if training_mode else round_mgr.update(p1, p2)
-                if training_mode:
-                    round_mgr.state = ROUND_FIGHTING
-                _prev = round_mgr._prev_state
-                if _prev is None:
-                    if round_mgr.state == ROUND_COUNTDOWN:
-                        sound_fx.play("round_ready", volume=0.7)
-                    elif training_mode and round_mgr.state == ROUND_FIGHTING:
-                        sound_fx.play("round_fight", volume=0.9)
-                elif _prev == ROUND_COUNTDOWN and round_mgr.state == ROUND_HOLD:
-                    sound_fx.play("round_fight", volume=0.9)
-                if round_mgr.is_fighting and _prev != ROUND_FIGHTING:
-                    # Begin charging at FIGHT, so the intro/countdown cannot
-                    # use up the opening five-second lockout.
-                    p1.special_cooldown_frames = settings.SPECIAL_COOLDOWN_FRAMES
-                    p2.special_cooldown_frames = settings.SPECIAL_COOLDOWN_FRAMES
-                round_mgr._prev_state = round_mgr.state
-
-                if round_mgr.accepts_input:
-                    p1.handle_input(p1_keys)
-                    if network_peer is not None:
-                        p2.handle_input(p2_keys)
-                    elif bot is None and not training_mode:
-                        p2.handle_input(p2_keys)
-                    elif bot is not None:
-                        bot.update()
-                    elif training_mode:
-                        p2._holding_back = training_dummy_mode == "BLOCK"
-                        if training_dummy_mode == "ATTACK":
-                            if training_attack_timer > 0:
-                                training_attack_timer -= 1
-                            elif p2.state not in (
-                                "ATTACK", "HITSTUN", "BLOCKSTUN", "KNOCKDOWN"
-                            ):
-                                p2._start_attack("light")
-                                training_attack_timer = 60
-
-                p1.update(opponent=p2)
-                p2.update(opponent=p1)
-
-                if round_mgr.is_fighting:
-                    # Fire a projectile once per special move, on the first active frame
-                    for attacker, defender in ((p1, p2), (p2, p1)):
-                        atk = attacker.current_attack
-                        if atk is None:
-                            attacker._special_spawned = False
-                            if attacker._projectile_fired:
-                                attacker._projectile_fired = False
-                            continue
-                        eff = attacker.character.get("weapon_effect", {})
-                        ultimate = character_data.ultimate_for(
-                            attacker.character["key"]
-                        )
-                        is_ultimate = atk.data.name == "ultimate"
-                        proj_kind = (
-                            ultimate.get("projectile")
-                            if is_ultimate else eff.get("projectile")
-                        )
-                        stun_frames = (
-                            ultimate.get("stun_frames", 0)
-                            if is_ultimate else attacker.character.get(
-                                "special_behavior", {}
-                            ).get("stun_frames", 0)
-                        )
-                        special_active = (
-                            atk.data.name in ("special", "ultimate")
-                            and atk.in_active
-                        )
-                        if (special_active
-                                and not attacker._special_spawned):
-                            char_key = attacker.character["key"]
-                            kind = (
-                                ultimate["effect"]
-                                if is_ultimate
-                                else _SPECIAL_KINDS.get(char_key, "slash")
-                            )
-                            if kind not in ("orb", "spark"):
-                                special_effects.append(SpecialEffect(
-                                    kind,
-                                    attacker.rect.centerx,
-                                    attacker.rect.centery,
-                                    attacker.facing,
-                                    attacker.attack_color,
-                                ))
-                            attacker._special_spawned = True
-
-                        if (special_active and proj_kind
-                                and not attacker._projectile_fired):
-                            muzzle_x = attacker.rect.centerx + attacker.facing * (attacker.width // 2 + 15)
-                            muzzle_y = attacker.rect.centery - 20
-                            speed = {"orb": 10, "knife": 14, "spark": 11, "arrow": 15}.get(
-                                proj_kind, 12
-                            )
-                            projectile_count = (
-                                ultimate.get("projectiles", 1)
-                                if is_ultimate else
-                                attacker.character.get(
-                                    "special_behavior", {}
-                                ).get("projectiles", 1)
-                            )
-                            vertical_spread = (
-                                ultimate.get("projectile_spread", 0)
-                                if is_ultimate else 36
-                            )
-                            for projectile_index in range(projectile_count):
-                                if projectile_count == 1:
-                                    vertical_velocity = 0
-                                else:
-                                    spread_position = (
-                                        projectile_index / (projectile_count - 1) - 0.5
-                                    )
-                                    vertical_velocity = spread_position * (
-                                        vertical_spread / 10
-                                    )
-                                projectiles.append(Projectile(
-                                    muzzle_x, muzzle_y,
-                                    vx=speed,
-                                    owner_facing=attacker.facing,
-                                    color=attacker.attack_color,
-                                    kind=proj_kind,
-                                    damage=max(
-                                        1, int(atk.data.damage / projectile_count)
-                                    ),
-                                    hitstun=max(
-                                        atk.data.hitstun,
-                                        stun_frames,
-                                    ),
-                                    owner=attacker,
-                                    vy=vertical_velocity,
-                                ))
-                            attacker._stun_on_hit = 0
-                            sound_fx.play("projectile_launch", volume=0.65)
-                            attacker._projectile_fired = True
-
-                        if atk.is_finished:
-                            attacker._special_spawned = False
-
-                    if (round_mgr.timer_display <= 10
-                            and round_mgr.timer_display > 0
-                            and round_mgr.timer_frames % 60 == 0):
-                        sound_fx.play("timer_warn")
-                    for _f in (p1, p2):
-                        _was = _f._was_attacking
-                        _now = _f.is_attacking
-                        attack = _f.current_attack
-                        if _now and not _was and attack is not None:
-                            attack_name = attack.data.name
-                            sound_category = (
-                                "special" if attack_name in ("special", "ultimate")
-                                else "light" if attack_name.endswith("light")
-                                else "heavy" if attack_name.endswith("heavy")
-                                else attack_name
-                            )
-                            sound_fx.play(
-                                "ultimate" if attack_name == "ultimate"
-                                else f"attack_{sound_category}",
-                                volume=0.9 if attack_name == "ultimate" else 0.62,
-                            )
-                            if attack_name == "ultimate":
-                                camera_punch.kick(
-                                    0.045, 30,
-                                    (_f.rect.centerx, _f.rect.centery),
-                                )
-                                ultimate_name = character_data.ultimate_for(
-                                    _f.character["key"]
-                                )["name"]
-                                ultimate_presentations.append(UltimatePresentation(
-                                    _f.rect.centerx,
-                                    _f.rect.centery,
-                                    _f.attack_color,
-                                    _f.character["name"],
-                                    ultimate_name,
-                                    effect_kind=character_data.ultimate_for(
-                                        _f.character["key"]
-                                    )["effect"],
-                                ))
-                        _f._was_attacking = _now
-                    p2_health_before = p2.health
-                    player_hit = _resolve_combat(
-                        p1, p2, combo_on_p2, sparks, flashes,
-                        shake, camera_punch, damage_numbers_list,
-                        combo_display_p1,
-                    )
-                    if player_hit:
-                        training_damage += (
-                            max(0, int(p2_health_before - p2.health))
-                            if training_mode else 0
-                        )
-                        combat_callout = (
-                            "PARRY!" if p2._last_hit_was_parried
-                            else "BLOCK!" if p2.state == "BLOCKSTUN" else "HIT!"
-                        )
-                        combat_callout_color = (
-                            (120, 195, 255)
-                            if p2.state == "BLOCKSTUN"
-                            else (255, 225, 110)
-                        )
-                        combat_callout_timer = 28
-                    p1_health_before = p1.health
-                    opponent_hit = _resolve_combat(
-                        p2, p1, combo_on_p1, sparks, flashes,
-                        shake, camera_punch, damage_numbers_list,
-                        combo_display_p2,
-                    )
-                    if opponent_hit:
-                        combat_callout = (
-                            "PARRY!" if p1._last_hit_was_parried
-                            else "BLOCK!" if p1.state == "BLOCKSTUN" else "HIT!"
-                        )
-                        combat_callout_color = (
-                            (120, 195, 255)
-                            if p1.state == "BLOCKSTUN"
-                            else (255, 225, 110)
-                        )
-                        combat_callout_timer = 28
-                    if p1.health < p1_health_before:
-                        combat_callout = "BLOCKED!" if p1.state == "BLOCKSTUN" else "HIT!"
-                    combo_on_p1.update(); combo_on_p2.update()
-
-                if training_mode:
-                    p1.health = p1.max_health
-                    if p2.health <= 0:
-                        p2.reset()
-                        combo_on_p1.reset()
-
-                if round_event == "round_ended":
-                    round_end_reason = "ko" if min(p1.health, p2.health) <= 0 else "time"
-                    if round_end_reason == "ko":
-                        sound_fx.play("ko")
-                    ko_slowmo = settings.KO_SLOWMO_FRAMES
-                    shake.kick(*settings.SHAKE_KO)
-                    if not ko_flash_done:
-                        flashes.append(Flash((255, 255, 255),
-                                             life=settings.KO_FLASH_LIFE,
-                                             max_alpha=230))
-                        ko_flash_done = True
-                    match.register_round_winner(round_mgr.winner)
-                    round_end_registered = True
-                    if match.match_over:
-                        sound_fx.play("match_win")
-
-                if (round_mgr.is_over and round_mgr.over_pause_done
-                        and round_end_registered and not match.match_over):
-                    match.next_round()
-                    p1.reset(); p2.reset()
-                    combo_on_p1.reset(); combo_on_p2.reset()
-                    combo_display_p1.reset(); combo_display_p2.reset()
-                    sparks.clear()
-                    round_mgr = RoundManager(round_number=match.round_number,
-                                             timer_seconds=99)
-                    ko_slowmo = 0
-                    ko_flash_done = False
-                    round_end_registered = False
-
-            # Update projectiles and check collision
-            alive = []
-            for pr in projectiles:
-                if pr.update():
-                    continue
-                alive.append(pr)
-                # Check hit
-                for victim in (p1, p2):
-                    if victim is pr.owner:
-                        continue
-                    if pr.rect.colliderect(victim.get_hurtbox()):
-                        blocked = (
-                            victim.on_ground and victim._holding_back
-                            and victim.state not in (
-                                "ATTACK", "HITSTUN", "BLOCKSTUN", "KNOCKDOWN"
-                            )
-                        )
-                        perfect_guard = blocked and victim.is_perfect_guarding
-                        incoming = pr.damage * victim.defense
-                        dmg = (
-                            0 if perfect_guard else
-                            int(incoming * settings.BLOCK_REDUCTION)
-                            if blocked else int(incoming)
-                        )
-                        if not perfect_guard:
-                            dmg = max(1, dmg)
-                        victim.health = max(0, victim.health - dmg)
-                        attacker_combo = combo_on_p2 if pr.owner is p1 else combo_on_p1
-                        attacker_display = combo_display_p1 if pr.owner is p1 else combo_display_p2
-                        if blocked:
-                            victim._last_hit_was_parried = perfect_guard
-                            victim._parry_flash_frames = 20 if perfect_guard else 0
-                            victim.state = "BLOCKSTUN"
-                            victim.state_timer = 4 if perfect_guard else 8
-                            if pr.owner is not None:
-                                pr.owner.gain_ultimate_meter(dmg)
-                            victim.gain_ultimate_meter(dmg)
-                            attacker_combo.reset()
-                            attacker_display.reset()
-                            sparks.append(BlockSpark(pr.x, pr.y))
-                            shake.kick(3, 5)
-                            if perfect_guard:
-                                sparks.append(HitSpark(
-                                    pr.x, pr.y, (175, 235, 255),
-                                    count=18, speed=8, life=17,
-                                ))
-                                flashes.append(Flash(
-                                    (100, 200, 255), life=7, max_alpha=75,
-                                ))
-                                pr.owner = victim
-                                pr.vx = -pr.vx
-                                pr.color = victim.attack_color
-                                pr.x += (1 if pr.vx > 0 else -1) * 14
-                                pr.rect.centerx = int(pr.x)
-                            combat_callout = "PARRY!" if perfect_guard else "BLOCK!"
-                            combat_callout_color = (120, 195, 255)
-                            combat_callout_timer = 28
-                        else:
-                            victim.state = "HITSTUN"
-                            victim.state_timer = pr.hitstun
-                            victim.rect.x += (1 if pr.vx > 0 else -1) * 6
-                            if pr.owner is not None:
-                                pr.owner.gain_ultimate_meter(dmg)
-                                attacker_combo.register_hit()
-                                attacker_display.register_hit(dmg)
-                                pr.owner.hit_pause = settings.HIT_PAUSE_FRAMES_SPECIAL
-                            victim.gain_ultimate_meter(dmg)
-                            victim.hit_pause = settings.HIT_PAUSE_FRAMES_SPECIAL
-                            sparks.append(HitSpark(
-                                pr.x, pr.y, pr.color,
-                                count=settings.HIT_SPARK_COUNT_SPECIAL,
-                                speed=11, life=settings.HIT_SPARK_LIFE,
-                            ))
-                            shake.kick(*settings.SHAKE_SPECIAL)
-                            camera_punch.kick(
-                                0.05, 9, (pr.x, pr.y),
-                            )
-                            flashes.append(Flash(pr.color, life=5, max_alpha=60))
-                            combat_callout = "HIT!"
-                            combat_callout_color = (255, 225, 110)
-                            combat_callout_timer = 28
-                        if training_mode and pr.owner is p1:
-                            training_damage += dmg
-                        if dmg > 0:
-                            damage_numbers.spawn(damage_numbers_list,
-                                                 pr.x, pr.y - 20, dmg, blocked=blocked)
-                        if victim.health <= 0:
-                            victim.go_knockdown()
-                        if not perfect_guard:
-                            pr.life = 0
-                        break
-            projectiles = [pr for pr in alive if pr.life > 0]
-            special_effects = [se for se in special_effects if not se.update()]
-            ultimate_presentations = [
-                presentation for presentation in ultimate_presentations
-                if not presentation.update()
-            ]
-            sparks = [s for s in sparks if not s.update()]
-            flashes = [f for f in flashes if not f.update()]
-            damage_numbers_list = [d for d in damage_numbers_list if not d.update()]
-            combo_display_p1.update()
-            combo_display_p2.update()
-            if combat_callout_timer > 0:
-                combat_callout_timer -= 1
-            p1_health_trail = max(p1.health, p1_health_trail - 0.6)
-            p2_health_trail = max(p2.health, p2_health_trail - 0.6)
-            ox, oy = shake.update()
-            footwork.update((p1, p2))
+                if submitted_frame != session.frame:
+                    submitted_frame = session.frame
+                    submitted_values = {
+                        action: p1.action_pressed(keys, action) or action in pending_actions
+                        for action in ACTIONS if action not in ("rematch", "leave")
+                    }
+                    submitted_values["rematch"] = network_local_rematch
+                    submitted_values["leave"] = network_local_leave
+                    network_peer.submit_input(submitted_frame, submitted_values)
+                    pending_actions.clear()
+                if not session.advance(submitted_values):
+                    # Bound speculation during loss/jitter while keeping the event
+                    # loop responsive. Do not build a seconds-long catch-up burst.
+                    network_waiting = True
+                    accumulator = min(accumulator, fixed_dt)
+                    break
+                network_local_rematch = False
+                network_local_leave = False
+            accumulator -= fixed_dt
+            ticks_this_render += 1
+        if network_waiting:
+            if network_wait_started is None:
+                network_wait_started = t
+        else:
+            network_wait_started = None
+        render_frame = (session.frame if session else offline_frame) + min(1.0, accumulator / fixed_dt)
 
         # DRAW world
-        world = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
         # Parallax scroll: -1.0 (left of center) .. 1.0 (right of center)
         _midpoint = (p1.rect.centerx + p2.rect.centerx) / 2
         _center = settings.WINDOW_WIDTH / 2
         _scroll = max(-1.0, min(1.0, (_midpoint - _center) / _center))
         stages.draw(world, stage_key, t, scroll=_scroll, palette_key=palette_key)
+
+        # A reply arriving during simulation or background rendering can still
+        # correct the fighters in this display frame.
+        if session is not None and receive_network_inputs():
+            return "MENU"
 
         for fighter in (p1, p2):
             sh = pygame.Surface((fighter.width + 20, 14), pygame.SRCALPHA)
@@ -1059,7 +1204,17 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                             settings.GROUND_Y - 6))
 
         footwork.draw(world)
-        p1.draw(world); p2.draw(world)
+        for player_number, fighter in enumerate((p1, p2), start=1):
+            if session is not None and player_number != local_player:
+                position = remote_visuals.sample(render_frame) if smooth_remote else None
+                visual_trails[player_number - 1] = _draw_fighter_visual(
+                    world, fighter, position, visual_trails[player_number - 1],
+                )
+            else:
+                visual_trails[player_number - 1] = _draw_fighter_visual(
+                    world, fighter, trail=visual_trails[player_number - 1],
+                )
+
         for s in sparks:
             s.draw(world)
         for se in special_effects:
@@ -1385,4 +1540,7 @@ def run_fight(screen, clock, difficulty_name=None, training_mode=False,
                     align="left",
                 )
 
+        if session is not None and show_network_debug:
+            draw_network_debug(screen, network_peer.get_stats(), session.get_stats(),
+                               render_fps=clock.get_fps(), smooth_remote=smooth_remote)
         retro.present(screen)

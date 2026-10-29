@@ -2,7 +2,9 @@
 
 import array
 import math
+from contextlib import contextmanager
 from pathlib import Path
+import threading
 
 import pygame
 
@@ -77,6 +79,7 @@ _MAX_DURATIONS = {
 }
 _sounds = {}
 _enabled = True
+_playback_context = threading.local()
 
 
 def _make_ultimate_sound():
@@ -185,7 +188,7 @@ def init():
 
 
 def play(name, volume=1.0):
-    if not _enabled:
+    if not _enabled or getattr(_playback_context, 'suppressed', 0):
         return
     if name not in _EVENT_LEVELS:
         raise KeyError(f"Unknown sound effect: {name}")
@@ -206,3 +209,14 @@ def play(name, volume=1.0):
 def set_enabled(flag):
     global _enabled
     _enabled = bool(flag)
+
+
+@contextmanager
+def suppress(enabled=True):
+    """Mute replay side effects in this thread without changing user settings."""
+    previous = getattr(_playback_context, 'suppressed', 0)
+    _playback_context.suppressed = previous + bool(enabled)
+    try:
+        yield
+    finally:
+        _playback_context.suppressed = previous

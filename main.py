@@ -7,9 +7,9 @@ import sys
 import random
 import pygame
 
-import settings
 from ui import (
     menu, character_select, stage_select, settings_menu, intro_video, lan_lobby,
+    display,
 )
 from game import fight_scene
 from characters import character_data
@@ -25,11 +25,7 @@ def main():
     preferences.load()
     from audio import sound_fx as _sfx
     _sfx.init()
-    display_flags = pygame.FULLSCREEN if preferences.get("fullscreen") else 0
-    screen = pygame.display.set_mode(
-        (settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT), display_flags
-    )
-    pygame.display.set_caption(settings.WINDOW_TITLE)
+    screen = display.create_window(fullscreen=bool(preferences.get("fullscreen")))
     clock = pygame.time.Clock()
 
     music.play("intro", volume=0.25)

@@ -68,6 +68,12 @@ training mode, or connect to another player over a local network.
 - Music, sound effects, stage atmosphere, and camera parallax.
 - Settings for master/music/effects volume, fullscreen, and Player 1 key
   rebinding. Preferences are saved between launches.
+- **Scalable display:** resize or maximize the window from a minimum of
+  **1280 × 720**, or enable **Options → Fullscreen** to fit the current display.
+  The game retains its 16:9 proportions with borders when needed, sharp pixel
+  graphics and correctly aligned mouse controls. Fullscreen also fits displays
+  smaller than the minimum window size. Combat coordinates stay consistent
+  across screen sizes, including LAN matches.
 - In-match controls/help overlay and fitted, readable HUD/menu text.
 
 ## Getting started
